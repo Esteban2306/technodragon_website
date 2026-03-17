@@ -1,7 +1,12 @@
 export const EventTypes = {
+
+    CATEGORY_CREATED: "category.created",
+    CATEGORY_UPDATED: "category.updated",
+    CATEGORY_DELETED: "category.deleted",
+
     PRODUCT_CREATED: "product.created",
     PRODUCT_UPDATED: "product.updated",
-    PRODUCT_DISABLED: "product.disable",
+    PRODUCT_DISABLED: "product.disabled",
     PRODUCT_DELETED: "product.deleted",
 
     CART_PRODUCT_ADDED: "cart.product_added",
@@ -12,12 +17,28 @@ export const EventTypes = {
     STOCK_OUT_OF_STOCK: "stock.out_of_stock",
 
     CHECKOUT_STARTED: "checkout.started",
-    WHATSAPP_MESSAGE_SENT: "whatsapp.message_sent"
+
+    WHATSAPP_MESSAGE_SENT: "whatsapp.message.sent"
 } as const;
 
 export type EventType = (typeof EventTypes)[keyof typeof EventTypes];
 
 export interface EventPayloadMap {
+
+    [EventTypes.CATEGORY_CREATED]: {
+        categoryId: string;
+        name: string;
+        slug: string;
+    };
+
+    [EventTypes.CATEGORY_UPDATED]: {
+        categoryId: string;
+    };
+
+    [EventTypes.CATEGORY_DELETED]: {
+        categoryId: string;
+    };
+
     [EventTypes.PRODUCT_CREATED]: { 
         productId: string;
     };
@@ -44,18 +65,18 @@ export interface EventPayloadMap {
     };
 
     [EventTypes.STOCK_UPDATED]: {
+        productId: string;
         variantId: string;
-        slug: string
+        stock: number;
     }
 
     [EventTypes.STOCK_LOW]: {
         variantId: string;
-        slug: string
+        stock: number;
     }
 
     [EventTypes.STOCK_OUT_OF_STOCK]: {
         variantId: string;
-        slug: string
     }
 
 
