@@ -53,6 +53,8 @@ model Product {
   variants    ProductVariant[]
   images      ProductImage[]
 
+  isActive    Boolean
+
   createdAt   DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
