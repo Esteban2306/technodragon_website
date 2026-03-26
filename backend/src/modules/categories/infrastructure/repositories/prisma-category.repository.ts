@@ -9,17 +9,17 @@ export class PrismaCategoryRepository implements CategoryRepository {
     constructor(private prisma: PrismaService) {}
 
     async create(category: Category): Promise<Category> {
-        const data = await this.prisma.category.create({
-            data: {
-                id: category.id,
-                name: category.name,
-                slug: category.slug,
-                parentId: category.parentId
-            }
-        })
+    const data = await this.prisma.category.create({
+        data: {
+            id: category.id,
+            name: category.getName(),
+            slug: category.getSlug(),
+            parentId: category.getParentId()
+        }
+    })
 
-        return this.toDomain(data);
-    }
+    return this.toDomain(data);
+}
 
     async findAll(): Promise<Category[]> {
         const data = await this.prisma.category.findMany()
@@ -47,9 +47,9 @@ export class PrismaCategoryRepository implements CategoryRepository {
         const data = await this.prisma.category.update({
             where: { id: category.id },
             data: {
-                name: category.name,
-                slug: category.slug,
-                parentId: category.parentId
+                name: category.getName(),
+            slug: category.getSlug(),
+            parentId: category.getParentId()
             }
         })
 
@@ -76,10 +76,11 @@ export class PrismaCategoryRepository implements CategoryRepository {
         const tree: Category[] = []
 
         category.forEach((cat) => {
-            if (cat.parentId) {
-                const parent = map.get(cat.parentId)
+            if (cat.getParentId()) {
+                const parent = map.get(cat.getParentId()!)
                 if (parent) {
-                    parent.children.push(cat)
+                    const currentChildren = parent.getChildren()
+                    parent.setChildren([...currentChildren, cat])
                 }
             } else {
                 tree.push(cat)

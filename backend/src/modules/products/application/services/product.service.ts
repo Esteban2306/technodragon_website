@@ -1,14 +1,19 @@
-import { BadRequestException, ConflictException, Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, ConflictException, Injectable, NotFoundException, Inject } from "@nestjs/common";
 import { PrismaProductRepository } from "../../infrastructure/repositories/prisma-product.repository";
 import { EventBusService } from "src/infrastructure/events/event-bus.service";
 import { Product } from "../../domain/entities/product.entity";
 import { ProductFilters } from "../../types/ProductFilters.types";
 import { EventTypes } from "src/infrastructure/events/event.types";
+import { PRODUCT_REPOSITORY } from "../../constants/product.tokens";
 
 @Injectable()
 export class ProductService {
 
-    constructor (private productRepository: PrismaProductRepository, private eventBus: EventBusService) {}
+    constructor (
+        @Inject(PRODUCT_REPOSITORY)
+        private productRepository: PrismaProductRepository, 
+        private eventBus: EventBusService
+    ) {}
 
     private readonly ERRORS = {
         NOT_FOUND: (id: string) => `Product whit id ${id} not found.`,

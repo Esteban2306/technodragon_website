@@ -4,6 +4,11 @@ export const EventTypes = {
     CATEGORY_UPDATED: "category.updated",
     CATEGORY_DELETED: "category.deleted",
 
+    BRAND_CREATED: "brand.created",
+    BRAND_UPDATED: "brand.updated",
+    BRAND_DEACTIVATED: "brand.deactivated",
+    BRAND_ACTIVATED: "brand.activated",
+
     PRODUCT_CREATED: "product.created",
     PRODUCT_UPDATED: "product.updated",
     PRODUCT_DISABLED: "product.disabled",
@@ -37,6 +42,24 @@ export interface EventPayloadMap {
 
     [EventTypes.CATEGORY_DELETED]: {
         categoryId: string;
+    };
+
+    [EventTypes.BRAND_CREATED]: {
+    brandId: string;
+    name: string;
+    slug: string;
+    };
+
+    [EventTypes.BRAND_UPDATED]: {
+        brandId: string;
+    };
+
+    [EventTypes.BRAND_DEACTIVATED]: {
+        brandId: string;
+    };
+
+    [EventTypes.BRAND_ACTIVATED]: {
+        brandId: string;
     };
 
     [EventTypes.PRODUCT_CREATED]: { 

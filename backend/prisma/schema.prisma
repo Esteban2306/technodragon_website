@@ -27,8 +27,13 @@ model Brand {
   id    String    @id @default(uuid())
   name  String
   slug  String    @unique
+  logo  String?
+  isActive Boolean @default(true)
 
   products Product[]
+
+  createdAt   DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   @@index([slug])
 }
@@ -47,6 +52,8 @@ model Product {
 
   variants    ProductVariant[]
   images      ProductImage[]
+
+  isActive    Boolean
 
   createdAt   DateTime @default(now())
   updatedAt  DateTime @updatedAt
