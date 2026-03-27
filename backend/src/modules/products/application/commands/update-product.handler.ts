@@ -6,6 +6,7 @@ import { randomUUID } from "crypto";
 import { VariantAttribute } from "../../domain/entities/variant-attribute.entitt";
 import { ProductImage } from "../../domain/entities/product-image.entity";
 import { Product } from "../../domain/entities/product.entity";
+import { ProductCondition } from "../../domain/enums/product-condition.enum";
 
 export class UpdateProductHandler { 
     constructor (private readonly service: ProductService) {}
@@ -21,6 +22,7 @@ export class UpdateProductHandler {
                 v.sku,
                 v.price,
                 v.stock,
+                v.condition ?? ProductCondition.NEW,
                 v.attributes.map(attr => 
                     new VariantAttribute(
                         crypto.randomUUID(),

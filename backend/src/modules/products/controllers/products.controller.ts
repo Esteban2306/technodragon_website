@@ -10,7 +10,6 @@ import {
 } from "@nestjs/common";
 
 import { CreateProductHandler } from "../application/commands/product-handler.command";
-import { CreateProductCommand } from "../application/commands/product.command";
 import { ProductService } from "../application/services/product.service";
 import type { ProductFilters } from "../types/ProductFilters.types";
 import { DeleteProductCommand } from "../application/commands/delete-product.command";
@@ -21,6 +20,11 @@ import { UpdateProductCommand } from "../application/commands/update-product.com
 import { UpdateBasicProductCommand } from "../application/commands/updateBasic-product.command";
 import { UpdateStockProductCommand } from "../application/commands/updateStock-product.command";
 import { UpdateStockProductHandler } from "../application/commands/updateStock-product-handler";
+import { CreateProductDto } from "../dto/create-product.dto";
+import { GetProductByIdHandler } from "../application/queries/get-product-by-id.handler";
+import { GetProductHandler } from "../application/queries/get-products.handler";
+import { GetProductsQuery } from "../application/queries/get-products.query";
+import { GetProductByIdQuery } from "../application/queries/get-product-by-id.query";
 
 @Controller("products")
 export class ProductController {
@@ -30,22 +34,28 @@ export class ProductController {
     private readonly updateBasicHandler: UpdateBasicProductHandler,
     private readonly updateHandler: UpdateProductHandler,
     private readonly updateStockHandler: UpdateStockProductHandler,
+    private readonly getProductsHandler: GetProductHandler,
+    private readonly getProductByIdHandler: GetProductByIdHandler,
     private readonly productService: ProductService
   ) {}
 
   @Post()
-  async create(@Body() body: CreateProductCommand): Promise<void> {
+  async create(@Body() body: CreateProductDto): Promise<void> {
     return this.createHandler.execute(body);
   }
 
   @Get()
   async findAll(@Query() query: ProductFilters) {
-    return this.productService.findAll(query);
+    return this.getProductsHandler.execute(
+      new GetProductsQuery(query)
+    );
   }
 
   @Get(":id")
   async findById(@Param("id") id: string) {
-    return this.productService.findById(id);
+    return this.getProductByIdHandler.execute(
+      new GetProductByIdQuery(id)
+    );
   }
 
   @Put(":id")

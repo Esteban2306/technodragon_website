@@ -7,6 +7,7 @@ import { ProductImage } from "../../domain/entities/product-image.entity";
 import { ProductRepository } from "../../domain/repositories/product.repository.interface";
 import { PrismaProductWithRelations } from "../../types/PrismaProductWithRelations";
 import { ProductFilters } from "../../types/ProductFilters.types";
+import { ProductCondition } from "../../domain/enums/product-condition.enum";
 
 @Injectable()
 export class PrismaProductRepository implements ProductRepository {
@@ -36,6 +37,7 @@ export class PrismaProductRepository implements ProductRepository {
                         price: variant.getPrice(),
                         stock: variant.getStock(),
                         isActive: variant.isVariantActive(),
+                        condition: variant.getCondition() ?? ProductCondition.NEW,
 
                         attributes: {
                             create: variant.getAttributes().map(attr => ({
@@ -73,7 +75,14 @@ export class PrismaProductRepository implements ProductRepository {
             where: {
                 isActive: filters?.isActive,
                 brandId: filters?.brandId,
-                categoryId: filters?.categoryId
+                categoryId: filters?.categoryId,
+                variants: filters?.condition
+                    ? {
+                        some: {
+                            condition: filters.condition
+                        }
+                    }
+                    : undefined
             },
             include: {
                 images: true,
@@ -160,6 +169,8 @@ export class PrismaProductRepository implements ProductRepository {
         const current = existing.variants.find(v => v.id === incoming.getId());
         if (!current) return false;
 
+        if (current.condition !== incoming.getCondition()) return false; 
+
         const sameAttributes =
             current.attributes.length === incoming.getAttributes().length &&
             current.attributes.every(attr =>
@@ -173,6 +184,7 @@ export class PrismaProductRepository implements ProductRepository {
 
             current.price.toNumber() === incoming.getPrice() &&
             current.sku === incoming.getSku() &&
+            current.condition === incoming.getCondition() &&
             current.isActive === incoming.isVariantActive() &&
             sameAttributes
         );
@@ -246,6 +258,7 @@ export class PrismaProductRepository implements ProductRepository {
                 price: variant.getPrice(),
                 stock: variant.getStock(),
                 isActive: variant.isVariantActive(),
+                condition: variant.getCondition(),
                 attributes: {
                 create: variant.getAttributes().map(attr => ({
                     id: attr.id,
@@ -260,14 +273,16 @@ export class PrismaProductRepository implements ProductRepository {
             if (
             exists.price.toNumber() !== variant.getPrice() ||
             exists.sku !== variant.getSku() ||
-            exists.isActive !== variant.isVariantActive()
+            exists.isActive !== variant.isVariantActive() ||
+            exists.condition !== variant.getCondition()
             ) {
             await tx.productVariant.update({
                 where: { id: variant.getId() },
                 data: {
                 price: variant.getPrice(),
                 sku: variant.getSku(),
-                isActive: variant.isVariantActive()
+                isActive: variant.isVariantActive(),
+                condition: variant.getCondition() 
                 }
             });
             }
@@ -341,7 +356,7 @@ export class PrismaProductRepository implements ProductRepository {
             where: {id: variantId},
             data: {
                 stock,
-                isActive: stock === 0 ? false : true
+                isActive: stock > 0
             }
         })
     }
@@ -391,18 +406,19 @@ export class PrismaProductRepository implements ProductRepository {
             data.categoryId,
 
             data.variants.map(v => new ProductVariant(
-            v.id,
-            v.sku,
-            Number(v.price),
-            v.stock,
-            v.attributes.map(a => new VariantAttribute(
-                a.id,
-                a.name,
-                a.value
-            )),
-            v.isActive,
-            v.createdAt,
-            v.updatedAt
+                v.id,
+                v.sku,
+                Number(v.price),
+                v.stock,
+                v.condition as ProductCondition,
+                v.attributes.map(a => new VariantAttribute(
+                    a.id,
+                    a.name,
+                    a.value
+                )),
+                v.isActive,
+                v.createdAt,
+                v.updatedAt
             )),
 
             data.images.map(img => new ProductImage(

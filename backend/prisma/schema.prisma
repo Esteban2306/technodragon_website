@@ -5,6 +5,12 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+enum ProductCondition {
+  NEW
+  REFURBISHED
+}
+
 model Category {
   id    String     @id @default(uuid())
   name  String
@@ -72,6 +78,8 @@ model ProductVariant {
 
   price      Decimal
   stock      Int
+
+  condition ProductCondition @default(NEW)
 
   isActive   Boolean  @default(true)
 

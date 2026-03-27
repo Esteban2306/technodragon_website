@@ -10,7 +10,7 @@ import { BrandModule } from './modules/brand/brand.module';
     EventEmitterModule.forRoot(),
 
     CategoriesModule,
-    BrandModule
+    BrandModule,
     
     PrismaModule
   ]

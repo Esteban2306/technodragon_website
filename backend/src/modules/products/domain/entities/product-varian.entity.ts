@@ -1,3 +1,4 @@
+import { ProductCondition } from "../enums/product-condition.enum";
 import { VariantAttribute } from "./variant-attribute.entitt";
 
 export class ProductVariant {
@@ -5,6 +6,7 @@ export class ProductVariant {
     private price: number;
     private stock: number;
     private isActive: boolean;
+    private condition: ProductCondition;
 
     private attributes: VariantAttribute[]
 
@@ -16,6 +18,7 @@ export class ProductVariant {
         sku : string,
         price : number,
         stock : number,
+        condition: ProductCondition = ProductCondition.NEW,
         attributes : VariantAttribute[] = [],
         isActive: boolean = true,
         createdAt?: Date,
@@ -24,7 +27,9 @@ export class ProductVariant {
         this.validateSku(sku);
         this.validatePrice(price);
         this.validateStock(stock);
+        this.validateCondition(condition);
 
+        this.condition = condition;
         this.sku = sku;
         this.price = price;
         this.stock = stock;
@@ -108,6 +113,12 @@ export class ProductVariant {
         }
     }
 
+    private validateCondition(condition: ProductCondition) {
+        if (!condition) {
+            throw new Error("Product condition is required");
+    }
+}
+
     private validateAttributes(attributes: VariantAttribute[]) {
         if (!attributes || attributes.length === 0) {
             throw new Error("Variant must have attributes");
@@ -136,6 +147,10 @@ export class ProductVariant {
 
     getSku() {
     return this.sku;
+    }
+
+    getCondition() {
+        return this.condition;
     }
 
     getPrice() {

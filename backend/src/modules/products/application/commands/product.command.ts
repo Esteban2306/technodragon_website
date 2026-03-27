@@ -1,3 +1,5 @@
+import { ProductCondition } from "../../domain/enums/product-condition.enum";
+
 export class CreateProductCommand {
   constructor(
     public readonly name: string,
@@ -9,6 +11,7 @@ export class CreateProductCommand {
       sku: string;
       price: number;
       stock: number;
+      condition: ProductCondition;
       attributes: {
         name: string;
         value: string;
