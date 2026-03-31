@@ -1,14 +1,20 @@
-import { BadRequestException, ConflictException, Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, ConflictException, Injectable, NotFoundException, Inject } from "@nestjs/common";
 import { PrismaProductRepository } from "../../infrastructure/repositories/prisma-product.repository";
 import { EventBusService } from "src/infrastructure/events/event-bus.service";
 import { Product } from "../../domain/entities/product.entity";
 import { ProductFilters } from "../../types/ProductFilters.types";
 import { EventTypes } from "src/infrastructure/events/event.types";
+import { PRODUCT_REPOSITORY } from "../../constants/product.tokens";
+import { ProductCondition } from "../../domain/enums/product-condition.enum";
 
 @Injectable()
 export class ProductService {
 
-    constructor (private productRepository: PrismaProductRepository, private eventBus: EventBusService) {}
+    constructor (
+        @Inject(PRODUCT_REPOSITORY)
+        private productRepository: PrismaProductRepository, 
+        private eventBus: EventBusService
+    ) {}
 
     private readonly ERRORS = {
         NOT_FOUND: (id: string) => `Product whit id ${id} not found.`,
@@ -21,6 +27,8 @@ export class ProductService {
     async create(product: Product): Promise<void> {
         await this.ensureSlugIsUnique(product.getSlug());
         this.validateProduct(product);
+
+        this.ensureValidConditions(product);
 
         await this.productRepository.save(product);
 
@@ -42,6 +50,8 @@ export class ProductService {
 
         await this.ensureSlugIsUniqueOnUpdate(product, existing)
         this.validateProduct(product)
+
+        this.ensureValidConditions(product);
 
         await this.productRepository.update(product)
 
@@ -75,6 +85,8 @@ export class ProductService {
 
         await this.ensureSlugIsUniqueOnUpdate(product, product)
 
+        this.ensureValidConditions(product);
+
         await this.productRepository.update(product)
     }
 
@@ -84,6 +96,8 @@ export class ProductService {
         if (!product) {
             throw new NotFoundException(`Variant ${variantId} not found`);
         }
+
+        this.ensureValidConditions(product);
 
         await this.productRepository.updateStock(variantId, stock)
 
@@ -161,17 +175,33 @@ export class ProductService {
 
     private validateProduct(product: Product) {
         if (product.getVariants().length === 0) {
-        throw new BadRequestException(this.ERRORS.NO_VARIANTS);
+            throw new BadRequestException(this.ERRORS.NO_VARIANTS);
         }
 
         if (product.getImages().length === 0) {
-        throw new BadRequestException(this.ERRORS.NO_IMAGES);
+            throw new BadRequestException(this.ERRORS.NO_IMAGES);
         }
 
         product.getVariants().forEach(v => {
-        if (v.getAttributes().length === 0) {
-            throw new BadRequestException(this.ERRORS.INVALID_VARIANT);
-        }
+            if (v.getAttributes().length === 0) {
+                throw new BadRequestException(this.ERRORS.INVALID_VARIANT);
+            }
+
+            if (!Object.values(ProductCondition).includes(v.getCondition())) {
+                throw new BadRequestException("Invalid condition");
+            }
+        });
+    }
+
+    private ensureValidConditions(product: Product) {
+        const allowed = Object.values(ProductCondition);
+
+        product.getVariants().forEach(v => {
+            if (!allowed.includes(v.getCondition())) {
+                throw new BadRequestException(
+                    `Invalid condition: ${v.getCondition()}`
+                );
+            }
         });
     }
 

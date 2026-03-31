@@ -26,19 +26,20 @@ export class CreateProductHandler {
         }
 
         const variants = command.variants.map(v =>
-        new ProductVariant(
-            crypto.randomUUID(),
-            v.sku,
-            v.price,
-            v.stock,
-            v.attributes.map(attr =>
-            new VariantAttribute(
+            new ProductVariant(
                 crypto.randomUUID(),
-                attr.name,
-                attr.value
+                v.sku,
+                v.price,
+                v.stock,
+                v.condition ?? ProductCondition.NEW,
+                v.attributes.map(attr =>
+                new VariantAttribute(
+                    crypto.randomUUID(),
+                    attr.name,
+                    attr.value
+                )
+                )
             )
-            )
-        )
         );
 
         const images = command.images.map(img => 
