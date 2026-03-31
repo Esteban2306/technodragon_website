@@ -10,7 +10,6 @@ import {
 } from "@nestjs/common";
 
 import { CreateProductHandler } from "../application/commands/product-handler.command";
-import { ProductService } from "../application/services/product.service";
 import type { ProductFilters } from "../types/ProductFilters.types";
 import { DeleteProductCommand } from "../application/commands/delete-product.command";
 import { DeleteProductHandler } from "../application/commands/delete-product.handler";
@@ -36,7 +35,6 @@ export class ProductController {
     private readonly updateStockHandler: UpdateStockProductHandler,
     private readonly getProductsHandler: GetProductHandler,
     private readonly getProductByIdHandler: GetProductByIdHandler,
-    private readonly productService: ProductService
   ) {}
 
   @Post()

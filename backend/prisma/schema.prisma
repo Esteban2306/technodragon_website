@@ -117,6 +117,41 @@ model ProductImage {
   createdAt  DateTime @default(now())
 }
 
+model CatalogItem {
+  id            String   @id @default(uuid())
+
+  productId     String
+  variantId     String
+
+  name          String
+  slug          String
+
+  brandId       String
+  brandName     String
+
+  categoryId    String
+  categoryName  String
+
+  price         Float
+  stock         Int
+  condition     ProductCondition
+
+  attributes    Json   
+
+  images         Json?
+
+  isActive      Boolean
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([productId, variantId])
+  @@index([price])
+  @@index([brandId])
+  @@index([categoryId])
+  @@index([condition])
+}
+
 model Cart {
   id         String   @id @default(uuid())
 
