@@ -1,4 +1,5 @@
 import { CatalogFilters } from "../../types/catalogRepository.types";
+import { PaginatedResult } from "../../types/pagination.types";
 import { CatalogItem } from "../entities/catalog.entity";
 
 export interface CatalogRepository {

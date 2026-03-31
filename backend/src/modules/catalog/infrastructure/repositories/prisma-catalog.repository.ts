@@ -87,7 +87,7 @@ export class PrismaCatalogRepository implements CatalogRepository {
         });
     }
 
-    findAll(filters: CatalogFilters): Promise<PaginatedResult<CatalogItem>> {
+    async findAll(filters: CatalogFilters): Promise<PaginatedResult<CatalogItem>> {
 
         const {
             minPrice,

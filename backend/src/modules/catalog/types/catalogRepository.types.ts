@@ -1,8 +1,9 @@
 import { CatalogItem } from "../domain/entities/catalog.entity";
 import { ProductCondition } from "src/modules/products/domain/enums/product-condition.enum";
+import { PaginatedResult } from "./pagination.types";
 
 export interface CatalogRepository {
-    findAll(filters: CatalogFilters): Promise<CatalogItem[]>
+    findAll(filters: CatalogFilters): Promise<PaginatedResult<CatalogItem>>
     findById(id: string): Promise<CatalogItem | null>
 }
 

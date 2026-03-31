@@ -1,7 +1,7 @@
 import { Module } from "@nestjs/common";
 import { CATALOG_REPOSITORY } from "./helpers/catalog-repository.token";
-import { PrismaCatalogRepository } from "./listeners/product-create.listener";
-import { CqrsModule, QueryHandler } from "@nestjs/cqrs";
+import { PrismaCatalogRepository } from "./infrastructure/repositories/prisma-catalog.repository";
+import { CqrsModule } from "@nestjs/cqrs";
 import { CatalogController } from "./controllers/catalog.controller";
 import { GetCatalogHandler } from "./application/queries/get-catalog.handler";
 import { GetCatalogByIdHandler } from "./application/queries/getByID-catalog.handler";
@@ -16,7 +16,6 @@ const EventListeners = [
     ProductCreatedListener,
     ProductUpdatedListener,
     ProductDeletedListener,
-    StockUpdatedListener
 ];
 @Module({
     imports: [CqrsModule],
