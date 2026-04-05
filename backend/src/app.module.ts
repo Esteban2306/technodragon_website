@@ -7,11 +7,14 @@ import { CartModule } from './modules/cart/cart.module';
 import { ProductModule } from './modules/products/products.module';
 import { CatalogModule } from './modules/catalog/catalog.module';
 import { WhatsAppModule } from './modules/whatsapp/whatsapp.module';
+import { AuthModule } from './modules/auth/auth.module';
 
 
 @Module({
   imports: [
     EventEmitterModule.forRoot(),
+
+    AuthModule,
 
     CategoriesModule,
     BrandModule,
