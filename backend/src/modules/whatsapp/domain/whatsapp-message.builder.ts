@@ -53,9 +53,11 @@ export class WhatsAppMessageBuilder {
     });
 
     lines.push(
-  `Total: ${this.formatPrice(total)}`,
-  "",
-  "¿Podrían ayudarme con la compra?"
-);
+      `Total: ${this.formatPrice(total)}`,
+      '',
+      '¿Podrían ayudarme con la compra?',
+    );
+
+    return lines.join('\n');
   }
 }
