@@ -3,6 +3,10 @@ import { PrismaModule } from './infrastructure/database/prisma/prisma.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { CategoriesModule } from './modules/categories/categories.module';
 import { BrandModule } from './modules/brand/brand.module';
+import { CartModule } from './modules/cart/cart.module';
+import { ProductModule } from './modules/products/products.module';
+import { CatalogModule } from './modules/catalog/catalog.module';
+import { WhatsAppModule } from './modules/whatsapp/whatsapp.module';
 
 
 @Module({
@@ -11,6 +15,10 @@ import { BrandModule } from './modules/brand/brand.module';
 
     CategoriesModule,
     BrandModule,
+    CartModule,
+    ProductModule,
+    CatalogModule,
+    WhatsAppModule,
     
     PrismaModule
   ]
