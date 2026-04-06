@@ -6,6 +6,7 @@ import { CatalogController } from "./controllers/catalog.controller";
 import { GetCatalogHandler } from "./application/queries/get-catalog.handler";
 import { GetCatalogByIdHandler } from "./application/queries/getByID-catalog.handler";
 import { ProductCreatedListener, ProductDeletedListener, ProductUpdatedListener } from "./listeners/product.listener";
+import { EventsModule } from "src/infrastructure/events/events.module";
 
 const QueryHandlers = [
     GetCatalogHandler,
@@ -18,7 +19,7 @@ const EventListeners = [
     ProductDeletedListener,
 ];
 @Module({
-    imports: [CqrsModule],
+    imports: [CqrsModule, EventsModule],
     controllers: [CatalogController],
     providers: [
         {
