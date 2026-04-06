@@ -7,15 +7,19 @@ import {
   Delete,
   Param,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { BrandService } from '../application/brand.service';
 import { CreateBrandDto } from '../dto/create-brand.dto';
 import { UpdateBrandDto } from '../dto/update-brand.dto';
+import { JwtGuard } from 'src/modules/auth/guards/jwt-auth.guard';
+import { AdminGuard } from 'src/modules/auth/guards/admin.guard';
 
 @Controller('brands')
 export class BrandController {
   constructor(private readonly brandService: BrandService) {}
 
+  @UseGuards(JwtGuard, AdminGuard)
   @Post()
   async create(@Body() dto: CreateBrandDto) {
     return this.brandService.create(dto);
@@ -46,6 +50,7 @@ export class BrandController {
     return this.brandService.findById(id);
   }
 
+  @UseGuards(JwtGuard, AdminGuard)
   @Patch(':id')
   async update(
     @Param('id') id: string,
@@ -54,16 +59,19 @@ export class BrandController {
     return this.brandService.update(id, dto);
   }
 
+  @UseGuards(JwtGuard, AdminGuard)
   @Patch(':id/deactivate')
   async deactivate(@Param('id') id: string) {
     return this.brandService.deactivate(id);
   }
 
+  @UseGuards(JwtGuard, AdminGuard)
   @Patch(':id/activate')
   async activate(@Param('id') id: string) {
     return this.brandService.activate(id);
   }
 
+  @UseGuards(JwtGuard, AdminGuard)
   @Delete(':id')
   async delete(@Param('id') id: string) {
     return this.brandService.delete(id);

@@ -6,7 +6,8 @@ import {
   Post,
   Put,
   Delete,
-  Query
+  Query,
+  UseGuards
 } from "@nestjs/common";
 
 import { CreateProductHandler } from "../application/commands/product-handler.command";
@@ -24,6 +25,8 @@ import { GetProductByIdHandler } from "../application/queries/get-product-by-id.
 import { GetProductHandler } from "../application/queries/get-products.handler";
 import { GetProductsQuery } from "../application/queries/get-products.query";
 import { GetProductByIdQuery } from "../application/queries/get-product-by-id.query";
+import { JwtGuard } from "src/modules/auth/guards/jwt-auth.guard";
+import { AdminGuard } from "src/modules/auth/guards/admin.guard";
 
 @Controller("products")
 export class ProductController {
@@ -37,6 +40,7 @@ export class ProductController {
     private readonly getProductByIdHandler: GetProductByIdHandler,
   ) {}
 
+  @UseGuards(JwtGuard, AdminGuard)
   @Post()
   async create(@Body() body: CreateProductDto): Promise<void> {
     return this.createHandler.execute(body);
@@ -56,6 +60,7 @@ export class ProductController {
     );
   }
 
+  @UseGuards(JwtGuard, AdminGuard)
   @Put(":id")
   async update(
     @Param("id") id: string,
@@ -76,6 +81,7 @@ export class ProductController {
   }
 
 
+  @UseGuards(JwtGuard, AdminGuard)
   @Put(":id/basic")
   async updateBasic(
     @Param("id") id: string,
@@ -91,6 +97,7 @@ export class ProductController {
     return this.updateBasicHandler.execute(command);
   }
 
+  @UseGuards(JwtGuard, AdminGuard)
   @Put("variants/:variantId/stock")
   async updateStock(
     @Param("variantId") variantId: string,
@@ -101,6 +108,7 @@ export class ProductController {
     return this.updateStockHandler.execute(command)
   }
 
+  @UseGuards(JwtGuard, AdminGuard)
   @Delete(":id")
   async delete(@Param("id") id: string) {
     const command = new DeleteProductCommand(id)

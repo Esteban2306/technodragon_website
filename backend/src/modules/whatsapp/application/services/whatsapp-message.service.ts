@@ -2,17 +2,20 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  Inject,
 } from '@nestjs/common';
 import { PrismaService } from 'src/infrastructure/database/prisma/prisma.service';
 import type { CartRepository } from 'src/modules/cart/domain/repositories/cart.repository';
 import { WhatsAppMessageBuilder } from '../../domain/whatsapp-message.builder';
 import { WhatsAppUrlFactory } from '../../infrastructure/whatsapp-url.factory';
 import { ConfigService } from '@nestjs/config';
+import { CART_REPOSITORY } from 'src/modules/cart/domain/token/cart-repository.token';
 
 @Injectable()
 export class WhatsAppService {
   constructor(
     private readonly prisma: PrismaService,
+    @Inject(CART_REPOSITORY)
     private readonly cartRepository: CartRepository,
     private readonly configService: ConfigService,
   ) {}
@@ -29,7 +32,7 @@ export class WhatsAppService {
     if (!variant || !variant.product) {
       throw new NotFoundException('variant not found');
     }
-
+ 
     const variantText = variant.attributes
       .map((a) => `${a.name}: ${a.value}`)
       .join(', ');
