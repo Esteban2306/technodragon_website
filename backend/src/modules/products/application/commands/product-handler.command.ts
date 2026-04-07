@@ -10,7 +10,7 @@ import { ProductCondition } from "../../domain/enums/product-condition.enum";
 @Injectable()
 export class CreateProductHandler {
 
-    constructor(private service: ProductService) {}
+    constructor(private readonly service: ProductService) {}
 
     async execute (command: CreateProductCommand): Promise<void> {
 
@@ -55,8 +55,8 @@ export class CreateProductHandler {
             command.name,
             command.slug,
             command.description,
-            command.categoryId,
             command.brandId,
+            command.categoryId,
             variants,
             images,
             true,

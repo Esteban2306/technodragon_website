@@ -95,7 +95,7 @@ export class PrismaProductRepository implements ProductRepository {
         })
 
         return data.map(d => this.toDomain(d))
-    }
+    }  
 
     async findByVariantId(variantId: string): Promise<Product | null> {
         const data = await this.prisma.product.findFirst({

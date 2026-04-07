@@ -8,6 +8,7 @@ import { ProductImage } from "../../domain/entities/product-image.entity";
 import { Product } from "../../domain/entities/product.entity";
 import { ProductCondition } from "../../domain/enums/product-condition.enum";
 
+@Injectable()
 export class UpdateProductHandler { 
     constructor (private readonly service: ProductService) {}
 
@@ -46,8 +47,8 @@ export class UpdateProductHandler {
             command.name,
             command.slug,
             command.description,
-            command.categoryId,
             command.brandId,
+            command.categoryId,
             variants,
             image,
             true,

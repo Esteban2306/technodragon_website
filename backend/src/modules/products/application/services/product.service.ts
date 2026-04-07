@@ -10,7 +10,7 @@ import { ProductCondition } from "../../domain/enums/product-condition.enum";
 @Injectable()
 export class ProductService {
 
-    constructor (
+    constructor ( 
         @Inject(PRODUCT_REPOSITORY)
         private productRepository: PrismaProductRepository, 
         private eventBus: EventBusService
