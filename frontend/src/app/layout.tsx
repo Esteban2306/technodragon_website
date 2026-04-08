@@ -28,7 +28,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${headingFont.variable} ${bodyFont.variable} h-full antialiased p-10`}
+      className={`${headingFont.variable} ${bodyFont.variable} h-full antialiased `}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>

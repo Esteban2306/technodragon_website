@@ -3,7 +3,7 @@ import dragonImage from '../../../../public/landing/hero/dragon.png';
 
 export default function HeroSection() {
   return (
-    <section className="w-full min-h-screen flex items-center overflow-hidden">
+    <section className="w-full min-h-screen flex items-center overflow-hidden relative">
       <div className="absolute inset-0 pointer-events-none z-0">
         <Image
           src={dragonImage}
