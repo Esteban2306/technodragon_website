@@ -7,6 +7,7 @@ import { GetCatalogHandler } from "./application/queries/get-catalog.handler";
 import { GetCatalogByIdHandler } from "./application/queries/getByID-catalog.handler";
 import { ProductCreatedListener, ProductDeletedListener, ProductUpdatedListener } from "./listeners/product.listener";
 import { EventsModule } from "src/infrastructure/events/events.module";
+import { catalogListener } from "./application/listener/catalog.listener";
 
 const QueryHandlers = [
     GetCatalogHandler,
@@ -28,9 +29,12 @@ const EventListeners = [
         },
         ...QueryHandlers,
 
-        ...EventListeners
+        ...EventListeners,
+
+        catalogListener,
+        PrismaCatalogRepository
     ],
 
-    exports: [CATALOG_REPOSITORY]
+    exports: [CATALOG_REPOSITORY, PrismaCatalogRepository]
 })
 export class CatalogModule {}

@@ -12,7 +12,7 @@ export const EventTypes = {
   PRODUCT_UPDATED: 'product.updated',
   PRODUCT_DISABLED: 'product.disabled',
   PRODUCT_DELETED: 'product.deleted',
-
+  
   CART_CREATED: 'cart.created',
   CART_PRODUCT_ADDED: 'cart.product_added',
   CART_PRODUCT_REMOVED: 'cart.product_removed',

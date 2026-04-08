@@ -1,26 +1,19 @@
-export function mapJsonToAttributes(
-    input: unknown
-): Record<string, string> {
+export function mapJsonToAttributes(json: any): Record<string, string[]> {
+  const result: Record<string, string[]> = {};
 
-    if (!input || typeof input !== "object") {
-        return {};
+  if (!json || typeof json !== "object") return result;
+
+  for (const key of Object.keys(json)) {
+    const value = json[key];
+
+    if (Array.isArray(value)) {
+      result[key] = value.map(v => String(v));
+    } else if (typeof value === "string") {
+      result[key] = [value];
+    } else {
+      result[key] = [];
     }
+  }
 
-    const result: Record<string, string> = {};
-
-    for (const [key, value] of Object.entries(input)) {
-
-        if (Array.isArray(value) && value.length > 0) {
-            const firstValid = value.find(v => typeof v === "string");
-            if (firstValid) {
-                result[key] = firstValid;
-            }
-        }
-
-        else if (typeof value === "string") {
-            result[key] = value;
-        }
-    }
-
-    return result;
+  return result;
 }
