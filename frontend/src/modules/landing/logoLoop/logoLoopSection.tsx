@@ -9,7 +9,7 @@ export default function LogoLoopSection() {
           logos={techLogo}
           speed={100}
           direction="left"
-          logoHeight={60}
+          logoHeight={80}
           gap={60}
           hoverSpeed={0}
           scaleOnHover
