@@ -1,5 +1,6 @@
 "use client"
 
+import BusinessAreasSection from './BusinessAreasSection/BusinessAreasSection';
 import HeroSection from './hero/HeroSection';
 import LogoLoopSection from './logoLoop/logoLoopSection';
 import ProductsPreviewSection from './productsPreview/ProductsPreviewSection';
@@ -11,6 +12,7 @@ export default function LandingPage() {
       <HeroSection></HeroSection>
       <LogoLoopSection></LogoLoopSection>
       <ProductsPreviewSection products={producPreviewData}></ProductsPreviewSection>
+      <BusinessAreasSection></BusinessAreasSection>
     </>
   );
 }
