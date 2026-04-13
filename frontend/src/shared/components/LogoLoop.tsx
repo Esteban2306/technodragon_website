@@ -432,8 +432,8 @@ export const LogoLoop = React.memo<LogoLoopProps>(
               'flex items-center justify-center', 
               'flex-none',
               isVertical
-                ? 'mb-[var(--logoloop-gap)]'
-                : 'mr-[var(--logoloop-gap)]',
+                ? 'mb-(--logoloop-gap)'
+                : 'mr-(--logoloop-gap)',
               scaleOnHover && 'overflow-visible group/item',
             )}
             style={{ height: 'var(--logoloop-logoHeight)' }} 
