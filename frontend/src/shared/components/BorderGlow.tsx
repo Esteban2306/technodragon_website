@@ -129,9 +129,9 @@ const BorderGlow: React.FC<BorderGlowProps> = ({
   coneSpread = 25,
   animated = false,
   colors = [
-    'rgba(120, 0, 40, 0.9)', // vino fuerte
-    'rgba(180, 0, 60, 0.7)', // rojo medio
-    'rgba(60, 0, 20, 0.8)', // sombra vino oscuro
+    'rgba(120, 0, 40, 0.9)',
+    'rgba(180, 0, 60, 0.7)',
+    'rgba(60, 0, 20, 0.8)', 
   ],
   fillOpacity = 0.5,
 }) => {

@@ -57,7 +57,7 @@ export default function RepairService() {
   };
 
   return (
-    <section ref={ref} className="flex flex-col gap-6 p-8 overflow-hidden">
+    <section ref={ref} id='#service' className="flex flex-col gap-6 p-8 overflow-hidden">
 
       <motion.div
         variants={container}

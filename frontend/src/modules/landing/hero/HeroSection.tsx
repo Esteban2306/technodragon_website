@@ -104,7 +104,7 @@ export default function HeroSection() {
           
           <motion.span
             variants={item}
-            className="text-sm text-muted-foreground"
+            className="text-sm text-muted-foreground mt-10"
           >
             Venta de laptops, computadores y accesorios
           </motion.span>
