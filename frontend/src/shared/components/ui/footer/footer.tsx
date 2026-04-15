@@ -9,9 +9,9 @@ export default function Footer() {
     <footer className="relative mt-20 border-t border-white/10 bg-black/70 backdrop-blur-xl text-white">
 
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-screen pointer-events-none">
-        <div className="h-[2px] bg-red-600/40" />
-        <div className="h-[6px] bg-red-600/60 blur-md" />
-        <div className="h-[30px] bg-gradient-to-b from-red-600/30 to-transparent blur-lg" />
+        <div className="h-0.5 bg-red-600/40" />
+        <div className="h-1.5 bg-red-600/60 blur-md" />
+        <div className="h-7.5 bg-linear-to-b from-red-600/30 to-transparent blur-lg" />
       </div>
 
       <div className="max-w-7xl mx-auto px-6 py-12 grid gap-10 md:grid-cols-3">

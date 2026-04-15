@@ -5,6 +5,7 @@ import Image from 'next/image';
 import logo from '../../../../../public/landing/logoPage.png';
 import { ShoppingCart } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { getCategoryIcon } from '@/src/shared/utils/categoryIcons';
 
 import {
   NavigationMenu,
@@ -63,34 +64,49 @@ export default function Navbar() {
 
                 <NavigationMenuContent>
                   <div className="grid w-100 gap-3 p-4 md:w-125 md:grid-cols-2">
-                    {catalogCategories.map((category) => (
-                      <NavigationMenuLink asChild key={category.title}>
-                        <Link
-                          href={category.href}
-                          className="flex flex-col items-start gap-1"
-                        >
-                          <span className="font-medium text-white">
-                            {category.title}
-                          </span>
-                          <span className="text-sm text-muted-foreground">
-                            {category.description}
-                          </span>
-                        </Link>
-                      </NavigationMenuLink>
-                    ))}
+                    {catalogCategories.map((category) => {
+                      const Icon = getCategoryIcon(category.title);
+
+                      return (
+                        <NavigationMenuLink asChild key={category.title}>
+                          <Link
+                            href={category.href}
+                            className="
+                            flex items-start gap-3 p-2 rounded-lg
+                            hover:bg-white/5 transition
+                            "
+                          >
+                            {/* ICONO */}
+                            <div className="mt-1">
+                              <Icon className="w-5 h-5 text-red-500" />
+                            </div>
+
+                            {/* TEXTO */}
+                            <div className="flex flex-col">
+                              <span className="font-medium text-white">
+                                {category.title}
+                              </span>
+                              <span className="text-sm text-muted-foreground">
+                                {category.description}
+                              </span>
+                            </div>
+                          </Link>
+                        </NavigationMenuLink>
+                      );
+                    })}
                   </div>
                 </NavigationMenuContent>
               </NavigationMenuItem>
 
               <NavigationMenuItem>
                 <NavigationMenuLink asChild>
-                  <Link href="#service">Servicios</Link>
+                  <Link href="/#service">Servicios</Link>
                 </NavigationMenuLink>
               </NavigationMenuItem>
 
-              <NavigationMenuItem >
+              <NavigationMenuItem>
                 <NavigationMenuLink asChild>
-                  <Link href="#" passHref>
+                  <Link href="/#contact" passHref>
                     Contacto
                   </Link>
                 </NavigationMenuLink>

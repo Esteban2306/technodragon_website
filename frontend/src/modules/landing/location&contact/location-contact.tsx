@@ -55,6 +55,7 @@ export default function ContactSection() {
 
   return (
     <section
+      id='contact'
       ref={ref}
       className="relative text-white py-16 px-6 lg:px-20 overflow-hidden"
     >

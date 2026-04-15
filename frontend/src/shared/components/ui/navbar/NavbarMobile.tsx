@@ -11,6 +11,7 @@ import { Sheet, SheetTrigger, SheetContent, SheetTitle } from '../../sheet';
 
 import { catalogCategories } from './catalog-categorie.data';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
+import { getCategoryIcon } from '@/src/shared/utils/categoryIcons';
 
 export function NavbarMobile() {
   const [openCatalog, setOpenCatalog] = useState(false);
@@ -18,7 +19,7 @@ export function NavbarMobile() {
   return (
     <div className="flex items-center justify-between w-full ">
       <Link href="/">
-        <Image src={logo} alt="logo" className='max-w-25'/>
+        <Image src={logo} alt="logo" className="max-w-25" />
       </Link>
 
       <Sheet>
@@ -112,24 +113,32 @@ export function NavbarMobile() {
                 `}
               >
                 <div className="flex flex-col gap-2">
-                  {catalogCategories.map((category) => (
-                    <Link
-                      key={category.title}
-                      href={category.href}
-                      className="
-                        bg-white/5 hover:bg-white/10
-                        px-4 py-2 rounded-lg
-                        text-left
-                      "
-                    >
-                      <span className="block text-sm font-medium">
-                        {category.title}
-                      </span>
-                      <span className="text-xs text-gray-400">
-                        {category.description}
-                      </span>
-                    </Link>
-                  ))}
+                  {catalogCategories.map((category) => {
+                    const Icon = getCategoryIcon(category.title);
+
+                    return (
+                      <Link
+                        key={category.title}
+                        href={category.href}
+                        className="
+                            flex items-start gap-3
+                            bg-white/5 hover:bg-white/10
+                            px-4 py-2 rounded-lg
+                        "
+                      >
+                        <Icon className="w-8 h-8 text-red-400 mt-1 min-w-4.75 min-h-4.75 max-w-4.75 max-h-4.75 " />
+
+                        <div>
+                          <span className="block text-sm font-medium">
+                            {category.title}
+                          </span>
+                          <span className="text-xs text-gray-400">
+                            {category.description}
+                          </span>
+                        </div>
+                      </Link>
+                    );
+                  })}
                 </div>
               </div>
             </div>
