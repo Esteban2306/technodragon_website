@@ -170,3 +170,8 @@ html, body {
     animation: star-movement-top linear infinite alternate;
   }
 }
+
+:root {
+  --sidebar-accent: #3e3e3e;
+  --sidebar-accent-foreground: #ffffff;
+}

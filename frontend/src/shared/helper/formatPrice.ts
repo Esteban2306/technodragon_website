@@ -5,3 +5,7 @@ export const formatPriceCOP = (price: number) => {
     maximumFractionDigits: 0
   }).format(price);
 };
+
+export const parseNumber = (value: string) => {
+  return Number(value.replace(/\D/g, '')) || 0;
+};

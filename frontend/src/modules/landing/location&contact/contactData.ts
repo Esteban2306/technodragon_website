@@ -18,7 +18,7 @@ export const contactData = [
     title: "Horarios de atención",
     description:
       "Nuestros técnicos están listos para ayudarte durante la semana",
-    value: "Lunes a sábado\n9 am - 8 pm",
+    value: "Lunes a sábado\n9 am - 7 pm",
   },
   {
     icon: Phone,
