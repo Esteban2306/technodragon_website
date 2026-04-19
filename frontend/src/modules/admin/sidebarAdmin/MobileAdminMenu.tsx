@@ -12,14 +12,14 @@ import { useState } from 'react';
 import { Boxes, Menu, Package, PlusCircle, Tags } from 'lucide-react';
 
 import { AdminView } from '../types/Admin.types';
+import { AdminSidebarProps } from '../types/Admin.types';
 
 export default function MobileAdminMenu({
   active,
   setActive,
-}: {
-  active: AdminView;
-  setActive: (value: AdminView) => void;
-}) {
+  stockMode,
+  setStockMode,
+}: AdminSidebarProps) {
   const [open, setOpen] = useState(false);
 
   const handleChange = (view: AdminView) => {
@@ -28,7 +28,7 @@ export default function MobileAdminMenu({
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 md:hidden">
+    <div className="fixed bottom-6 right-6 z-100 md:hidden">
       <DropdownMenu open={open} onOpenChange={setOpen}>
         <DropdownMenuTrigger asChild>
           <button className="bg-[#7a1c1c] hover:bg-[#5c1515] text-white p-4 rounded-full shadow-lg">
@@ -42,9 +42,7 @@ export default function MobileAdminMenu({
           className="w-64 bg-[#0b0b0c] text-gray-300 rounded-xl border border-[#1a1a1a] p-2"
         >
           <DropdownMenuGroup>
-            <p className="px-2 py-1 text-xs text-gray-500 uppercase">
-              Gestión
-            </p>
+            <p className="px-2 py-1 text-xs text-gray-500 uppercase">Gestión</p>
 
             <DropdownMenuItem
               onClick={() => handleChange('product')}
@@ -73,7 +71,10 @@ export default function MobileAdminMenu({
             </p>
 
             <DropdownMenuItem
-              onClick={() => handleChange('stock')}
+              onClick={() => {
+                setActive('product');
+                setStockMode((prev) => !prev);
+              }}
               className={`flex items-center gap-2 px-2 py-2 rounded-md cursor-pointer ${
                 active === 'stock' ? 'bg-[#7a1c1c]' : ''
               }`}

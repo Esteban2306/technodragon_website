@@ -1,6 +1,7 @@
 export type ProductCardData = {
   id: string;
   name: string;
+  description: string;
   brand: string;
   category: string;
   image: string;

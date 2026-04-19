@@ -68,7 +68,7 @@ export default function AttributeSelector({ variant, update }: Props) {
         ))}
 
         <Popover>
-          <PopoverTrigger>
+          <PopoverTrigger asChild>
             <button className="px-2 py-1 text-xs border cursor-pointer border-[#1a1a1a] rounded-md">
               + Añadir atributo
             </button>

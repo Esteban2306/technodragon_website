@@ -29,105 +29,122 @@ import Image from 'next/image';
 
 import logo from '../../../../public/landing/logoPage.png';
 
+import { AdminSidebarProps } from '../types/Admin.types';
+import CreateMetaDialog from '../productManagment/CreateProductDialog';
+
 export default function AdminSidebar({
   active,
   setActive,
-}: {
-  active: string;
-  setActive: (value: any) => void;
-}) {
-  
-
+  stockMode,
+  setStockMode,
+}: AdminSidebarProps) {
+  const [openMetaDialog, setOpenMetaDialog] = useState(false);
   return (
-    <SidebarProvider>
-      <Sidebar
-        variant="inset"
-        collapsible="none"
-        className="bg-transparent min-h-screen w-full "
-      >
-        <SidebarHeader>
-          <div className="flex items-center mx-auto px-2 py-2">
-            <Image src={logo} alt="Logo TechnoDragon" />
-          </div>
-        </SidebarHeader>
+    <>
+      <SidebarProvider>
+        <Sidebar
+          variant="inset"
+          collapsible="none"
+          className="bg-transparent min-h-screen w-full "
+        >
+          <SidebarHeader>
+            <div className="flex items-center mx-auto px-2 py-2">
+              <Image src={logo} alt="Logo TechnoDragon" />
+            </div>
+          </SidebarHeader>
 
-        <SidebarContent className="text-gray-300">
-          <SidebarGroup>
-            <SidebarGroupLabel className="text-gray-500 uppercase text-xs">
-              Gestión
-            </SidebarGroupLabel>
+          <SidebarContent className="text-gray-300">
+            <SidebarGroup>
+              <SidebarGroupLabel className="text-gray-500 uppercase text-xs">
+                Gestión
+              </SidebarGroupLabel>
 
-            <SidebarGroupContent>
-              <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    isActive={active === 'product'}
-                    onClick={() => setActive('product')}
-                    className="data-[active=true]:bg-[#7a1c1c] data-[active=true]:text-black hover:bg-[#7a1c1c]/80 cursor-pointer"
-                  >
-                    <Package />
-                    <span>Gestion de producto</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      isActive={active === 'product'}
+                      onClick={() => setActive('product')}
+                      className="data-[active=true]:bg-[#7a1c1c] data-[active=true]:text-black hover:bg-[#7a1c1c]/80 cursor-pointer"
+                    >
+                      <Package />
+                      <span>Gestion de producto</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
 
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    isActive={active === 'create'}
-                    onClick={() => setActive('create')}
-                    className="data-[active=true]:bg-[#7a1c1c] data-[active=true]:text-black hover:bg-[#7a1c1c]/80 cursor-pointer"
-                  >
-                    <PlusCircle />
-                    <span>Crear producto</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      isActive={active === 'create'}
+                      onClick={() => setActive('create')}
+                      className="data-[active=true]:bg-[#7a1c1c] data-[active=true]:text-black hover:bg-[#7a1c1c]/80 cursor-pointer"
+                    >
+                      <PlusCircle />
+                      <span>Crear producto</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
 
-          <SidebarGroup>
-            <SidebarGroupLabel className="text-gray-500 uppercase text-xs">
-              Inventario
-            </SidebarGroupLabel>
+            <SidebarGroup>
+              <SidebarGroupLabel className="text-gray-500 uppercase text-xs">
+                Inventario
+              </SidebarGroupLabel>
 
-            <SidebarGroupContent>
-              <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    isActive={active === 'stock'}
-                    onClick={() => setActive('stock')}
-                    className="data-[active=true]:bg-[#7a1c1c] data-[active=true]:text-black hover:bg-[#7a1c1c]/80 cursor-pointer"
-                  >
-                    <Boxes />
-                    <span>Gestion de Stock</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      isActive={stockMode}
+                      onClick={() => {
+                        setActive('product');
+                        setStockMode((prev) => !prev);
+                      }}
+                      className="data-[active=true]:bg-[#7a1c1c] data-[active=true]:text-black hover:bg-[#7a1c1c]/80 cursor-pointer"
+                    >
+                      <Boxes />
+                      <span>Gestion de Stock</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
 
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    isActive={active === 'brand'}
-                    onClick={() => setActive('brand')}
-                    className="data-[active=true]:bg-[#7a1c1c] data-[active=true]:text-black hover:bg-[#7a1c1c]/80 cursor-pointer"
-                  >
-                    <Tags />
-                    <span>Categorias / Marcas</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        </SidebarContent>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      onClick={() => setOpenMetaDialog(true)} 
+                      className="hover:bg-[#7a1c1c]/80 cursor-pointer"
+                    >
+                      <Tags />
+                      <span>Categorías / Marcas</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          </SidebarContent>
 
-        <SidebarFooter>
-          <SidebarMenu className="text-white">
-            <SidebarMenuItem>
-              <SidebarMenuButton className="hover:bg-[#7a1c1c]/80">
-                <Settings />
-                <span>Settings</span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarFooter>
-      </Sidebar>
-    </SidebarProvider>
+          <SidebarFooter>
+            <SidebarMenu className="text-white">
+              <SidebarMenuItem>
+                <SidebarMenuButton className="hover:bg-[#7a1c1c]/80">
+                  <Settings />
+                  <span>Settings</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarFooter>
+        </Sidebar>
+      </SidebarProvider>
+
+      <CreateMetaDialog
+        open={openMetaDialog}
+        onOpenChange={setOpenMetaDialog}
+        onCreateBrand={(brand) => {
+          console.log('brand creada', brand);
+          // 👉 aquí conectas con tu estado global o query
+        }}
+        onCreateCategory={(category) => {
+          console.log('category creada', category);
+        }}
+      />
+    </>
   );
 }

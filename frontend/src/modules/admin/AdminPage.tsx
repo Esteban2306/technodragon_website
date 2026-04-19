@@ -12,19 +12,30 @@ import { AdminView } from './types/Admin.types';
 export default function AdminPage() {
   const [view, setView] = useState<AdminView>('product');
   const [openCardId, setOpenCardId] = useState<string | null>(null);
+  const [stockMode, setStockMode] = useState(false);
   return (
     <>
       <div className="flex">
         <div className="hidden md:block">
-          <SidebarAdmin active={view} setActive={setView} />
+          <SidebarAdmin
+            active={view}
+            setActive={setView}
+            stockMode={stockMode}
+            setStockMode={setStockMode}
+          />
         </div>
 
-        <MobileAdminMenu active={view} setActive={setView}/>
+        <MobileAdminMenu
+          active={view}
+          setActive={setView}
+          stockMode={stockMode}
+          setStockMode={setStockMode}
+        />
 
         <div className="flex-1">
           {view === 'product' && (
             <>
-              <div id='#product' className="my-10 mx-4">
+              <div id="#product" className="my-10 mx-4">
                 <h3 className="text-2xl text-white mb-3">
                   Gestion de Producto
                 </h3>
@@ -46,6 +57,7 @@ export default function AdminPage() {
                       key={product.id}
                       product={product}
                       isOpen={openCardId === product.id}
+                      stockMode={stockMode}
                       onToggle={() =>
                         setOpenCardId((prev) =>
                           prev === product.id ? null : product.id,
@@ -57,9 +69,9 @@ export default function AdminPage() {
               </div>
             </>
           )}
-          {view === "create" && (
-            <div className='p-6'>
-                <CreateProductStepper onFinish={() => setView('product')}/>
+          {view === 'create' && (
+            <div className="p-6">
+              <CreateProductStepper onFinish={() => setView('product')} />
             </div>
           )}
         </div>
