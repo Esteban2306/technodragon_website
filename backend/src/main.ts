@@ -6,9 +6,16 @@ import cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   dotenv.config({ path: '.env' });
+
   const app = await NestFactory.create(AppModule);
-  await app.listen(process.env.PORT ?? 3001);
 
   app.use(cookieParser());
+
+  app.enableCors({
+    origin: 'http://localhost:3000',
+    credentials: true,
+  });
+
+  await app.listen(process.env.PORT ?? 3001);
 }
 bootstrap();
