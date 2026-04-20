@@ -7,6 +7,8 @@ export class CreateProductDto {
   categoryId: string;
   brandId: string;
 
+  isFeatured?: boolean;
+
   variants: {
     sku: string;
     price: number;
@@ -20,5 +22,6 @@ export class CreateProductDto {
 
   images: {
     url: string;
+    isMain?: boolean; 
   }[];
 }

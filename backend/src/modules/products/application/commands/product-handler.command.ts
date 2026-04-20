@@ -60,6 +60,7 @@ export class CreateProductHandler {
             variants,
             images,
             true,
+            false,
             new Date(),
             new Date()
         )

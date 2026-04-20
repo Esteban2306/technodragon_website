@@ -19,6 +19,8 @@ export class CreateProductCommand {
     }[],
     public readonly images: {
       url: string;
-    }[]
+      isMain?: boolean;
+    }[],
+    public readonly isFeatured: boolean
   ) {}
 }

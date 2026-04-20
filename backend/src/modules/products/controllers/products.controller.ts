@@ -28,6 +28,7 @@ import { GetProductByIdQuery } from '../application/queries/get-product-by-id.qu
 import { JwtGuard } from 'src/modules/auth/guards/jwt-auth.guard';
 import { AdminGuard } from 'src/modules/auth/guards/admin.guard';
 import { CreateProductCommand } from '../application/commands/product.command';
+import { UpdateProductDto } from '../dto/update-product.dto';
 
 @Controller('products')
 export class ProductController {
@@ -52,6 +53,7 @@ export class ProductController {
       body.categoryId,
       body.variants,
       body.images,
+      body.isFeatured ?? false,
     );
 
     return this.createHandler.execute(command);
@@ -71,7 +73,7 @@ export class ProductController {
   @Put(':id')
   async update(
     @Param('id') id: string,
-    @Body() body: Omit<UpdateProductCommand, 'productId'>,
+    @Body() body: UpdateProductDto
   ) {
     const command = new UpdateProductCommand(
       id,
@@ -82,6 +84,7 @@ export class ProductController {
       body.categoryId,
       body.variants,
       body.images,
+      body.isFeatured ?? false,
     );
 
     return this.updateHandler.execute(command);

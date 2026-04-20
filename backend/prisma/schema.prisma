@@ -65,6 +65,7 @@ model Product {
   variants ProductVariant[]
   images   ProductImage[]
 
+  isFeatured Boolean @default(false)
   isActive Boolean
 
   createdAt DateTime @default(now())

@@ -52,6 +52,7 @@ export class UpdateProductHandler {
             variants,
             image,
             true,
+            false,
             new Date(),
             new Date()
         )
