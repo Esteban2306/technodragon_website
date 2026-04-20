@@ -12,9 +12,15 @@ import { Sheet, SheetTrigger, SheetContent, SheetTitle } from '../../sheet';
 import { catalogCategories } from './catalog-categorie.data';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { getCategoryIcon } from '@/src/shared/utils/categoryIcons';
+import CartSidebar from '@/src/modules/catalog/cart/CartSidebar';
+import { useCart } from '@/src/shared/context/cartContext';
 
 export function NavbarMobile() {
+  const { items } = useCart();
+
+  const totalItems = items.reduce((acc, item) => acc + item.quantity, 0);
   const [openCatalog, setOpenCatalog] = useState(false);
+  const [cartOpen, setCartOpen] = useState(false);
 
   return (
     <div className="flex items-center justify-between w-full ">
@@ -24,28 +30,31 @@ export function NavbarMobile() {
 
       <Sheet>
         <div className="flex items-center gap-2">
-          {/* CARRITO */}
           <button
+            onClick={() => setCartOpen(true)}
             className="
-            relative p-2 rounded-xl
-            bg-red-900/30 hover:bg-red-700/80
-            transition-all duration-300
-            shadow-[0_0_10px_rgba(220,38,38,0.3)]
-            hover:shadow-[0_0_20px_rgba(220,38,38,0.6)]
+              relative p-2 rounded-xl
+              bg-red-900/30 hover:bg-red-700/80
+              transition-all duration-300
+              shadow-[0_0_10px_rgba(220,38,38,0.3)]
+              hover:shadow-[0_0_20px_rgba(220,38,38,0.6)]
             "
           >
             <ShoppingCart className="w-5 h-5 text-red-400" />
 
-            <span
-              className="
-            absolute -top-1 -right-1
-            bg-red-600 text-white text-[10px]
-            px-1.5 py-0.5 rounded-full
-            font-bold
-            "
-            >
-              2
-            </span>
+            {totalItems > 0 && (
+              <span
+                className="
+                  absolute -top-1 -right-1
+                  bg-red-600 text-white text-[10px]
+                  px-1.5 py-0.5 rounded-full
+                  font-bold
+                  min-w-4.5 text-center
+                "
+              >
+                {totalItems}
+              </span>
+            )}
           </button>
 
           <SheetTrigger asChild>
@@ -171,6 +180,7 @@ export function NavbarMobile() {
           </div>
         </SheetContent>
       </Sheet>
+      <CartSidebar open={cartOpen} onOpenChange={setCartOpen} />
     </div>
   );
 }

@@ -8,6 +8,7 @@ import {
   TooltipTrigger,
 } from '../../tooltip';
 import { useMediaQuery } from '@/src/shared/hooks/useMediaQuery';
+import { CartItem, useCart } from '@/src/shared/context/cartContext';
 
 type Props = {
   product: ProductPreview;
@@ -17,7 +18,31 @@ type Props = {
 
 export const ProductCardBase = ({ product, className, showCTA }: Props) => {
   const mainImage = product.images?.[0];
+  const { addItem } = useCart();
   const isMobile = useMediaQuery('(max-width: 768px)');
+
+  const defaultVariant = product.variants[0];
+
+  const handleAddToCart = () => {
+    if (!defaultVariant) return;
+
+    const cartItem: CartItem = {
+      variantId: defaultVariant.id,
+      productId: product.id,
+
+      name: product.name,
+      image: defaultVariant.image || product.images?.[0] || '',
+      price: defaultVariant.price,
+
+      quantity: 1,
+
+      variantLabel: defaultVariant.attributes
+        .map((attr) => `${attr.name}: ${attr.value}`)
+        .join(', '),
+    };
+
+    addItem(cartItem);
+  };
   return (
     <TooltipProvider>
       <Tooltip>
@@ -60,14 +85,23 @@ export const ProductCardBase = ({ product, className, showCTA }: Props) => {
               </ul>
 
               <p className="text-xl font-bold text-white mt-2">
-                {formatPriceCOP(product.price)}
+                {formatPriceCOP(product.variants[0].price)}
               </p>
             </div>
 
             {showCTA && (
-              <button className="mt-4 bg-white/10 hover:bg-white/20 text-white py-2 rounded-lg text-sm transition">
-                Ver producto
-              </button>
+              <div className="mt-4 flex gap-2">
+                <button className="flex-1 bg-white/10 hover:bg-white/20 text-white py-2 rounded-lg text-[11px] transition">
+                  Ver producto
+                </button>
+
+                <button
+                  onClick={handleAddToCart}
+                  className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg text-[11px] transition"
+                >
+                  Añadir
+                </button>
+              </div>
             )}
           </div>
         </TooltipTrigger>

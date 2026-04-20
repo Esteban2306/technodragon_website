@@ -19,7 +19,7 @@ import {
 import {
   Package,
   PlusCircle,
-  Pencil,
+  LogOut,
   Boxes,
   Tags,
   Settings,
@@ -125,8 +125,8 @@ export default function AdminSidebar({
             <SidebarMenu className="text-white">
               <SidebarMenuItem>
                 <SidebarMenuButton className="hover:bg-[#7a1c1c]/80">
-                  <Settings />
-                  <span>Settings</span>
+                  <LogOut />
+                  <span>Salir</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
@@ -139,7 +139,7 @@ export default function AdminSidebar({
         onOpenChange={setOpenMetaDialog}
         onCreateBrand={(brand) => {
           console.log('brand creada', brand);
-          // 👉 aquí conectas con tu estado global o query
+          
         }}
         onCreateCategory={(category) => {
           console.log('category creada', category);

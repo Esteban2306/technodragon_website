@@ -13,6 +13,7 @@ import { Boxes, Menu, Package, PlusCircle, Tags } from 'lucide-react';
 
 import { AdminView } from '../types/Admin.types';
 import { AdminSidebarProps } from '../types/Admin.types';
+import CreateMetaDialog from '../productManagment/CreateProductDialog';
 
 export default function MobileAdminMenu({
   active,
@@ -20,6 +21,7 @@ export default function MobileAdminMenu({
   stockMode,
   setStockMode,
 }: AdminSidebarProps) {
+  const [openMetaDialog, setOpenMetaDialog] = useState(false);
   const [open, setOpen] = useState(false);
 
   const handleChange = (view: AdminView) => {
@@ -84,7 +86,7 @@ export default function MobileAdminMenu({
             </DropdownMenuItem>
 
             <DropdownMenuItem
-              onClick={() => handleChange('categories')}
+              onClick={() => setOpenMetaDialog(true)}
               className={`flex items-center gap-2 px-2 py-2 rounded-md cursor-pointer ${
                 active === 'categories' ? 'bg-[#7a1c1c]' : ''
               }`}
@@ -95,6 +97,17 @@ export default function MobileAdminMenu({
           </DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>
+
+      <CreateMetaDialog
+        open={openMetaDialog}
+        onOpenChange={setOpenMetaDialog}
+        onCreateBrand={(brand) => {
+          console.log('brand creada', brand);
+        }}
+        onCreateCategory={(category) => {
+          console.log('category creada', category);
+        }}
+      />
     </div>
   );
 }

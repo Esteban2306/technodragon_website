@@ -1,7 +1,33 @@
 import { ProductPreview } from "@/src/shared/types/catalog.types";
 import { ProductCardBase } from "./ProductCardBase";
+import { useCart, CartItem } from "@/src/shared/context/cartContext";
 
 export const ProductCardDesktop = ({ product }: { product: ProductPreview }) => {
+  const { addItem } = useCart();
+
+  const defaultVariant = product.variants?.[0];
+
+  const handleAddToCart = () => {
+    if (!defaultVariant) return;
+
+    const cartItem: CartItem = {
+      variantId: defaultVariant.id,
+      productId: product.id,
+
+      name: product.name,
+      image: defaultVariant.image || product.images?.[0] || '',
+      price: defaultVariant.price,
+
+      quantity: 1,
+
+      variantLabel: defaultVariant.attributes
+        ?.map((attr) => `${attr.name}: ${attr.value}`)
+        .join(', '),
+    };
+
+    addItem(cartItem);
+  };
+
   return (
     <div
       className="
@@ -18,9 +44,9 @@ export const ProductCardDesktop = ({ product }: { product: ProductPreview }) => 
       <div
         className="
           absolute inset-0
-          flex items-center justify-center
+          flex flex-col items-center justify-center gap-3
           rounded-2xl
-          bg-black/40
+          bg-black/60
 
           opacity-0 group-hover:opacity-100
           transition-all duration-300
@@ -34,6 +60,17 @@ export const ProductCardDesktop = ({ product }: { product: ProductPreview }) => 
           "
         >
           Ver producto
+        </button>
+
+        <button
+          onClick={handleAddToCart}
+          className="
+            cursor-pointer
+            bg-red-600 text-white px-4 py-2 rounded-lg text-sm
+            hover:bg-red-700 hover:scale-103 transition
+          "
+        >
+          Añadir al carrito
         </button>
       </div>
     </div>
