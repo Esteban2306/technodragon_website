@@ -12,12 +12,14 @@ export const EventTypes = {
   PRODUCT_UPDATED: 'product.updated',
   PRODUCT_DISABLED: 'product.disabled',
   PRODUCT_DELETED: 'product.deleted',
-  
+
   CART_CREATED: 'cart.created',
   CART_PRODUCT_ADDED: 'cart.product_added',
   CART_PRODUCT_REMOVED: 'cart.product_removed',
   CART_PRODUCT_UPDATED: 'cart.product_updated',
   CART_CLEARED: 'cart.cleared',
+
+  PRODUCT_FEATURED: 'product.featured',
 
   STOCK_UPDATED: 'stock.updated',
   STOCK_LOW: 'stock.low',
@@ -49,6 +51,11 @@ export interface EventPayloadMap {
     brandId: string;
     name: string;
     slug: string;
+  };
+
+  [EventTypes.PRODUCT_FEATURED]: {
+    productId: string;
+    isFeatured: boolean;
   };
 
   [EventTypes.BRAND_UPDATED]: {

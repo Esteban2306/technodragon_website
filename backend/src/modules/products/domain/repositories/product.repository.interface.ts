@@ -18,4 +18,6 @@ export interface ProductRepository {
   existsBySlug(slug: string): Promise<boolean>;
 
   delete(id: string): Promise<void>;
+
+  markProductAsFeatured(productId: string): Promise<void>;
 }

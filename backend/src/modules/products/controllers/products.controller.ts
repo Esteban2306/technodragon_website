@@ -8,6 +8,7 @@ import {
   Delete,
   Query,
   UseGuards,
+  Patch,
 } from '@nestjs/common';
 
 import { CreateProductHandler } from '../application/commands/product-handler.command';
@@ -29,6 +30,7 @@ import { JwtGuard } from 'src/modules/auth/guards/jwt-auth.guard';
 import { AdminGuard } from 'src/modules/auth/guards/admin.guard';
 import { CreateProductCommand } from '../application/commands/product.command';
 import { UpdateProductDto } from '../dto/update-product.dto';
+import { ProductService } from '../application/services/product.service';
 
 @Controller('products')
 export class ProductController {
@@ -40,6 +42,7 @@ export class ProductController {
     private readonly updateStockHandler: UpdateStockProductHandler,
     private readonly getProductsHandler: GetProductHandler,
     private readonly getProductByIdHandler: GetProductByIdHandler,
+    private readonly productService: ProductService
   ) {}
 
   @UseGuards(JwtGuard, AdminGuard)
@@ -71,10 +74,7 @@ export class ProductController {
 
   @UseGuards(JwtGuard, AdminGuard)
   @Put(':id')
-  async update(
-    @Param('id') id: string,
-    @Body() body: UpdateProductDto
-  ) {
+  async update(@Param('id') id: string, @Body() body: UpdateProductDto) {
     const command = new UpdateProductCommand(
       id,
       body.name,
@@ -123,5 +123,11 @@ export class ProductController {
     const command = new DeleteProductCommand(id);
 
     return this.deleteHandler.execute(command);
+  }
+
+  @UseGuards(JwtGuard, AdminGuard)
+  @Patch(':id/featured')
+  async markAsFeatured(@Param('id') id: string) {
+    return this.productService.markAsFeatured(id);
   }
 }
