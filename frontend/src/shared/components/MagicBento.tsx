@@ -737,8 +737,6 @@ const MagicBento: React.FC<BentoProps> = ({
 
             const handleNavigation = () => {
               if (!card.link) return;
-              console.log('click funcionando');
-
               router.push(card.link);
               
             };

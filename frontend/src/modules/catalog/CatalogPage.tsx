@@ -1,11 +1,10 @@
 'use client';
 
-import { catalogCategories } from '@/src/shared/components/ui/navbar/catalog-categorie.data';
 import { ProductCardBase } from '@/src/shared/components/ui/product-card/ProductCardBase';
 import { getCategoryIcon } from '@/src/shared/utils/categoryIcons';
-import { mockProducts } from './mockProducts';
 import { SidebarProvider } from '@/src/shared/components/sidebar';
 import { motion, easeOut } from 'framer-motion';
+import { useCatalog } from './hook/useQueryCatalog';
 import FiltersSidebar from './FilterSideBar';
 import {
   DropdownMenu,
@@ -20,13 +19,46 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/src/shared/components/pagination';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { SlidersHorizontal } from 'lucide-react';
 import MobileFilters from './MobileFilter';
+import { buildDynamicFilters } from '@/src/shared/helper/buildDynamicFilters';
+import { CatalogFilters } from './types/filter.type';
+import { ProductSkeletonGrid } from './components/ProductSkeletonGrid';
+import { EmptyState } from '@/src/shared/components/ui/EmptyState/ErrorState';
 
 export default function CatalogPage() {
-  const [currentPage, setCurrentPage] = useState(1);
-  const totalPages = 5;
+  const [filters, setFilters] = useState<CatalogFilters>({
+    page: 1,
+    limit: 9,
+  });
+
+  const { data, isLoading, isError } = useCatalog(filters);
+  const totalPages = data?.meta.totalPages ?? 1;
+
+  const dynamicFilters = useMemo(() => {
+    if (!data?.data) return null;
+
+    return buildDynamicFilters(data.data);
+  }, [data]);
+
+  const categories = useMemo(() => {
+    if (!data?.data || data.data.length === 0) return [];
+
+    const map = new Map<string, { id: string; name: string }>();
+
+    data.data.forEach((product) => {
+      if (product?.categoryId && product?.categoryName) {
+        map.set(product.categoryId, {
+          id: product.categoryId,
+          name: product.categoryName,
+        });
+      }
+    });
+
+    return Array.from(map.values());
+  }, [data]);
+
   const containerVariants = {
     hidden: {},
     visible: {
@@ -91,26 +123,44 @@ export default function CatalogPage() {
             variants={containerVariants}
             initial="hidden"
             animate="visible"
-            className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-10"
+            className="
+      flex flex-wrap justify-center gap-4 mb-10
+    "
           >
-            {catalogCategories.map((cat) => {
-              const Icon = getCategoryIcon(cat.title);
+            {categories.map((cat) => {
+              const Icon = getCategoryIcon(cat.name);
 
               return (
                 <motion.div
-                  key={cat.title}
+                  key={cat.id}
                   variants={itemVariants}
-                  className="
-                flex flex-col items-center justify-center
-                bg-[#0F1316] border border-[#2D2F32]
-                rounded-xl p-4 min-h-40
-                hover:bg-red-900/10 transition
-                "
+                  onClick={() =>
+                    setFilters((prev) => ({
+                      ...prev,
+                      categoryId:
+                        prev.categoryId === cat.id ? undefined : cat.id,
+                      page: 1,
+                    }))
+                  }
+                  className={`
+                    w-40 lg:w-55
+                    flex flex-col items-center justify-center
+                    bg-[#0F1316] border border-[#2D2F32]
+                    rounded-xl p-4 min-h-40
+                    cursor-pointer transition
+                    ${
+                      filters.categoryId === cat.id
+                        ? 'border-red-500 bg-red-900/20'
+                        : 'hover:bg-red-900/10'
+                    }
+                  `}
                 >
                   <div className="bg-red-950/60 p-4 mb-4 rounded-2xl">
                     <Icon className="w-8 h-8 text-red-500" />
                   </div>
-                  <span className="text-sm text-white">{cat.title}</span>
+                  <span className="text-sm text-white text-center">
+                    {cat.name}
+                  </span>
                 </motion.div>
               );
             })}
@@ -119,7 +169,11 @@ export default function CatalogPage() {
 
         <div className="flex w-full">
           <aside className="hidden lg:block w-75 shrink-0">
-            <FiltersSidebar />
+            <FiltersSidebar
+              dynamicFilters={dynamicFilters}
+              filters={filters}
+              setFilters={setFilters}
+            />
           </aside>
 
           <div className="flex-1">
@@ -127,32 +181,61 @@ export default function CatalogPage() {
               <motion.div
                 variants={productContainer}
                 initial="hidden"
-                whileInView="visible"
-                viewport={{ once: false, margin: '-80px' }}
-                className="
-                grid 
-                grid-cols-1 
-                sm:grid-cols-2 
-                lg:grid-cols-3 
-                gap-6 
-                p-10
-                justify-items-center
-            "
+                animate="visible"
+                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-10 justify-items-center"
               >
-                {mockProducts.map((product) => (
-                  <motion.div key={product.id} variants={productItem}>
-                    <ProductCardBase product={product} showCTA />
-                  </motion.div>
-                ))}
+                {isLoading ? (
+                  <ProductSkeletonGrid count={6} />
+                ) : isError ? (
+                  <EmptyState
+                    title="Error al cargar productos"
+                    description="Algo salió mal. Intenta nuevamente."
+                    action={
+                      <button
+                        onClick={() => window.location.reload()}
+                        className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm"
+                      >
+                        Reintentar
+                      </button>
+                    }
+                  />
+                ) : data?.data?.length === 0 ? (
+                  <EmptyState
+                    title="No hay productos"
+                    description="Prueba cambiando los filtros o explorando otras categorías."
+                    action={
+                      <button
+                        onClick={() =>
+                          setFilters({
+                            page: 1,
+                            limit: 9,
+                          })
+                        }
+                        className="px-4 py-2 bg-white/10 text-white rounded-lg text-sm hover:bg-white/20"
+                      >
+                        Limpiar filtros
+                      </button>
+                    }
+                  />
+                ) : (
+                  data?.data?.map((product, i) => (
+                    <motion.div key={product.id} variants={productItem}>
+                      <ProductCardBase product={product} showCTA />
+                    </motion.div>
+                  ))
+                )}
               </motion.div>
               <div className="flex justify-center mt-10">
                 <Pagination>
                   <PaginationContent>
                     <PaginationItem>
                       <PaginationPrevious
-                        onClick={() =>
-                          setCurrentPage((p) => Math.max(p - 1, 1))
-                        }
+                        onClick={() => {
+                          setFilters((prev) => ({
+                            ...prev,
+                            page: Math.max((prev.page ?? 1) - 1, 1),
+                          }));
+                        }}
                       />
                     </PaginationItem>
 
@@ -162,8 +245,13 @@ export default function CatalogPage() {
                       return (
                         <PaginationItem key={page}>
                           <PaginationLink
-                            isActive={currentPage === page}
-                            onClick={() => setCurrentPage(page)}
+                            isActive={filters.page === page}
+                            onClick={() => {
+                              setFilters((prev) => ({
+                                ...prev,
+                                page,
+                              }));
+                            }}
                           >
                             {page}
                           </PaginationLink>
@@ -174,7 +262,10 @@ export default function CatalogPage() {
                     <PaginationItem>
                       <PaginationNext
                         onClick={() =>
-                          setCurrentPage((p) => Math.min(p + 1, totalPages))
+                          setFilters((prev) => ({
+                            ...prev,
+                            page: Math.min((prev.page ?? 1) + 1, totalPages),
+                          }))
                         }
                       />
                     </PaginationItem>
@@ -215,7 +306,11 @@ export default function CatalogPage() {
                 p-3
             "
             >
-              <MobileFilters />
+              <MobileFilters
+                dynamicFilters={dynamicFilters}
+                filters={filters}
+                setFilters={setFilters}
+              />
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

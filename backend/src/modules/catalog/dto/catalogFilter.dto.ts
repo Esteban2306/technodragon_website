@@ -1,5 +1,14 @@
 import { Transform, Type } from 'class-transformer';
-import { IsOptional, IsNumber, IsString, IsEnum, IsIn, IsInt, Min } from 'class-validator';
+import {
+  IsOptional,
+  IsNumber,
+  IsString,
+  IsEnum,
+  IsIn,
+  IsInt,
+  Min,
+  IsBoolean,
+} from 'class-validator';
 import { ProductCondition } from 'src/modules/products/domain/enums/product-condition.enum';
 
 export class CatalogFilterDto {
@@ -53,6 +62,11 @@ export class CatalogFilterDto {
   @IsInt()
   @Min(1)
   limit?: number;
+
+  @IsOptional()
+  @Transform(({ value }) => value === 'true' || value === true)
+  @IsBoolean()
+  isFeatured?: boolean;
 
   @IsOptional()
   @IsIn(['price', 'createdAt'])

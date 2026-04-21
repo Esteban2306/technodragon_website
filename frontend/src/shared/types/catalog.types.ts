@@ -1,5 +1,5 @@
-
 import { ProductCondition } from "./product-condition.enum";
+
 export type CatalogAttribute = {
   name: string;
   value: string;
@@ -18,9 +18,14 @@ export type ProductPreview = {
   slug: string;
 
   name: string;
+
+  brandId: string; 
   brandName: string;
 
   condition: ProductCondition;
+
+  categoryId: string;
+  categoryName: string;
 
   images: string[];
 

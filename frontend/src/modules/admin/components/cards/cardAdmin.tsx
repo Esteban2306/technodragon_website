@@ -81,12 +81,6 @@ export default function CardAdmin({
         setFeatured(false);
       }
 
-      console.log('PRODUCT_STATUS_CHANGE', {
-        productId: product.id,
-        isActive: newState,
-        featured: newState ? featured : false,
-      });
-
       return newState;
     });
   };

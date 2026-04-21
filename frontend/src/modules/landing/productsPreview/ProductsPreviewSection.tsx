@@ -21,6 +21,7 @@ import {
   textContainer,
   textItem,
 } from '@/src/shared/animations/card.animations';
+import FeaturedProductsSection from './FeaturedProductsSection';
 
 type Props = {
   products: ProductPreview[];
@@ -29,6 +30,7 @@ type Props = {
 export default function ProductsPreviewSection({ products }: Props) {
   const isMobile = useMediaQuery('(max-width: 768px)');
   const { ref, isVisible } = useIsVisible<HTMLDivElement>();
+ 
 
   const [hasInteracted, setHasInteracted] = useState(false);
 

@@ -9,6 +9,7 @@ import {
 } from '../../tooltip';
 import { useMediaQuery } from '@/src/shared/hooks/useMediaQuery';
 import { CartItem, useCart } from '@/src/shared/context/cartContext';
+import { CONDITION_LABEL } from '@/src/shared/helper/conditionLabel';
 
 type Props = {
   product: ProductPreview;
@@ -71,7 +72,7 @@ export const ProductCardBase = ({ product, className, showCTA }: Props) => {
 
             <div className="mt-4 space-y-2">
               <p className="text-xs text-gray-400 capitalize">
-                {product.condition.toLowerCase()}
+                {CONDITION_LABEL[product.condition] ?? product.condition}
               </p>
 
               <h3 className="text-lg font-semibold text-white leading-tight line-clamp-2 min-h-12">

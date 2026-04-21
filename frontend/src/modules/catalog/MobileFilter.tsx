@@ -1,131 +1,165 @@
+'use client';
+
+import { useState } from 'react';
 import ElasticSlider from '@/src/shared/components/ElasticSlider';
 import { FilterSection } from './components/Filtersection';
 import { ToggleItem } from './components/ToggleItem';
-import { useState } from 'react';
 import { ProductCondition } from '@/src/shared/types/product-condition.enum';
-import { AttributeMap, FilterOption } from './types/filter.type';
+import { Props } from './types/filter.type';
+import { CONDITION_LABEL } from '@/src/shared/helper/conditionLabel';
 
-const mockAttributes: AttributeMap = {
-  RAM: [
-    { label: '8GB', value: '8' },
-    { label: '16GB', value: '16' },
-    { label: '32GB', value: '32' },
-  ],
-  SSD: [
-    { label: '256GB', value: '256' },
-    { label: '512GB', value: '512' },
-    { label: '1TB', value: '1024' },
-  ],
-};
 
-const brandId: FilterOption[] = [
-  { label: 'Apple', value: 'apple' },
-  { label: 'Dell', value: 'dell' },
-  { label: 'HP', value: 'hp' },
+const status = [
+  { label: CONDITION_LABEL[ProductCondition.NEW], value: ProductCondition.NEW },
+  { label: CONDITION_LABEL[ProductCondition.REFURBISHED], value: ProductCondition.REFURBISHED },
 ];
 
-const status: FilterOption[] = [
-  { label: 'Nuevo', value: ProductCondition.NEW },
-  { label: 'Reacondicionado', value: ProductCondition.REFURBISHED },
-];
-
-export default function MobileFilters() {
-  const [selectedFilters, setSelectedFilters] = useState<{
-    brandId: string[];
-    condition: ProductCondition[];
-    attributes: Record<string, string[]>;
-    minPrice: number;
-    maxPrice: number;
-  }>({
-    brandId: [],
-    condition: [],
-    attributes: {},
-    minPrice: 0,
-    maxPrice: 10000000,
-  });
-
+export default function MobileFilters({
+  dynamicFilters,
+  filters,
+  setFilters,
+}: Props) {
   const [price, setPrice] = useState(5000000);
 
-  function toggleValue<T>(list: T[], value: T): T[] {
+  const safeFilters = filters ?? { page: 1, limit: 9 };
+
+  function toggleValue<T>(list: T[] = [], value: T): T[] {
     return list.includes(value)
       ? list.filter((v) => v !== value)
       : [...list, value];
   }
+
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-3 p-3">
+      <div className="flex justify-between items-center">
+        <h3 className="text-sm font-semibold text-white">Filtros</h3>
+        <button
+          onClick={() =>
+            setFilters({
+              page: 1,
+              limit: 9,
+            })
+          }
+          className="text-xs text-red-500"
+        >
+          Limpiar
+        </button>
+      </div>
+
       <FilterSection title="Marca">
-        {brandId.map((b) => (
-          <ToggleItem
-            key={b.value}
-            label={b.label}
-            value={b.value}
-            selectedValues={selectedFilters.brandId}
-            onChange={(value) =>
-              setSelectedFilters((prev) => ({
-                ...prev,
-                brandId: toggleValue(prev.brandId, value),
-              }))
-            }
-          />
-        ))}
+        {dynamicFilters?.brands.map((b) => {
+          const current = filters.brandId || [];
+          const realId = dynamicFilters.brandMap[b];
+
+          return (
+            <ToggleItem
+              key={b}
+              label={b}
+              value={realId}
+              selectedValues={current}
+              onChange={() => {
+                const next = toggleValue(current, realId);
+
+                setFilters((prev) => ({
+                  ...prev,
+                  brandId: next.length ? next : undefined,
+                  page: 1,
+                }));
+              }}
+            />
+          );
+        })}
       </FilterSection>
 
       <FilterSection title="Estado">
-        {status.map((s) => (
-          <ToggleItem
-            key={s.value}
-            label={s.label}
-            value={s.value}
-            selectedValues={selectedFilters.condition}
-            onChange={(value) =>
-              setSelectedFilters((prev) => ({
-                ...prev,
-                condition: toggleValue(
-                  prev.condition,
-                  value as ProductCondition,
-                ),
-              }))
-            }
-          />
-        ))}
+        {status.map((s) => {
+          const current = filters.condition || [];
+
+          return (
+            <ToggleItem
+              key={s.value}
+              label={s.label}
+              value={s.value}
+              selectedValues={current}
+              onChange={() => {
+                const next = toggleValue(current, s.value);
+
+                setFilters((prev) => ({
+                  ...prev,
+                  condition: next.length ? next : undefined,
+                  page: 1,
+                }));
+              }}
+            />
+          );
+        })}
       </FilterSection>
 
       <FilterSection title="Precio">
         <div className="flex flex-col items-center gap-4 w-full px-2">
-            <ElasticSlider
-              defaultValue={price}
-              startingValue={0}
-              maxValue={10000000}
-              isStepped
-              stepSize={500000}
-              leftIcon={<span className="text-xs text-gray-400">$0</span>}
-              rightIcon={<span className="text-xs text-gray-400">$10M</span>}
-              className="w-[75%]"
-            />
-          </div>
+          <ElasticSlider
+            defaultValue={price}
+            startingValue={0}
+            maxValue={10000000}
+            isStepped
+            stepSize={500000}
+            onChange={(value: number) => {
+              setPrice(value);
+
+              setFilters((prev) => ({
+                ...prev,
+                minPrice: 0,
+                maxPrice: value,
+                page: 1,
+              }));
+            }}
+            leftIcon={<span className="text-xs text-gray-400">$0</span>}
+            rightIcon={<span className="text-xs text-gray-400">$10M</span>}
+            className="w-[75%]"
+          />
+        </div>
       </FilterSection>
 
-      {Object.entries(mockAttributes).map(([attr, values]) => (
-        <FilterSection key={attr} title={attr}>
-          {values.map((v) => (
-            <ToggleItem
-              key={v.value}
-              label={v.label}
-              value={v.value}
-              selectedValues={selectedFilters.attributes[attr] || []}
-              onChange={(value) =>
-                setSelectedFilters((prev) => ({
-                  ...prev,
-                  attributes: {
-                    ...prev.attributes,
-                    [attr]: toggleValue(prev.attributes[attr] || [], value),
-                  },
-                }))
-              }
-            />
-          ))}
-        </FilterSection>
-      ))}
+      {dynamicFilters?.attributes &&
+        Object.entries(dynamicFilters.attributes).map(([attr, values]) => {
+          const currentAttrValues = filters.attributes?.[attr] || [];
+
+          return (
+            <FilterSection key={attr} title={attr}>
+              {values.map((v) => (
+                <ToggleItem
+                  key={v}
+                  label={v}
+                  value={v}
+                  selectedValues={currentAttrValues}
+                  onChange={() => {
+                    const next = toggleValue(currentAttrValues, v);
+
+                    setFilters((prev) => {
+                      const newAttributes = {
+                        ...(prev.attributes || {}),
+                        [attr]: next,
+                      };
+
+                      if (next.length === 0) {
+                        delete newAttributes[attr];
+                      }
+
+                      return {
+                        ...prev,
+                        attributes:
+                          Object.keys(newAttributes).length > 0
+                            ? newAttributes
+                            : undefined,
+                        page: 1,
+                      };
+                    });
+                  }}
+                />
+              ))}
+            </FilterSection>
+          );
+        })}
     </div>
   );
 }

@@ -1,0 +1,164 @@
+import { HttpError } from './http-error';
+import { HttpClientConfig, HttpMethod, RequestOptions } from './http.types';
+
+let isRefreshing = false;
+let refreshQueue: Array<() => void> = [];
+
+export class HttpClient {
+  private readonly baseUrl: string;
+  private readonly defaultHeaders: Record<string, string>;
+  private readonly refreshEndpoint: string;
+
+  constructor(config: HttpClientConfig) {
+    this.baseUrl = config.baseUrl;
+    this.refreshEndpoint = config.refreshEndpoint ?? '/auth/refresh';
+    this.defaultHeaders = {
+      'Content-Type': 'application/json',
+      ...config.defaultHeaders,
+    };
+  }
+
+  async request<T>(
+    path: string,
+    method: HttpMethod,
+    body?: unknown,
+    options: RequestOptions = {},
+  ): Promise<T> {
+    try {
+      const response = await this.rawRequest(path, method, body, options);
+      return this.handleResponse<T>(response);
+    } catch (error) {
+      if (
+        error instanceof HttpError &&
+        error.status === 401 &&
+        options.auth !== false
+      ) {
+        return this.handle401<T>(path, method, body, options);
+      }
+
+      throw error;
+    }
+  }
+
+  private async rawRequest(
+    path: string,
+    method: HttpMethod,
+    body?: unknown,
+    options: RequestOptions = {},
+  ): Promise<Response> {
+    const headers = this.buildHeaders(options, body);
+
+    return fetch(this.buildUrl(path, options.params), {
+      method,
+      headers,
+      credentials: 'include',
+      signal: options.signal,
+      body:
+        body instanceof FormData
+          ? body
+          : body
+            ? JSON.stringify(body)
+            : undefined,
+    });
+  }
+
+  private async handle401<T>(
+    path: string,
+    method: HttpMethod,
+    body?: unknown,
+    options: RequestOptions = {},
+  ): Promise<T> {
+    if (options.auth === false) {
+      throw new Error('Unauthorized request');
+    }
+    if (!isRefreshing) {
+      isRefreshing = true;
+
+      try {
+        await this.refreshToken();
+        refreshQueue.forEach((cb) => cb());
+        refreshQueue = [];
+      } catch {
+        refreshQueue.forEach((cb) => cb());
+        refreshQueue = [];
+        throw new HttpError(401, 'SESSION_EXPIRED');
+      } finally {
+        isRefreshing = false;
+      }
+    }
+
+    return new Promise<T>((resolve, reject) => {
+      refreshQueue.push(async () => {
+        try {
+          const response = await this.rawRequest(path, method, body, options);
+          resolve(await this.handleResponse<T>(response));
+        } catch (err) {
+          reject(err);
+        }
+      });
+    });
+  }
+
+  private async refreshToken(): Promise<void> {
+    const response = await fetch(this.buildUrl(this.refreshEndpoint), {
+      method: 'POST',
+      credentials: 'include',
+    });
+
+    if (!response.ok) {
+      throw new HttpError(401, 'SESSION_EXPIRED');
+    }
+  }
+
+  private buildHeaders(options: RequestOptions, body?: unknown): HeadersInit {
+    const isFormData = body instanceof FormData;
+
+    return {
+      ...(isFormData ? {} : this.defaultHeaders),
+      ...options.headers,
+    };
+  }
+
+  private buildUrl(path: string, params?: RequestOptions['params']): string {
+    const url = new URL(
+      `${this.baseUrl.replace(/\/$/, '')}/${path.replace(/^\//, '')}`,
+    );
+
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          url.searchParams.append(key, String(value));
+        }
+      });
+    }
+
+    return url.toString();
+  }
+
+  private async handleResponse<T>(response: Response): Promise<T> {
+    if (!response.ok) {
+      const message = await this.extractErrorMessage(response);
+      throw new HttpError(response.status, message);
+    }
+
+    if (response.status === 204) {
+      return null as T;
+    }
+
+    return response.json() as Promise<T>;
+  }
+
+  private async extractErrorMessage(response: Response): Promise<string> {
+    try {
+      const data = await response.json();
+      return data.message ?? `HTTP Error ${response.status}`;
+    } catch {
+      return `HTTP Error ${response.status}`;
+    }
+  }
+}
+
+export const httpClient = new HttpClient({
+  baseUrl: process.env.NEXT_PUBLIC_API_URL!,
+  refreshEndpoint: "/auth/refresh",
+});
