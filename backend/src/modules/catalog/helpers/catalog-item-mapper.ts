@@ -42,6 +42,8 @@ export class CatalogItemMapper {
       this.mapImages(product.images.map((url) => ({ url }))),
       this.mapIsActivate(product, variant),
 
+      product.isFeatured,
+
       new Date(),
       new Date(),
     );
@@ -63,7 +65,7 @@ export class CatalogItemMapper {
     }
 
     return result;
-  };
+  }
 
   private static mapImages(images: { url: string }[]): string[] {
     if (!images || images.length === 0) return [];

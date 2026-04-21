@@ -5,6 +5,8 @@ export interface ProductForCatalog {
     name: string;
     slug: string;
     isActive: boolean;
+    isFeatured: boolean;
+
 
     brand?: {
         id: string;

@@ -41,6 +41,7 @@ export class PrismaCatalogRepository implements CatalogRepository {
             attributes: data.attributes,
             images: data.images,
             isActive: data.isActive,
+            isFeatured: data.isFeatured,
             updatedAt: new Date(),
           },
           create: data,
@@ -97,12 +98,15 @@ export class PrismaCatalogRepository implements CatalogRepository {
       condition,
       attributes,
       search,
+      isFeatured,
       page = 1,
       limit = 10,
       sortBy = 'createdAt',
       sortOrder = 'desc',
     } = filters;
 
+    const safePage = Number(page);
+    const safeLimit = Number(limit);
     const where: Prisma.CatalogItemWhereInput = {
       isActive: true,
     };
@@ -132,6 +136,10 @@ export class PrismaCatalogRepository implements CatalogRepository {
       ];
     }
 
+    if (isFeatured !== undefined) {
+      where.isFeatured = isFeatured;
+    }
+
     if (attributes) {
       where.AND = Object.entries(attributes).map(([key, values]) => ({
         attributes: {
@@ -141,7 +149,7 @@ export class PrismaCatalogRepository implements CatalogRepository {
       }));
     }
 
-    const skip = (page - 1) * limit;
+    const skip = (safePage - 1) * safeLimit;
 
     const orderBy: Prisma.CatalogItemOrderByWithRelationInput = {
       [sortBy]: sortOrder,
@@ -152,7 +160,7 @@ export class PrismaCatalogRepository implements CatalogRepository {
         where,
         orderBy,
         skip,
-        take: limit,
+        take: safeLimit,
       }),
       this.prisma.catalogItem.count({ where }),
     ]);
@@ -179,19 +187,20 @@ export class PrismaCatalogRepository implements CatalogRepository {
         images: (item.images ?? []) as string[],
 
         isActive: item.isActive,
+        isFeatured: item.isFeatured,
         createdAt: item.createdAt,
         updatedAt: item.updatedAt,
       }),
     );
 
-    const totalPages = Math.ceil(total / limit);
+    const totalPages = Math.ceil(total / safeLimit);
 
     return {
       data,
       meta: {
         total,
-        page,
-        limit,
+        page: safePage,
+        limit: safeLimit,
         totalPages,
         hasNextPage: page < totalPages,
         hasPrevPage: page > 1,
@@ -236,6 +245,7 @@ export class PrismaCatalogRepository implements CatalogRepository {
       images: (item.images ?? []) as string[],
 
       isActive: item.isActive,
+      isFeatured: item.isFeatured,
       createdAt: item.createdAt,
       updatedAt: item.updatedAt,
     });

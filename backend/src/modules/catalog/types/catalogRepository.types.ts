@@ -23,6 +23,8 @@ export interface CatalogFilters {
   page?: number;
   limit?: number;
 
+  isFeatured?: boolean;
+
   sortBy?: "price" | "createdAt";
   sortOrder?: "asc" | "desc";
 }

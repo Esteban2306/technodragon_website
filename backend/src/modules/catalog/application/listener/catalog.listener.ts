@@ -74,12 +74,15 @@ export class catalogListener {
         Number(variant.price),
         variant.stock,
         mapPrismaConditionToDomain(variant.condition),
+        
 
         attributesMap,
+
         product.images.map(img => img.url),
 
         variant.stock > 0,
 
+        product.isFeatured,
         new Date(),
         new Date()
       );
