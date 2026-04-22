@@ -53,10 +53,12 @@ export class PrismaProductRepository implements ProductRepository {
     });
   }
 
-  async findById(id: string): Promise<Product | null> {
+  async findById(id: string): Promise<any | null> {
     const data = await this.prisma.product.findUnique({
       where: { id },
       include: {
+        brand: true,
+        category: true,
         images: true,
         variants: {
           include: {
@@ -68,10 +70,10 @@ export class PrismaProductRepository implements ProductRepository {
 
     if (!data) return null;
 
-    return this.toDomain(data);
+    return this.toResponse(data);
   }
 
-  async findAll(filters?: ProductFilters): Promise<Product[]> {
+  async findAll(filters?: ProductFilters): Promise<any[]> {
     const data = await this.prisma.product.findMany({
       where: {
         isActive: filters?.isActive,
@@ -86,6 +88,8 @@ export class PrismaProductRepository implements ProductRepository {
           : undefined,
       },
       include: {
+        brand: true,
+        category: true,
         images: true,
         variants: {
           include: {
@@ -95,7 +99,7 @@ export class PrismaProductRepository implements ProductRepository {
       },
     });
 
-    return data.map((d) => this.toDomain(d));
+    return data.map((d) => this.toResponse(d));
   }
 
   async findByVariantId(variantId: string): Promise<Product | null> {
@@ -375,10 +379,12 @@ export class PrismaProductRepository implements ProductRepository {
     return count > 0;
   }
 
-  async findBySlug(slug: string): Promise<Product | null> {
+  async findBySlug(slug: string): Promise<any | null> {
     const data = await this.prisma.product.findUnique({
       where: { slug },
       include: {
+        brand: true,
+        category: true,
         images: true,
         variants: {
           include: {
@@ -390,7 +396,7 @@ export class PrismaProductRepository implements ProductRepository {
 
     if (!data) return null;
 
-    return this.toDomain(data);
+    return this.toResponse(data);
   }
 
   async delete(id: string): Promise<void> {
@@ -417,7 +423,7 @@ export class PrismaProductRepository implements ProductRepository {
       data.name,
       data.slug,
       data.description ?? '',
-      
+
       data.brandId,
       data.categoryId,
 
@@ -445,5 +451,51 @@ export class PrismaProductRepository implements ProductRepository {
       data.createdAt,
       data.updatedAt,
     );
+  }
+
+  private toResponse(data: any) {
+    return {
+      id: data.id,
+      name: data.name,
+      slug: data.slug,
+      description: data.description ?? '',
+
+      brand: {
+        id: data.brand.id,
+        name: data.brand.name,
+      },
+
+      category: {
+        id: data.category.id,
+        name: data.category.name,
+      },
+
+      variants: data.variants.map((v) => ({
+        id: v.id,
+        sku: v.sku,
+        price: Number(v.price),
+        stock: v.stock,
+        isActive: v.isActive,
+        condition: v.condition,
+        attributes: v.attributes.map((a) => ({
+          id: a.id,
+          name: a.name,
+          value: a.value,
+        })),
+        createdAt: v.createdAt,
+        updatedAt: v.updatedAt,
+      })),
+
+      images: data.images.map((img) => ({
+        id: img.id,
+        url: img.url,
+        isFeatured: img.isFeatured,
+      })),
+
+      isActive: data.isActive,
+      isFeatured: data.isFeatured,
+      createdAt: data.createdAt,
+      updatedAt: data.updatedAt,
+    };
   }
 }

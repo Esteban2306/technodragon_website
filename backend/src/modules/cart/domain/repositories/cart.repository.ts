@@ -8,4 +8,4 @@ export interface CartRepository {
   removeItem(cartId: string, variantId: string): Promise<void>;
 
   clear(cartId: string): Promise<void>;
-}
+} 
