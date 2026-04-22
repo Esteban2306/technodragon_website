@@ -22,13 +22,12 @@ import {
 import { catalogCategories } from './catalog-categorie.data';
 import { useScrolled } from '@/src/shared/hooks/useScrolled';
 import { NavbarMobile } from './NavbarMobile';
-import { NavLinks } from './navLinks';
-import { useCart } from '@/src/shared/context/cartContext';
+import { useCart } from '@/src/modules/hooks/useCart';
 
 export default function Navbar() {
-  const { items } = useCart();
+  const { data: cart } = useCart();
 
-  const totalItems = items.reduce((acc, item) => acc + item.quantity, 0);
+  const totalItems = cart?.items.reduce((acc, item) => acc + item.quantity, 0) || 0;
   const [cartOpen, setCartOpen] = useState(false);
   const scrolled = useScrolled(20);
 

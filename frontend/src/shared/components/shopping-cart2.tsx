@@ -1,174 +1,225 @@
 'use client';
 
 import { Minus, Plus, ShoppingCart, Trash2 } from 'lucide-react';
-import { useState } from 'react';
+import Image from 'next/image';
 
 import { AspectRatio } from '@/src/shared/components/aspect-ratio';
 import { Button } from './button';
 import { Separator } from '@/src/shared/components/separator';
-import Image from 'next/image';
-import { useCart } from '@/src/shared/context/cartContext';
-import { CartItem } from '@/src/shared/context/cartContext';
+
+import { useCart } from '@/src/modules/hooks/useCart';
+import {
+  useRemoveCartItem,
+  useUpdateCartItem,
+} from '@/src/modules/hooks/useAddToCart';
+import { CartItem } from '../types/cart.types';
+import CartSkeleton from './ui/skeleton/CartSkeleton';
+import { EmptyState } from './ui/EmptyState/ErrorState';
 
 const ShoppingCart2 = () => {
-  const { items, updateQuantity, removeItem } = useCart();
+  const { data: cart, isLoading, isError } = useCart();
 
-  const subtotal = items.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0,
-  );
-  const shipping = 9.99;
-  const total = subtotal + shipping;
+  const changeQty = useUpdateCartItem();
+  const removeItem = useRemoveCartItem();
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(price);
-  };
+  if (isLoading) {
+    return <CartSkeleton />;
+  }
 
-  if (items.length === 0) {
+  if (isError) {
     return (
-      <section className="py-32">
-        <div className="container max-w-lg text-center">
-          <h1 className="mb-4 text-2xl font-semibold">Tu carrito está vacío</h1>
-          <p className="mb-8 text-muted-foreground">
-            Parece que aún no has añadido nada.
-          </p>
-          <Button asChild>
-            <a href="#">Continua explorando</a>
-          </Button>
-        </div>
-      </section>
+      <EmptyState
+        title="Error al cargar el carrito"
+        description="Algo salió mal. Intenta nuevamente más tarde."
+      />
     );
   }
 
+  if (!cart || cart.items.length === 0) {
+    return (
+      <EmptyState
+        title="Tu carrito está vacío"
+        description="Añade productos para seguir con tu compra y consultar por whatsapp."
+        icon={<ShoppingCart className="w-10 h-10" />}
+      />
+    );
+  }
+
+  const format = (n: number) =>
+    new Intl.NumberFormat('es-CO', {
+      style: 'currency',
+      currency: 'COP',
+    }).format(n);
+
+  const totalCart = cart.items.reduce(
+    (acc, item) => acc + item.price * item.quantity,
+    0,
+  );
+
+  const whatsappMessage = encodeURIComponent(
+    `Hola, quiero consultar este pedido:\n\n${cart.items
+      .map(
+        (item) =>
+          `• ${item.name} (${Object.entries(item.attributes)
+            .map(([k, v]) => `${k}: ${v}`)
+            .join(', ')}) x${item.quantity} - ${format(
+            item.price * item.quantity,
+          )}`,
+      )
+      .join('\n')}\n\nTotal: ${format(totalCart)}`,
+  );
+
+  const whatsappLink = `https://wa.me/573000000000?text=${whatsappMessage}`;
+
   return (
-    <section className="py-8">
-      <div className="container">
-        <div className="flex flex-col gap-8 w-full">
-          <div className="lg:col-span-2">
-            <div className="space-y-4">
-              {items.map((item) => (
-                <div
-                  key={item.variantId}
-                  className="
-                    grid grid-cols-[80px_1fr] 
-                    sm:flex 
-                    gap-3 sm:gap-4 
-                    rounded-lg border bg-card p-3
-                    border-gray-700/50
-                  "
-                >
-                  <div className="w-[80px] sm:w-24 shrink-0">
-                    <AspectRatio
-                      ratio={1}
-                      className="overflow-hidden rounded-md bg-muted"
-                    >
-                      <Image
-                        src={item.image}
-                        alt={item.name}
-                        fill
-                        className="size-full object-cover"
-                      />
-                    </AspectRatio>
-                  </div>
+    <div className="p-4 space-y-6 max-w-4xl mx-auto">
+      {cart.items.map((item: CartItem) => {
+        const image = item.image || '/placeholder.png';
+        const totalItem = item.price * item.quantity;
 
-                  <div className="flex flex-col justify-between min-w-0">
-                    <div>
-                      <h3 className="font-medium truncate ">{item.name}</h3>
-                      {item.variantId && (
-                        <p className="text-sm text-muted-foreground">
-                          {item.variantLabel}
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        className="size-8"
-                        onClick={() => updateQuantity(item.variantId, -1)}
-                      >
-                        <Minus className="size-3" />
-                      </Button>
-                      <span className="w-8 text-center">{item.quantity}</span>
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        className="size-8"
-                        onClick={() => updateQuantity(item.variantId, 1)}
-                      >
-                        <Plus className="size-3" />
-                      </Button>
-                    </div>
-                  </div>
-
-                  <div
-                    className="
-  col-span-2
-  flex justify-between items-center
-  sm:flex-col sm:items-end sm:justify-between
-  gap-2 mt-2 sm:mt-0
-"
-                  >
-                    
-                    <div className="text-right">
-                      <p className="font-semibold">
-                        {formatPrice(item.price * item.quantity)}
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        {formatPrice(item.price)} Cada
-                      </p>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-muted-foreground cursor-pointer p-4"
-                      onClick={() => removeItem(item.variantId)}
-                    >
-                      <Trash2 className="mr-1 size-4" />
-                      Eliminar
-                    </Button>
-                  </div>
-                </div>
-              ))}
+        return (
+          <div
+            key={item.id}
+            className="flex flex-col sm:flex-row gap-4 border border-neutral-800 rounded-xl p-4 bg-neutral-900/40 hover:border-neutral-700 transition"
+          >
+            <div className="w-full sm:w-28">
+              <AspectRatio ratio={1}>
+                <Image
+                  src={image}
+                  alt={item.name}
+                  fill
+                  className="object-cover rounded-md"
+                />
+              </AspectRatio>
             </div>
-          </div>
 
-          <div className="lg:col-span-1 w-full">
-            <div className="rounded-lg border bg-card p-6">
-              <h2 className="mb-4 text-lg font-semibold">Resumen del pedido</h2>
+            <div className="flex-1 flex flex-col justify-between">
+              <div>
+                <h3 className="text-white font-semibold text-lg line-clamp-2">
+                  {item.name}
+                </h3>
 
-              <div className="space-y-3">
-                <div className="flex justify-between text-sm">
-                  <span className="flex items-center gap-1.5 text-muted-foreground">
-                    <ShoppingCart className="size-4" />
-                    {items.length} {items.length === 1 ? 'item' : 'items'}
-                  </span>
+                <p className="text-sm text-neutral-400 mt-1">{item.brand}</p>
+
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {Object.entries(item.attributes).map(([key, value]) => (
+                    <span
+                      key={key}
+                      className="text-xs bg-neutral-800 text-neutral-300 px-2 py-1 rounded-md"
+                    >
+                      {key}: {value}
+                    </span>
+                  ))}
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Subtotal</span>
-                  <span>{formatPrice(subtotal)}</span>
-                </div>
 
-                <Separator />
+                <div className="mt-3 space-y-1">
+                  <p className="text-sm text-neutral-400">
+                    Precio unitario: {format(item.price)}
+                  </p>
 
-                <div className="flex justify-between font-semibold">
-                  <span>Total</span>
-                  <span>{formatPrice(total)}</span>
+                  {item.quantity > 1 && (
+                    <p className="text-red-500 font-semibold">
+                      Total: {format(totalItem)}
+                    </p>
+                  )}
                 </div>
               </div>
 
-              <Button size="lg" className="mt-6 w-full">
-                Consultar por whatsapp
-              </Button>
+              <div className="flex items-center justify-between mt-4">
+                <div className="flex items-center gap-2">
+                  <Button
+                    size="icon"
+                    variant="outline"
+                    disabled={item.quantity <= 1}
+                    onClick={() =>
+                      changeQty.mutate({
+                        cartId: cart.id,
+                        variantId: item.variantId,
+                        quantity: item.quantity - 1,
+                      })
+                    }
+                  >
+                    <Minus size={16} />
+                  </Button>
+
+                  <span className="text-white w-6 text-center">
+                    {item.quantity}
+                  </span>
+
+                  <Button
+                    size="icon"
+                    variant="outline"
+                    onClick={() =>
+                      changeQty.mutate({
+                        cartId: cart.id,
+                        variantId: item.variantId,
+                        quantity: item.quantity + 1,
+                      })
+                    }
+                  >
+                    <Plus size={16} />
+                  </Button>
+                </div>
+
+                <Button
+                  variant="ghost"
+                  onClick={() =>
+                    removeItem.mutate({
+                      cartId: cart.id,
+                      variantId: item.variantId,
+                    })
+                  }
+                  className="text-red-500 hover:text-red-400"
+                >
+                  <Trash2 size={18} />
+                </Button>
+              </div>
             </div>
           </div>
+        );
+      })}
+
+      <Separator />
+
+      <div className="bg-neutral-900 border border-neutral-800 rounded-xl p-5 space-y-4">
+        <div className="flex justify-between text-sm text-neutral-400">
+          <span>Productos</span>
+          <span>{cart.totalItems}</span>
         </div>
+
+        <div className="space-y-2">
+          {cart.items.map((item) => {
+            const totalItem = item.price * item.quantity;
+
+            return (
+              <div
+                key={item.id}
+                className="flex justify-between text-sm text-neutral-300"
+              >
+                <span className="truncate max-w-[70%]">
+                  {item.name} x{item.quantity}
+                </span>
+                <span className="font-medium text-white">
+                  {format(totalItem)}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="flex justify-between text-lg font-semibold text-white pt-2 border-t border-neutral-800">
+          <span>Total</span>
+          <span>{format(totalCart)}</span>
+        </div>
+
+        <Button
+          className="w-full bg-green-600 hover:bg-green-700 text-white text-sm font-medium py-3 rounded-md transition"
+          onClick={() => window.open(whatsappLink, '_blank')}
+        >
+          Consultar por WhatsApp
+        </Button>
       </div>
-    </section>
+    </div>
   );
 };
 

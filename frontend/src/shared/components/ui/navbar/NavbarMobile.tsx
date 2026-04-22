@@ -13,12 +13,12 @@ import { catalogCategories } from './catalog-categorie.data';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { getCategoryIcon } from '@/src/shared/utils/categoryIcons';
 import CartSidebar from '@/src/modules/catalog/cart/CartSidebar';
-import { useCart } from '@/src/shared/context/cartContext';
+import { useCart } from '@/src/modules/hooks/useCart';
 
 export function NavbarMobile() {
-  const { items } = useCart();
+  const { data: cart } = useCart();
 
-  const totalItems = items.reduce((acc, item) => acc + item.quantity, 0);
+  const totalItems = cart?.items.reduce((acc, item) => acc + item.quantity, 0) || 0;
   const [openCatalog, setOpenCatalog] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
 

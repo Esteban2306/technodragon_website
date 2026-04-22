@@ -2,6 +2,7 @@
 
 import { ProductVariantDetail } from "@/src/shared/types/product.types"
 import { useMemo, useState } from "react"
+import { useAddToCart } from "../../hooks/useAddToCart"
 
 type Props = {
   variant?: ProductVariantDetail
@@ -16,6 +17,8 @@ type VariantStatus =
 export default function AddToCartSection({ variant }: Props) {
   const [quantity, setQuantity] = useState(1)
 
+  const { mutate: addToCart, isPending } = useAddToCart()
+
   const status: VariantStatus = useMemo(() => {
     if (!variant) return "NO_MATCH"
     if (!variant.isActive) return "INACTIVE"
@@ -23,55 +26,36 @@ export default function AddToCartSection({ variant }: Props) {
     return "AVAILABLE"
   }, [variant])
 
-  const isDisabled = status !== "AVAILABLE"
+  const isDisabled = status !== "AVAILABLE" || isPending
 
-  const statusUI = useMemo(() => {
-    switch (status) {
-      case "NO_MATCH":
-        return {
-          text: "No hay productos con esta combinación. Ajusta los atributos.",
-          color: "text-neutral-500",
-          showWhatsApp: false,
-        }
+  const statusText = {
+    NO_MATCH: "Selecciona una combinación válida",
+    INACTIVE: "Producto no disponible",
+    OUT_OF_STOCK: "Sin stock",
+    AVAILABLE: "Disponible",
+  }
 
-      case "INACTIVE":
-        return {
-          text: "Este producto no está disponible actualmente.",
-          color: "text-red-500",
-          showWhatsApp: true,
-        }
+  const handleAddToCart = () => {
+    if (!variant) return
 
-      case "OUT_OF_STOCK":
-        return {
-          text: "Sin stock disponible por el momento.",
-          color: "text-red-500",
-          showWhatsApp: true,
-        }
-
-      case "AVAILABLE":
-        return {
-          text: "Disponible. Consulta por whatsapp y realiza tu compra.",
-          color: "text-green-500",
-          showWhatsApp: true,
-        }
-    }
-  }, [status])
+    addToCart({
+      variantId: variant.id,
+      quantity,
+    })
+  }
 
   return (
     <div className="mt-8 flex flex-col gap-4 border-t border-neutral-800 pt-6">
 
-      {/* STATUS */}
-      <div className="text-sm">
-        <span className={statusUI.color}>
-          {statusUI.text}
-        </span>
-      </div>
+      <span className="text-sm text-neutral-400">
+        {statusText[status]}
+      </span>
 
-      {/* QUANTITY */}
       <div className="flex items-center gap-3">
 
         <button
           onClick={() => setQuantity(q => Math.max(1, q - 1))}
+          disabled={isPending}
           className="px-3 py-1 border border-neutral-700 rounded-md text-white"
         >
           -
@@ -81,6 +65,7 @@ export default function AddToCartSection({ variant }: Props) {
 
         <button
           onClick={() => setQuantity(q => q + 1)}
+          disabled={isPending}
           className="px-3 py-1 border border-neutral-700 rounded-md text-white"
         >
           +
@@ -88,8 +73,8 @@ export default function AddToCartSection({ variant }: Props) {
 
       </div>
 
-      {/* ADD TO CART */}
       <button
+        onClick={handleAddToCart}
         disabled={isDisabled}
         className={`
           w-full py-3 rounded-md font-medium transition
@@ -99,17 +84,8 @@ export default function AddToCartSection({ variant }: Props) {
           }
         `}
       >
-        Add to Cart
+        {isPending ? "Añadiendo..." : "Añadir al carrito"}
       </button>
-
-      {/* WHATSAPP */}
-      {statusUI.showWhatsApp && (
-        <button
-          className="w-full py-3 rounded-md border border-neutral-700 text-white hover:border-neutral-400 transition"
-        >
-          Consultar disponibilidad por WhatsApp
-        </button>
-      )}
 
     </div>
   )

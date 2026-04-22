@@ -10,6 +10,7 @@ import {
 import { useMediaQuery } from '@/src/shared/hooks/useMediaQuery';
 import { CartItem, useCart } from '@/src/shared/context/cartContext';
 import { CONDITION_LABEL } from '@/src/shared/helper/conditionLabel';
+import Link from 'next/link';
 
 type Props = {
   product: ProductPreview;
@@ -92,16 +93,13 @@ export const ProductCardBase = ({ product, className, showCTA }: Props) => {
 
             {showCTA && (
               <div className="mt-4 flex gap-2">
-                <button className="flex-1 bg-white/10 hover:bg-white/20 text-white py-2 rounded-lg text-[11px] transition">
-                  Ver producto
-                </button>
-
-                <button
-                  onClick={handleAddToCart}
-                  className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg text-[11px] transition"
+                <Link
+                  href={`/product/${product.id}`}
+                  className="flex-1 bg-white/10 hover:bg-white/20 text-white py-2 rounded-lg text-[11px] transition flex items-center justify-center"
                 >
-                  Añadir
-                </button>
+                  Ver producto
+                </Link>
+
               </div>
             )}
           </div>

@@ -12,7 +12,7 @@ export default function ProductInfo({ product, variant }: Props) {
     <div className="flex flex-col gap-4">
 
       <span className="text-sm text-neutral-400 uppercase tracking-widest">
-        {product.brand.name}
+        {product.brand?.name ?? "Unknown brand"}
       </span>
 
       <h1 className="text-3xl lg:text-4xl font-semibold text-white">

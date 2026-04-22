@@ -1,8 +1,13 @@
-import { ProductPreview } from "@/src/shared/types/catalog.types";
-import { ProductCardBase } from "./ProductCardBase";
-import { useCart, CartItem } from "@/src/shared/context/cartContext";
+import { ProductPreview } from '@/src/shared/types/catalog.types';
+import { ProductCardBase } from './ProductCardBase';
+import { useCart, CartItem } from '@/src/shared/context/cartContext';
+import Link from 'next/link';
 
-export const ProductCardDesktop = ({ product }: { product: ProductPreview }) => {
+export const ProductCardDesktop = ({
+  product,
+}: {
+  product: ProductPreview;
+}) => {
   const { addItem } = useCart();
 
   const defaultVariant = product.variants?.[0];
@@ -52,26 +57,17 @@ export const ProductCardDesktop = ({ product }: { product: ProductPreview }) => 
           transition-all duration-300
         "
       >
-        <button
-          className="
+        <Link href={`/product/${product.id}`}>
+          <button
+            className="
             cursor-pointer
             bg-white text-black px-4 py-2 rounded-lg text-sm
             hover:scale-103 transition
           "
-        >
-          Ver producto
-        </button>
-
-        <button
-          onClick={handleAddToCart}
-          className="
-            cursor-pointer
-            bg-red-600 text-white px-4 py-2 rounded-lg text-sm
-            hover:bg-red-700 hover:scale-103 transition
-          "
-        >
-          Añadir al carrito
-        </button>
+          >
+            Ver producto
+          </button>
+        </Link>
       </div>
     </div>
   );

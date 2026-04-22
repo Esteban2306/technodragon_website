@@ -1,45 +1,57 @@
-// /modules/product/types/product.types.ts
+import { ProductCondition } from './product-condition.enum';
 
-import { ProductCondition } from "./product-condition.enum"
-import { CatalogAttribute } from "./catalog.types"
+export type ProductAttribute = {
+  id: string;
+  name: string;
+  value: string;
+};
 
 export type ProductVariantDetail = {
-  id: string
-  price: number
-  stock: number
+  id: string;
+  sku: string;
+  price: number;
+  stock: number;
+  isActive: boolean;
+  condition: ProductCondition;
+  attributes: ProductAttribute[];
+  createdAt: string;
+  updatedAt: string;
+};
 
-  condition: ProductCondition
-  isActive: boolean
-
-  attributes: CatalogAttribute[]
-}
+export type ProductImage = {
+  id: string;
+  url: string;
+  isFeatured: boolean;
+};
 
 export type ProductDetail = {
-  id: string
-  slug: string
-
-  name: string
-  description?: string
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
 
   brand: {
-    id: string
-    name: string
-  }
+    id: string;
+    name: string;
+  };
 
   category: {
-    id: string
-    name: string
-  }
+    id: string;
+    name: string;
+  };
 
-  images: string[]
+  variants: ProductVariantDetail[];
+  images: ProductImage[];
 
-  variants: ProductVariantDetail[]
+  isActive: boolean;
+  isFeatured: boolean;
 
-  isActive: boolean
-}
+  createdAt: string;
+  updatedAt: string;
+};
 
 export type ProductPageProps = {
   params: {
-    id: string
-  }
-}
+    id: string;
+  };
+};

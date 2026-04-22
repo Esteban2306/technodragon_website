@@ -1,26 +1,31 @@
-'use client'
+'use client';
 
-import { useState } from "react"
-import Image from "next/image"
+import { useState } from 'react';
+import Image from 'next/image';
+import { ProductImage } from '@/src/shared/types/product.types';
 
 type ProductGalleryProps = {
-  images: string[]
-}
+  images: ProductImage[];
+};
 
 export default function ProductGallery({ images }: ProductGalleryProps) {
-  const safeImages = images.slice(0, 4)
+  const safeImages = images.slice(0, 4);
 
-  const [selectedIndex, setSelectedIndex] = useState(0)
+  const featuredIndex = safeImages.findIndex((img) => img.isFeatured);
+  const initialIndex = featuredIndex !== -1 ? featuredIndex : 0;
 
-  const mainImage = safeImages[selectedIndex]
-  const thumbnails = safeImages.filter((_, i) => i !== selectedIndex)
+  const [selectedIndex, setSelectedIndex] = useState(initialIndex);
+
+  const mainImage = safeImages[selectedIndex];
+
+  const thumbnails = safeImages.filter((_, i) => i !== selectedIndex);
 
   if (!safeImages.length) {
     return (
       <div className="flex items-center justify-center h-100 bg-neutral-900 rounded-xl">
         <span className="text-neutral-500">No images available</span>
       </div>
-    )
+    );
   }
 
   return (
@@ -28,7 +33,7 @@ export default function ProductGallery({ images }: ProductGalleryProps) {
 
       <div className="relative w-full aspect-square bg-neutral-900 rounded-xl overflow-hidden">
         <Image
-          src={mainImage}
+          src={mainImage.url}
           alt="product image"
           fill
           className="object-cover"
@@ -37,18 +42,18 @@ export default function ProductGallery({ images }: ProductGalleryProps) {
       </div>
 
       <div className="flex flex-col gap-4">
-        {thumbnails.map((img, index) => (
+        {thumbnails.map((img) => (
           <button
-            key={img}
+            key={img.id}
             onClick={() => {
-              const realIndex = safeImages.findIndex(i => i === img)
-              setSelectedIndex(realIndex)
+              const realIndex = safeImages.findIndex(i => i.id === img.id);
+              setSelectedIndex(realIndex);
             }}
             className="relative w-full aspect-square rounded-lg overflow-hidden border border-neutral-800 hover:border-white transition"
           >
             <Image
-              src={img}
-              alt={`thumbnail ${index}`}
+              src={img.url}
+              alt={`thumbnail`}
               fill
               className="object-cover"
             />
@@ -57,5 +62,5 @@ export default function ProductGallery({ images }: ProductGalleryProps) {
       </div>
 
     </div>
-  )
+  );
 }
