@@ -15,12 +15,14 @@ import {
 import { CartItem } from '../types/cart.types';
 import CartSkeleton from './ui/skeleton/CartSkeleton';
 import { EmptyState } from './ui/EmptyState/ErrorState';
+import { useOpenCartWhatsApp } from '@/src/modules/hooks/useOpenWhatsApp';
 
 const ShoppingCart2 = () => {
   const { data: cart, isLoading, isError } = useCart();
 
   const changeQty = useUpdateCartItem();
   const removeItem = useRemoveCartItem();
+  const openWhatsApp = useOpenCartWhatsApp();
 
   if (isLoading) {
     return <CartSkeleton />;
@@ -213,10 +215,13 @@ const ShoppingCart2 = () => {
         </div>
 
         <Button
+          disabled={openWhatsApp.isPending}
           className="w-full bg-green-600 hover:bg-green-700 text-white text-sm font-medium py-3 rounded-md transition"
-          onClick={() => window.open(whatsappLink, '_blank')}
+          onClick={() => openWhatsApp.mutate(cart.id)}
         >
-          Consultar por WhatsApp
+          {openWhatsApp.isPending
+            ? 'Generando enlace...'
+            : 'Consultar por WhatsApp'}
         </Button>
       </div>
     </div>

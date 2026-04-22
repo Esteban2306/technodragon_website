@@ -3,6 +3,7 @@
 import { ProductVariantDetail } from "@/src/shared/types/product.types"
 import { useMemo, useState } from "react"
 import { useAddToCart } from "../../hooks/useAddToCart"
+import { useProductWhatsApp } from "../../hooks/useProductWhatsApp"
 
 type Props = {
   variant?: ProductVariantDetail
@@ -18,6 +19,11 @@ export default function AddToCartSection({ variant }: Props) {
   const [quantity, setQuantity] = useState(1)
 
   const { mutate: addToCart, isPending } = useAddToCart()
+
+  const {
+    data: whatsappData,
+    isFetching: isFetchingWhatsapp,
+  } = useProductWhatsApp(variant?.id)
 
   const status: VariantStatus = useMemo(() => {
     if (!variant) return "NO_MATCH"
@@ -42,6 +48,11 @@ export default function AddToCartSection({ variant }: Props) {
       variantId: variant.id,
       quantity,
     })
+  }
+
+  const handleWhatsApp = () => {
+    if (!whatsappData?.url) return
+    window.open(whatsappData.url, '_blank')
   }
 
   return (
@@ -86,6 +97,24 @@ export default function AddToCartSection({ variant }: Props) {
       >
         {isPending ? "Añadiendo..." : "Añadir al carrito"}
       </button>
+
+      {variant && status === "AVAILABLE" && (
+        <button
+          onClick={handleWhatsApp}
+          disabled={!whatsappData || isFetchingWhatsapp}
+          className={`
+            w-full py-3 rounded-md font-medium transition
+            ${!whatsappData || isFetchingWhatsapp
+              ? "bg-neutral-800 text-neutral-500 cursor-not-allowed"
+              : "bg-green-600 hover:bg-green-700 text-white"
+            }
+          `}
+        >
+          {isFetchingWhatsapp
+            ? "Preparando WhatsApp..."
+            : "Consultar por WhatsApp"}
+        </button>
+      )}
 
     </div>
   )
