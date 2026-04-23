@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { ReactQueryProvider } from '@/src/core/providers/react-query/ReactQueryProvider';
 import { Audiowide, Bruno_Ace } from 'next/font/google';
 import '../globals.css';
+import { AuthProvider } from '../modules/auth/provider/AuthProvider';
 
 const headingFont = Audiowide({
   weight: '400',
@@ -31,7 +32,9 @@ export default function RootLayout({
       className={`${headingFont.variable} ${bodyFont.variable} h-full antialiased `}
     >
       <body className="min-h-full flex flex-col">
-        <ReactQueryProvider>{children}</ReactQueryProvider>
+        <ReactQueryProvider>
+          <AuthProvider>{children}</AuthProvider>
+        </ReactQueryProvider>
       </body>
     </html>
   );
