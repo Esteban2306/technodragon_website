@@ -35,6 +35,11 @@ import {
 } from '@/src/shared/components/popover';
 import StockCounter from '@/src/shared/components/countCounter';
 import EditProductDialog from '../editProduct/editProduct';
+import {
+  useDeleteProduct,
+  useMarkAsFeatured,
+  useToggleProductStatus,
+} from '../../hooks/useProductMutations';
 
 export default function CardAdmin({
   product,
@@ -49,8 +54,10 @@ export default function CardAdmin({
 }) {
   const [featured, setFeatured] = useState(false);
   const [variants, setVariants] = useState(product.variants);
-  const [isProductActive, setIsProductActive] = useState(true);
   const [isEditOpen, setIsEditOpen] = useState(false);
+
+  const { mutate: markAsFeatured } = useMarkAsFeatured();
+  const { mutate: toggleProduct, isPending } = useToggleProductStatus();
 
   const updateVariantStock = (id: string, newStock: number) => {
     setVariants((prev) =>
@@ -64,25 +71,6 @@ export default function CardAdmin({
           : v,
       ),
     );
-  };
-
-  const toggleProductState = () => {
-    setIsProductActive((prev) => {
-      const newState = !prev;
-
-      setVariants((prevVariants) =>
-        prevVariants.map((v) => ({
-          ...v,
-          isActive: newState,
-        })),
-      );
-
-      if (!newState) {
-        setFeatured(false);
-      }
-
-      return newState;
-    });
   };
 
   const handleDeactivate = (id: string) => {
@@ -100,7 +88,7 @@ export default function CardAdmin({
 
   const totalState = getStockState(totalStock);
 
-  const isDisabled = !isProductActive;
+  const isDisabled = !product.isActive;
   return (
     <>
       <EditProductDialog
@@ -113,7 +101,7 @@ export default function CardAdmin({
         relative
         rounded-xl overflow-hidden bg-[#0b0b0c] mb-5 min-w-76.75 max-w-100 mx-auto border border-[#1a1a1a]
         transition-all duration-300
-        ${!isProductActive ? 'opacity-60 grayscale' : ''}
+        ${!product.isActive ? 'opacity-60 grayscale' : ''}
       `}
       >
         <div className="aspect-square relative">
@@ -133,13 +121,20 @@ export default function CardAdmin({
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button
-                    onClick={toggleProductState}
+                    disabled={isPending}
+                    onClick={() => {
+                      toggleProduct({
+                        id: product.id,
+                        isActive: !product.isActive,
+                      });
+                    }}
                     className={`
-                      p-1 md:h-7 rounded-md  cursor-pointer
-                      ${isProductActive ? 'bg-black/50' : 'bg-green-600'}
+                      p-1 md:h-7 rounded-md cursor-pointer
+                      ${product.isActive ? 'bg-black/50' : 'bg-green-700'}
+                      ${isPending ? 'opacity-50 cursor-not-allowed' : ''}
                     `}
                   >
-                    {isProductActive ? (
+                    {product.isActive ? (
                       <Trash className="md:size-5 text-red-500" />
                     ) : (
                       <RotateCcw className="md:size-5 text-white" />
@@ -148,7 +143,7 @@ export default function CardAdmin({
                 </TooltipTrigger>
 
                 <TooltipContent side="left">
-                  {isProductActive
+                  {product.isActive
                     ? 'Desactivar producto'
                     : 'Reactivar producto'}
                 </TooltipContent>
@@ -157,12 +152,16 @@ export default function CardAdmin({
                 <TooltipTrigger asChild>
                   <button
                     disabled={isDisabled}
-                    onClick={() => setFeatured(!featured)}
+                    onClick={() => {
+                      if (isDisabled) return;
+
+                      markAsFeatured(product.id);
+                    }}
                     className={`p-1 md:h-7 rounded-md  ${
-                      featured ? 'bg-amber-500' : 'bg-black/50'
+                      product.isFeatured ? 'bg-amber-500' : 'bg-black/50'
                     } ${isDisabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
                   >
-                    {featured ? (
+                    {product.isFeatured ? (
                       <Star className="md:size-5" />
                     ) : (
                       <StarOff className="md:size-5" />
@@ -170,7 +169,9 @@ export default function CardAdmin({
                   </button>
                 </TooltipTrigger>
                 <TooltipContent side="left">
-                  {featured ? 'Quitar de destacados' : 'Marcar como destacado'}
+                  {product.isFeatured
+                    ? 'Quitar de destacados'
+                    : 'Marcar como destacado'}
                 </TooltipContent>
               </Tooltip>
 
@@ -196,7 +197,7 @@ export default function CardAdmin({
 
         <div className="p-3 space-y-2">
           <p className="text-xs text-gray-500">
-            {product.brand} • {product.category}
+            {product.brand.name} • {product.category.name}
           </p>
 
           <h3 className="text-sm font-medium text-white">{product.name}</h3>
@@ -241,7 +242,7 @@ export default function CardAdmin({
                     <div
                       key={v.id}
                       className={`flex justify-between items-center p-2 border-b border-[#1a1a1a] ${
-                        !isProductActive || !v.isActive
+                        !product.isActive || !v.isActive
                           ? 'opacity-40 grayscale line-through'
                           : ''
                       }`}

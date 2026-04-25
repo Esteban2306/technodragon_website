@@ -20,6 +20,17 @@ import VariantList from '../variants/VariantList';
 import type { ProductCardData } from '../cards/mockProducts';
 import type { CreateVariantForm } from '../../createProduct/stepper/types/fromProps.types';
 import { Upload, X } from 'lucide-react';
+import {
+  useUpdateBasicProduct,
+  useUpdateProduct,
+} from '../../hooks/useProductMutations';
+import { ProductCondition } from '@/src/shared/types/product-condition.enum';
+
+import BrandCategorySelector from './BrandCategorySelector';
+import AddVariantButton from './AddVariantButton';
+import { useBrands } from '../../hooks/useBrands';
+import { useCategories } from '../../hooks/useCategories';
+import { useUploadImage } from '@/src/modules/hooks/useUploadImage';
 
 type Props = {
   open: boolean;
@@ -29,9 +40,16 @@ type Props = {
 
 type FormState = {
   name: string;
+  slug: string;
   description: string;
-  brand: string;
-  category: string;
+  brand: {
+    id: string;
+    name: string;
+  };
+  category: {
+    id: string;
+    name: string;
+  };
   images: string[];
   variants: CreateVariantForm[];
 };
@@ -41,78 +59,174 @@ export default function EditProductDialog({
   onOpenChange,
   product,
 }: Props) {
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const updateBasic = useUpdateBasicProduct();
+  const updateFull = useUpdateProduct();
+
+  const { data: brands = [] } = useBrands();
+  const { data: categories = [] } = useCategories();
+
   const [form, setForm] = useState<FormState | null>(null);
 
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const selectedIndexRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (!product) return;
+
+    setForm({
+      name: product.name,
+      slug: product.slug ?? '',
+      description: product.description ?? '',
+      images: [product.image],
+      brand: product.brand,
+      category: product.category,
+      variants: product.variants.map((v) => ({
+        id: v.id,
+        price: v.price,
+        stock: v.stock,
+        isActive: v.isActive ?? true,
+        sku: v.sku ?? '',
+        condition: v.condition as ProductCondition,
+        attributes: v.attributes,
+      })),
+    });
+  }, [product]);
+
+  const uploadImageMutation = useUploadImage({
+    onSuccess: (data) => {
+      console.log('Uploaded:', data.url);
+    },
+  });
+
+  if (!form || !product) return null;
+
+  const handleChange = (field: keyof FormState, value: any) => {
+    setForm((prev) => prev && { ...prev, [field]: value });
+  };
 
   const handleImageClick = (index: number) => {
-    setSelectedIndex(index);
+    selectedIndexRef.current = index;
     fileInputRef.current?.click();
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || selectedIndex === null) return;
+    if (!file || selectedIndexRef.current === null) return;
 
+    const index = selectedIndexRef.current;
+
+    // preview inmediato (UX)
     const preview = URL.createObjectURL(file);
 
     setForm((prev) => {
       if (!prev) return prev;
 
       const newImages = [...prev.images];
+      newImages[index] = preview;
 
-      if (newImages[selectedIndex]) {
-        newImages[selectedIndex] = preview;
-      } else {
-        newImages.push(preview);
-      }
-
-      return { ...prev, images: newImages.slice(0, 4) };
+      return { ...prev, images: newImages };
     });
+
+    try {
+      const result = await uploadImageMutation.mutateAsync({ file });
+
+      setForm((prev) => {
+        if (!prev) return prev;
+
+        const newImages = [...prev.images];
+        newImages[index] = result.url;
+
+        return { ...prev, images: newImages };
+      });
+    } catch (error) {
+      console.error('Upload failed:', error);
+
+      // rollback visual
+      setForm((prev) => {
+        if (!prev) return prev;
+
+        const newImages = [...prev.images];
+        newImages[index] = '';
+
+        return { ...prev, images: newImages };
+      });
+    }
   };
 
   const removeImage = (index: number) => {
     setForm((prev) => {
       if (!prev) return prev;
-
-      const newImages = prev.images.filter((_, i) => i !== index);
-      return { ...prev, images: newImages };
+      return {
+        ...prev,
+        images: prev.images.filter((_, i) => i !== index),
+      };
     });
   };
 
-  useEffect(() => {
-    if (!product) return;
+  const buildSlug = (name: string) =>
+    name.toLowerCase().trim().replace(/\s+/g, '-');
 
-    const mappedVariants: CreateVariantForm[] = product.variants.map((v) => ({
-      id: v.id,
-      price: v.price,
-      stock: v.stock,
-      isActive: v.isActive ?? true,
-      sku: v.sku ?? '',
-      attributes: v.attributes,
-    }));
+  const handleSave = async () => {
+    const basicPayload = {
+      name: form.name,
+      slug: form.slug,
+      description: form.description,
+    };
 
-    setForm({
-      name: product.name,
-      description: product.description ?? '',
-      brand: product.brand,
-      category: product.category,
-      images: [product.image],
-      variants: mappedVariants,
-    });
-  }, [product]);
+    const fullPayload = {
+      ...basicPayload,
+      brandId: form.brand.id,
+      categoryId: form.category.id,
+      isFeatured: product.isFeatured ?? false,
 
-  if (!form) return null;
+      variants: form.variants.map((v) => ({
+        id: v.id,
+        sku: v.sku,
+        price: v.price,
+        stock: v.stock,
+        isActive: v.stock > 0,
+        condition: v.condition as ProductCondition,
+        attributes: v.attributes,
+      })),
 
-  const handleChange = (field: keyof FormState, value: any) => {
-    setForm((prev) => prev && { ...prev, [field]: value });
-  };
+      images: form.images
+        .filter((img) => img.startsWith('http'))
+        .map((img, i) => ({
+          id: crypto.randomUUID(),
+          url: img,
+          isMain: i === 0,
+        })),
+    };
 
-  const handleSave = () => {
-    console.log('UPDATE_PRODUCT_PAYLOAD', form);
+    const onlyBasicChanged =
+      form.name !== product.name ||
+      form.description !== (product.description ?? '') ||
+      form.slug !== (product.slug ?? '');
 
-    onOpenChange(false);
+    const brandChanged = form.brand.id !== product.brand.id;
+    const categoryChanged = form.category.id !== product.category.id;
+
+    const shouldUseFullUpdate =
+      !onlyBasicChanged || brandChanged || categoryChanged;
+
+    try {
+      if (shouldUseFullUpdate) {
+        await updateFull.mutateAsync({
+          id: product.id,
+          data: fullPayload,
+        });
+      } else {
+        await updateBasic.mutateAsync({
+          id: product.id,
+          data: basicPayload,
+        });
+      }
+
+      onOpenChange(false);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   return (
@@ -128,33 +242,52 @@ export default function EditProductDialog({
               value={form.name}
               onChange={(e) => handleChange('name', e.target.value)}
               placeholder="Nombre del producto"
+              className="w-85 "
             />
-
-            <Input
-              value={form.brand}
-              onChange={(e) => handleChange('brand', e.target.value)}
-              placeholder="Marca"
-            />
-
-            <Input
-              value={form.category}
-              onChange={(e) => handleChange('category', e.target.value)}
-              placeholder="Categoría"
-            />
-
             <div />
+          </div>
+
+          <div className="flex justify-between">
+            <BrandCategorySelector
+              label="Marca"
+              value={form.brand.id}
+              options={brands}
+              onChange={(id) => {
+                const selected = brands.find((b) => b.id === id);
+                handleChange('brand', selected);
+              }}
+            />
+
+            <BrandCategorySelector
+              label="Categoría"
+              value={form.category.id}
+              options={categories}
+              onChange={(id) => {
+                const selected = categories.find((c) => c.id === id);
+                handleChange('category', selected);
+              }}
+            />
+          </div>
+
+          <div>
+            <Input
+              value={form.slug}
+              onChange={(e) => handleChange('slug', e.target.value)}
+              placeholder="Slug del producto"
+            />
           </div>
 
           <Textarea
             value={form.description}
-            onChange={(e) => handleChange('description', e.target.value)}
+            onChange={(e) => {
+              const value = e.target.value;
+              handleChange('description', value);
+            }}
             placeholder="Descripción del producto"
           />
 
           <div className="bg-[#111] border border-[#1a1a1a] rounded-xl p-4 space-y-4">
-            <p className="text-xs text-gray-400 uppercase tracking-wide">
-              Imágenes (máx 4)
-            </p>
+            <p className="text-xs text-gray-400 uppercase">Imágenes (máx 4)</p>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {[0, 1, 2, 3].map((i) => {
@@ -164,13 +297,7 @@ export default function EditProductDialog({
                   <div
                     key={i}
                     onClick={() => handleImageClick(i)}
-                    className="
-            relative aspect-square rounded-lg overflow-hidden
-            border border-[#222]
-            cursor-pointer group
-            bg-[#0b0b0c]
-            hover:border-gray-500 transition
-          "
+                    className="relative aspect-square rounded-lg overflow-hidden border border-[#222] cursor-pointer group bg-[#0b0b0c]"
                   >
                     {img ? (
                       <>
@@ -178,34 +305,26 @@ export default function EditProductDialog({
                           src={img}
                           alt="product"
                           fill
-                          className="object-cover group-hover:scale-105 transition"
+                          className="object-cover"
                         />
 
-                        {/* overlay */}
-                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center">
                           <Upload className="size-5 text-white" />
                         </div>
 
-                        {/* delete */}
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             removeImage(i);
                           }}
-                          className="
-                  absolute top-1 right-1
-                  bg-black/70 hover:bg-red-600
-                  p-1 rounded
-                  opacity-0 group-hover:opacity-100 transition
-                "
+                          className="absolute top-1 right-1 bg-black/70 hover:bg-red-600 p-1 rounded"
                         >
                           <X className="size-4 text-white" />
                         </button>
                       </>
                     ) : (
-                      <div className="w-full h-full flex flex-col items-center justify-center text-gray-500 text-xs gap-1">
+                      <div className="w-full h-full flex items-center justify-center text-gray-500 text-xs">
                         <Upload className="size-5" />
-                        Subir
                       </div>
                     )}
                   </div>
@@ -215,21 +334,19 @@ export default function EditProductDialog({
 
             <input
               type="file"
-              accept="image/*"
               ref={fileInputRef}
               onChange={handleImageChange}
               className="hidden"
             />
           </div>
 
-          <div className="space-y-3">
-            <p className="text-sm text-gray-400">Variantes</p>
-
-            <VariantList variants={form.variants} setForm={setForm as any} />
+          <VariantList variants={form.variants} setForm={setForm as any} />
+          <div className="flex justify-end">
+            <AddVariantButton setForm={setForm} />
           </div>
         </div>
 
-        <DialogFooter className='border-t-2 border-t-gray-500'>
+        <DialogFooter className="border-t border-gray-700">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancelar
           </Button>

@@ -28,10 +28,10 @@ export type CreateProductForm = {
 
 export type CreateVariantForm = {
   id?: string;
-  sku?: string;
+  sku: string;
   price: number;
   stock: number;
-  condition?: ProductCondition
+  condition: ProductCondition;
 
   attributes: {
     name: string;

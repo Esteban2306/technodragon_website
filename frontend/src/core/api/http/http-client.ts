@@ -145,7 +145,13 @@ export class HttpClient {
       return null as T;
     }
 
-    return response.json() as Promise<T>;
+    const text = await response.text();
+
+    if (!text) {
+      return null as T;
+    }
+
+    return JSON.parse(text) as T;
   }
 
   private async extractErrorMessage(response: Response): Promise<string> {
@@ -160,5 +166,5 @@ export class HttpClient {
 
 export const httpClient = new HttpClient({
   baseUrl: process.env.NEXT_PUBLIC_API_URL!,
-  refreshEndpoint: "/auth/refresh",
+  refreshEndpoint: '/auth/refresh',
 });

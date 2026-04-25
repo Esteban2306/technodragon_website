@@ -96,9 +96,9 @@ export default function AttributeSelector({ variant, update }: Props) {
             <Collapsible open={isCustomOpen} onOpenChange={setIsCustomOpen}>
               <CollapsibleTrigger>
                 <div className="hover:bg-red-900/40 rounded-lg px-2 py-1 text-xs  cursor-pointer mt-4">
-                  <button className="text-xs text-[#7a1c1c]">
+                  <span className="text-xs text-[#7a1c1c] cursor-pointer">
                     + Crear atributo personalizado
-                  </button>
+                  </span>
                 </div>
               </CollapsibleTrigger>
 

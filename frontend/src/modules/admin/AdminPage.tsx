@@ -2,17 +2,51 @@
 
 import SidebarAdmin from './sidebarAdmin/sidebarAdmin';
 import MobileAdminMenu from './sidebarAdmin/MobileAdminMenu';
-import { mockProducts } from './components/cards/mockProducts';
+import { ProductCardData } from './components/cards/mockProducts';
 import CardAdmin from './components/cards/cardAdmin';
 import { useState } from 'react';
 import CreateProductStepper from './createProduct/stepper/CreateProductStepper';
 
 import { AdminView } from './types/Admin.types';
+import { useProducts } from './hooks/useProducts';
 
 export default function AdminPage() {
   const [view, setView] = useState<AdminView>('product');
   const [openCardId, setOpenCardId] = useState<string | null>(null);
   const [stockMode, setStockMode] = useState(false);
+  const { data: products, isLoading, isError } = useProducts();
+
+  const adaptedProducts: ProductCardData[] =
+  products?.map((product) => ({
+    id: product.id,
+    name: product.name,
+    description: product.description ?? '',
+    slug: product.slug,
+    category: {
+      id: product.category?.id ?? '',
+      name: product.category?.name ?? '',
+    },
+    brand: {
+      id: product.brand?.id ?? '',
+      name: product.brand?.name ?? '',
+    },
+    isFeatured: product.isFeatured, 
+    isActive: product.isActive,
+    image: product.images?.[0]?.url ?? '',
+    variants: product.variants.map((v) => ({
+      id: v.id,
+      sku: v.sku,
+      price: v.price,
+      stock: v.stock,
+      isActive: v.isActive,
+      condition: v.condition,
+      attributes: v.attributes.map((a) => ({
+        name: a.name,
+        value: a.value,
+      })),
+    })),
+  })) || [];
+
   return (
     <>
       <div className="flex">
@@ -52,7 +86,7 @@ export default function AdminPage() {
                 items-start
                 "
                 >
-                  {mockProducts.map((product) => (
+                  {adaptedProducts?.map((product) => (
                     <CardAdmin
                       key={product.id}
                       product={product}

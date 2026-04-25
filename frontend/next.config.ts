@@ -2,7 +2,7 @@ import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   images: {
-    domains: ['example.com'],
+    domains: ['store.storeimages.cdn-apple.com', 'example.com', 'res.cloudinary.com'],
   },
 };
 
