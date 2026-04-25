@@ -8,10 +8,13 @@ import { ProductRepository } from '../../domain/repositories/product.repository.
 import { PrismaProductWithRelations } from '../../types/PrismaProductWithRelations';
 import { ProductFilters } from '../../types/ProductFilters.types';
 import { ProductCondition } from '../../domain/enums/product-condition.enum';
-
+import { CloudinaryService } from 'src/infrastructure/service/cloudinary/cloudinary.service';
 @Injectable()
 export class PrismaProductRepository implements ProductRepository {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private cloudinaryService: CloudinaryService,
+  ) {}
 
   async save(product: Product): Promise<void> {
     await this.prisma.product.create({
@@ -28,7 +31,7 @@ export class PrismaProductRepository implements ProductRepository {
           create: product.getImages().map((img) => ({
             id: img.getId(),
             url: img.getUrl(),
-            isFeatured: img.isMain(),
+            isMain: img.isMain(),
           })),
         },
         variants: {
@@ -71,6 +74,26 @@ export class PrismaProductRepository implements ProductRepository {
     if (!data) return null;
 
     return this.toResponse(data);
+  }
+
+  async findDomainById(id: string): Promise<Product | null> {
+    const data = await this.prisma.product.findUnique({
+      where: { id },
+      include: {
+        brand: true,
+        category: true,
+        images: true,
+        variants: {
+          include: {
+            attributes: true,
+          },
+        },
+      },
+    });
+
+    if (!data) return null;
+
+    return this.toDomain(data);
   }
 
   async findAll(filters?: ProductFilters): Promise<any[]> {
@@ -145,29 +168,24 @@ export class PrismaProductRepository implements ProductRepository {
       const incomingVariants = product.getVariants();
       const incomingImages = product.getImages();
 
-      const isSameBasicInfo =
-        existing.name === product.getName() &&
-        existing.slug === product.getSlug() &&
-        existing.description === product.getDescription() &&
-        existing.isActive === product.isProductActive();
-
-      const existingVariantIds = new Set(existing.variants.map((v) => v.id));
-      const incomingVariantIds = new Set(
-        incomingVariants.map((v) => v.getId()),
-      );
+      await tx.product.update({
+        where: { id: product.id },
+        data: {
+          name: product.getName(),
+          slug: product.getSlug(),
+          description: product.getDescription(),
+          brandId: product.getBrandId(),
+          categoryId: product.getCategoryId(),
+          isActive: product.isProductActive(),
+          isFeatured: product.isProductFeatured(),
+        },
+      });
 
       const isSameVariantsStructure =
-        existingVariantIds.size === incomingVariantIds.size &&
-        [...existingVariantIds].every((id) => incomingVariantIds.has(id));
-
-      const existingImageIds = new Set(existing.images.map((i) => i.id));
-      const incomingImageIds = new Set(incomingImages.map((i) => i.getId()));
-
-      const isSameImagesStructure =
-        existingImageIds.size === incomingImageIds.size &&
-        [...existingImageIds].every((id) => incomingImageIds.has(id));
-
-      const isSameStructure = isSameVariantsStructure && isSameImagesStructure;
+        existing.variants.length === incomingVariants.length &&
+        existing.variants.every((v) =>
+          incomingVariants.some((i) => i.getId() === v.id),
+        );
 
       const onlyStockChanged =
         isSameVariantsStructure &&
@@ -177,100 +195,70 @@ export class PrismaProductRepository implements ProductRepository {
           );
           if (!current) return false;
 
-          if (current.condition !== incoming.getCondition()) return false;
-
-          const sameAttributes =
-            current.attributes.length === incoming.getAttributes().length &&
-            current.attributes.every((attr) =>
-              incoming
-                .getAttributes()
-                .some(
-                  (i) =>
-                    i.getName() === attr.name && i.getValue() === attr.value,
-                ),
-            );
-
           return (
             current.stock !== incoming.getStock() &&
             current.price.toNumber() === incoming.getPrice() &&
             current.sku === incoming.getSku() &&
-            current.condition === incoming.getCondition() &&
-            current.isActive === incoming.isVariantActive() &&
-            sameAttributes
+            current.condition === incoming.getCondition()
           );
         });
 
-      if (isSameStructure) {
-        if (!isSameBasicInfo) {
-          await tx.product.update({
-            where: { id: product.id },
+      if (onlyStockChanged) {
+        for (const variant of incomingVariants) {
+          await tx.productVariant.update({
+            where: { id: variant.getId() },
             data: {
-              name: product.getName(),
-              slug: product.getSlug(),
-              description: product.getDescription(),
-              isActive: product.isProductActive(),
+              stock: variant.getStock(),
+              isActive: variant.getStock() > 0,
             },
           });
         }
-
-        if (onlyStockChanged) {
-          for (const variant of incomingVariants) {
-            await tx.productVariant.update({
-              where: { id: variant.getId() },
-              data: {
-                stock: variant.getStock(),
-                isActive:
-                  variant.getStock() === 0 ? false : variant.isVariantActive(),
-              },
-            });
-          }
-
-          return;
-        }
-
-        if (isSameBasicInfo) {
-          return;
-        }
+        return;
       }
-
-      await tx.product.update({
-        where: { id: product.id },
-        data: {
-          name: product.getName(),
-          slug: product.getSlug(),
-          description: product.getDescription(),
-          isActive: product.isProductActive(),
-          isFeatured: product.isProductFeatured(),
-        },
-      });
 
       const existingMap = new Map(existing.variants.map((v) => [v.id, v]));
 
-      const toDelete = existing.variants
-        .filter((v) => !incomingVariants.some((i) => i.getId() === v.id))
-        .map((v) => v.id);
+      const incomingMap = new Map(incomingVariants.map((v) => [v.getId(), v]));
 
-      if (toDelete.length > 0) {
-        await tx.productVariant.deleteMany({
-          where: { id: { in: toDelete } },
-        });
-      }
+      for (const incoming of incomingVariants) {
+        const existingVariant = existingMap.get(incoming.getId());
 
-      for (const variant of incomingVariants) {
-        const exists = existingMap.get(variant.getId());
+        if (existingVariant) {
+          await tx.productVariant.update({
+            where: { id: incoming.getId() },
+            data: {
+              sku: incoming.getSku(),
+              price: incoming.getPrice(),
+              stock: incoming.getStock(),
+              isActive: incoming.getStock() > 0,
+              condition: incoming.getCondition(),
+            },
+          });
 
-        if (!exists) {
+          await tx.variantAttribute.deleteMany({
+            where: { variantId: incoming.getId() },
+          });
+
+          await tx.variantAttribute.createMany({
+            data: incoming.getAttributes().map((attr) => ({
+              id: attr.id,
+              variantId: incoming.getId(),
+              name: attr.getName(),
+              value: attr.getValue(),
+            })),
+          });
+        } else {
           await tx.productVariant.create({
             data: {
-              id: variant.getId(),
+              id: incoming.getId(),
               productId: product.id,
-              sku: variant.getSku(),
-              price: variant.getPrice(),
-              stock: variant.getStock(),
-              isActive: variant.isVariantActive(),
-              condition: variant.getCondition(),
+              sku: incoming.getSku(),
+              price: incoming.getPrice(),
+              stock: incoming.getStock(),
+              isActive: incoming.isVariantActive(),
+              condition: incoming.getCondition(),
               attributes: {
-                create: variant.getAttributes().map((attr) => ({
+                create: incoming.getAttributes().map((attr) => ({
                   id: attr.id,
                   name: attr.getName(),
                   value: attr.getValue(),
@@ -278,85 +266,61 @@ export class PrismaProductRepository implements ProductRepository {
               },
             },
           });
-        } else {
-          if (
-            exists.price.toNumber() !== variant.getPrice() ||
-            exists.sku !== variant.getSku() ||
-            exists.isActive !== variant.isVariantActive() ||
-            exists.condition !== variant.getCondition()
-          ) {
-            await tx.productVariant.update({
-              where: { id: variant.getId() },
-              data: {
-                price: variant.getPrice(),
-                sku: variant.getSku(),
-                isActive: variant.isVariantActive(),
-                condition: variant.getCondition(),
-              },
-            });
-          }
-
-          const existingAttrs = new Map(
-            exists.attributes.map((a) => [`${a.name}-${a.value}`, a]),
-          );
-
-          const incomingAttrs = variant.getAttributes();
-
-          const toDeleteAttrs = exists.attributes
-            .filter(
-              (a) =>
-                !incomingAttrs.some(
-                  (i) => i.getName() === a.name && i.getValue() === a.value,
-                ),
-            )
-            .map((a) => a.id);
-
-          if (toDeleteAttrs.length > 0) {
-            await tx.variantAttribute.deleteMany({
-              where: { id: { in: toDeleteAttrs } },
-            });
-          }
-
-          for (const attr of incomingAttrs) {
-            const key = `${attr.getName()}-${attr.getValue()}`;
-
-            if (!existingAttrs.has(key)) {
-              await tx.variantAttribute.create({
-                data: {
-                  id: attr.id,
-                  variantId: variant.getId(),
-                  name: attr.getName(),
-                  value: attr.getValue(),
-                },
-              });
-            }
-          }
         }
       }
 
-      const existingImages = new Map(existing.images.map((i) => [i.id, i]));
+      for (const existingVariant of existing.variants) {
+        const stillExists = incomingMap.has(existingVariant.id);
 
-      const imagesToDelete = existing.images
-        .filter((img) => !incomingImages.some((i) => i.getId() === img.id))
-        .map((img) => img.id);
+        if (!stillExists) {
+          const inUse = await tx.cartItem.findFirst({
+            where: { variantId: existingVariant.id },
+          });
 
-      if (imagesToDelete.length > 0) {
-        await tx.productImage.deleteMany({
-          where: { id: { in: imagesToDelete } },
-        });
-      }
+          if (inUse) {
+            console.log('Variant in use, skipping delete:', existingVariant.id);
+            continue;
+          }
 
-      for (const img of incomingImages) {
-        if (!existingImages.has(img.getId())) {
-          await tx.productImage.create({
-            data: {
-              id: img.getId(),
-              productId: product.id,
-              url: img.getUrl(),
-              isMain: img.isMain(),
-            },
+          await tx.productVariant.delete({
+            where: { id: existingVariant.id },
           });
         }
+      }
+
+      const incomingUrls = new Set(incomingImages.map((img) => img.getUrl()));
+
+      const imagesToDelete = existing.images.filter(
+        (img) => !incomingUrls.has(img.url),
+      );
+
+      for (const img of imagesToDelete) {
+        const publicId = this.cloudinaryService.extractPublicId(img.url);
+        if (publicId) {
+          try {
+            await this.cloudinaryService.deleteImage(publicId);
+          } catch (error) {
+            console.error(
+              'Error deleting image from Cloudinary:',
+              publicId,
+            );
+          }
+        }
+      }
+
+      await tx.productImage.deleteMany({
+        where: { productId: product.id },
+      });
+
+      for (const img of incomingImages) {
+        await tx.productImage.create({
+          data: {
+            id: img.getId(),
+            productId: product.id,
+            url: img.getUrl(),
+            isMain: img.isMain(),
+          },
+        });
       }
     });
   }
@@ -400,20 +364,50 @@ export class PrismaProductRepository implements ProductRepository {
   }
 
   async delete(id: string): Promise<void> {
+    await this.prisma.product.delete({
+      where: { id },
+    });
+  }
+
+  async markProductAsFeatured(productId: string): Promise<boolean> {
+    const current = await this.prisma.product.findUnique({
+      where: { id: productId },
+      select: { isFeatured: true },
+    });
+
+    if (!current) {
+      throw new Error('Product not found');
+    }
+
+    const updated = await this.prisma.product.update({
+      where: { id: productId },
+      data: {
+        isFeatured: !current.isFeatured,
+      },
+      select: {
+        isFeatured: true,
+      },
+    });
+
+    return updated.isFeatured;
+  }
+
+  async toggleActive(id: string, isActive: boolean): Promise<void> {
     await this.prisma.product.update({
       where: { id },
       data: {
-        isActive: false,
+        isActive,
       },
     });
   }
 
-  async markProductAsFeatured(productId: string): Promise<void> {
-    await this.prisma.product.update({
-      where: { id: productId },
-      data: {
-        isFeatured: true,
-      },
+  async toggleVariantStatus(
+    variantId: string,
+    isActive: boolean,
+  ): Promise<void> {
+    await this.prisma.productVariant.update({
+      where: { id: variantId },
+      data: { isActive },
     });
   }
 

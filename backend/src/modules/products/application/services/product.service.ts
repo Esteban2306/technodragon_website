@@ -46,27 +46,41 @@ export class ProductService {
     });
   }
 
-  async update(product: Product): Promise<void> {
-    const existing = await this.productRepository.findById(product.id);
+  async update(product: Product): Promise<Product> {
+    const existing = await this.productRepository.findDomainById(product.id);
 
     if (!existing) {
       throw new NotFoundException(this.ERRORS.NOT_FOUND(product.id));
     }
 
-    await this.ensureSlugIsUniqueOnUpdate(product, existing);
-    this.validateProduct(product);
+    const prevSlug = existing.getSlug();
 
-    this.ensureValidConditions(product);
+    existing.updateName(product.getName());
+    existing.updateSlug(product.getSlug());
+    existing.updateDescription(product.getDescription());
 
-    await this.productRepository.update(product);
+    existing.updateBrand(product.getBrandId());
+    existing.updateCategory(product.getCategoryId());
 
-    this.eventBus.emit({
-      name: EventTypes.PRODUCT_UPDATED,
-      occurredAt: new Date(),
-      payload: {
-        productId: product.id,
-      },
-    });
+    existing.updateVariants([...product.getVariants()]);
+    existing.updateImages([...product.getImages()]);
+
+    if (prevSlug !== existing.getSlug()) {
+      await this.ensureSlugIsUnique(existing.getSlug());
+    }
+
+    this.validateProduct(existing);
+    this.ensureValidConditions(existing);
+
+    await this.productRepository.update(existing);
+
+    const updated = await this.productRepository.findById(existing.id);
+
+    if (!updated) {
+      throw new NotFoundException(this.ERRORS.NOT_FOUND(existing.id));
+    }
+
+    return updated;
   }
 
   async updateBasic(
@@ -76,22 +90,30 @@ export class ProductService {
       description?: string;
       slug?: string;
     },
-  ): Promise<void> {
-    const product = await this.productRepository.findById(id);
+  ): Promise<Product> {
+    const product = await this.productRepository.findDomainById(id);
 
     if (!product) {
       throw new NotFoundException(this.ERRORS.NOT_FOUND(id));
     }
 
-    if (data.name) product.updatedName(data.name);
+    if (data.name) product.updateName(data.name);
     if (data.slug) product.updateSlug(data.slug);
     if (data.description) product.updateDescription(data.description);
 
-    await this.ensureSlugIsUniqueOnUpdate(product, product);
 
+    await this.ensureSlugIsUniqueOnUpdate(product, product);
     this.ensureValidConditions(product);
 
     await this.productRepository.update(product);
+
+    const updated = await this.productRepository.findById(id);
+
+    if (!updated) {
+      throw new NotFoundException(this.ERRORS.NOT_FOUND(id));
+    }
+
+    return updated;
   }
 
   async updateStock(variantId: string, stock: number): Promise<void> {
@@ -156,9 +178,7 @@ export class ProductService {
       throw new NotFoundException(this.ERRORS.NOT_FOUND(id));
     }
 
-    product.desactive();
-
-    await this.productRepository.update(product);
+    await this.productRepository.delete(id);
 
     this.eventBus.emit({
       name: EventTypes.PRODUCT_DELETED,
@@ -176,14 +196,61 @@ export class ProductService {
       throw new NotFoundException(this.ERRORS.NOT_FOUND(productId));
     }
 
-    await this.productRepository.markProductAsFeatured(productId);
+    const newState =
+      await this.productRepository.markProductAsFeatured(productId);
 
     this.eventBus.emit({
-      name: EventTypes.PRODUCT_FEATURED,
+      name: newState
+        ? EventTypes.PRODUCT_FEATURED
+        : EventTypes.PRODUCT_UNFEATURED,
       occurredAt: new Date(),
       payload: {
         productId,
-        isFeatured: true,
+        isFeatured: newState,
+      },
+    });
+  }
+
+  async changeProductStatus(id: string, isActive: boolean): Promise<void> {
+    const product = await this.productRepository.findDomainById(id);
+
+    if (!product) {
+      throw new NotFoundException(this.ERRORS.NOT_FOUND(id));
+    }
+
+    await this.productRepository.toggleActive(id, isActive);
+
+    this.eventBus.emit({
+      name: isActive
+        ? EventTypes.PRODUCT_ACTIVATED
+        : EventTypes.PRODUCT_DISABLED,
+      occurredAt: new Date(),
+      payload: {
+        productId: id,
+      },
+    });
+  }
+
+  async changeVariantStatus(
+    variantId: string,
+    isActive: boolean,
+  ): Promise<void> {
+    const product = await this.productRepository.findByVariantId(variantId);
+
+    if (!product) {
+      throw new NotFoundException(`Variant ${variantId} not found`);
+    }
+
+    await this.productRepository.toggleVariantStatus(variantId, isActive);
+
+    this.eventBus.emit({
+      name: isActive
+        ? EventTypes.VARIANT_ACTIVATED
+        : EventTypes.VARIANT_DISABLED,
+      occurredAt: new Date(),
+      payload: {
+        variantId,
+        productId: product.id,
       },
     });
   }

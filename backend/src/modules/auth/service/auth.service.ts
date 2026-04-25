@@ -16,7 +16,7 @@ export class AuthService {
   private signAccessToken(userId: string, role: string) {
     return this.jwtService.sign(
       { sub: userId, role },
-      { expiresIn: '15m' }
+      { expiresIn: '1h' }
     );
   }
 

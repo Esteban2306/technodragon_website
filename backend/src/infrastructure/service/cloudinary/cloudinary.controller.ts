@@ -15,7 +15,7 @@ export class CloudinaryController {
   @Post('image')
   @UseInterceptors(
     FileInterceptor('file', {
-      limits: { fileSize: 2 * 1024 * 1024 }, // 2MB
+      limits: { fileSize: 2 * 1024 * 1024 },
     }),
   )
   async uploadImage(@UploadedFile() file: Express.Multer.File) {

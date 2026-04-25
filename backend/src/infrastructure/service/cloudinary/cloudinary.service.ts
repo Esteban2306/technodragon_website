@@ -39,4 +39,50 @@ export class CloudinaryService {
       stream.end(file.buffer);
     });
   }
+
+  async deleteImage(publicId: string): Promise<void> {
+    if (!publicId) {
+      throw new InternalServerErrorException('PublicId is required');
+    }
+
+    try {
+      const result = await cloudinary.uploader.destroy(publicId, {
+        resource_type: 'image',
+      });
+
+      if (result.result !== 'ok' && result.result !== 'not found') {
+        throw new Error(`Unexpected Cloudinary response: ${result.result}`);
+      }
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Error deleting image from Cloudinary',
+      );
+    }
+  }
+
+  async deleteImages(publicIds: string[]): Promise<void> {
+    if (!publicIds || publicIds.length === 0) return;
+
+    try {
+      await Promise.all(
+        publicIds.map((id) => cloudinary.uploader.destroy(id)),
+      );
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Error deleting multiple images from Cloudinary',
+      );
+    }
+  }
+
+  extractPublicId(url: string): string | null {
+    try {
+      const parts = url.split('/');
+      const file = parts.pop();
+      if (!file) return null;
+
+      return file.split('.')[0];
+    } catch {
+      return null;
+    }
+  }
 }

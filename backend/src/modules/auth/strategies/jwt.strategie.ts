@@ -10,7 +10,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(configService: ConfigService) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
-        (req: Request) => req?.cookies?.access_token,
+        (req: Request) => req?.cookies?.accessToken,
         ExtractJwt.fromAuthHeaderAsBearerToken(),
       ]),
       secretOrKey: configService.get<string>('JWT_SECRET'),
@@ -21,7 +21,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     if (!payload?.sub) throw new UnauthorizedException();
 
     return {
-      userId: payload.sub,
+      sub: payload.sub,
       role: payload.role,
     };
   }

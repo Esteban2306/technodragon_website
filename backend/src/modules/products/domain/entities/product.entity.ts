@@ -50,7 +50,7 @@ export class Product {
     this.updatedAt = updatedAt ?? new Date();
   }
 
-  updatedName(name: string) {
+  updateName(name: string) {
     this.validateName(name);
     this.name = name;
     this.touch();
@@ -63,6 +63,26 @@ export class Product {
 
   updateDescription(description: string) {
     this.description = description;
+    this.touch();
+  }
+
+  updateBrand(brandId: string) {
+    this.brandId = brandId;
+    this.touch();
+  }
+
+  updateCategory(categoryId: string) {
+    this.categoryId = categoryId;
+    this.touch();
+  }
+
+  updateVariants(variants: ProductVariant[]) {
+    this.variants = variants;
+    this.touch();
+  }
+
+  updateImages(images: ProductImage[]) {
+    this.images = images;
     this.touch();
   }
 

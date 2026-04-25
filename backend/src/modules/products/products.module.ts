@@ -12,6 +12,7 @@ import { UpdateProductHandler } from './application/commands/update-product.hand
 import { UpdateStockProductHandler } from './application/commands/updateStock-product-handler';
 import { GetProductHandler } from './application/queries/get-products.handler';
 import { GetProductByIdHandler } from './application/queries/get-product-by-id.handler';
+import { CloudinaryService } from 'src/infrastructure/service/cloudinary/cloudinary.service';
 
 const CommandHandlers = [
   CreateProductHandler,
@@ -31,6 +32,7 @@ const QueryHandlers = [
   controllers: [ProductController],
   imports: [EventsModule],
   providers: [
+    CloudinaryService,
     ProductService,
     ...CommandHandlers,
     ...QueryHandlers,
@@ -39,6 +41,6 @@ const QueryHandlers = [
       useClass: PrismaProductRepository,
     },
   ],
-  exports: [ProductService],
+  exports: [ProductService, CloudinaryService],
 })
 export class ProductModule {}

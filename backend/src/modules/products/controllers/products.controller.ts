@@ -42,7 +42,7 @@ export class ProductController {
     private readonly updateStockHandler: UpdateStockProductHandler,
     private readonly getProductsHandler: GetProductHandler,
     private readonly getProductByIdHandler: GetProductByIdHandler,
-    private readonly productService: ProductService
+    private readonly productService: ProductService,
   ) {}
 
   @UseGuards(JwtGuard, AdminGuard)
@@ -99,8 +99,8 @@ export class ProductController {
     const command = new UpdateBasicProductCommand(
       id,
       body.name,
-      body.slug,
       body.description,
+      body.slug,
     );
 
     return this.updateBasicHandler.execute(command);
@@ -120,9 +120,25 @@ export class ProductController {
   @UseGuards(JwtGuard, AdminGuard)
   @Delete(':id')
   async delete(@Param('id') id: string) {
-    const command = new DeleteProductCommand(id);
+    return this.productService.delete(id);
+  }
 
-    return this.deleteHandler.execute(command);
+  @UseGuards(JwtGuard, AdminGuard)
+  @Patch(':id/status')
+  async changeStatus(
+    @Param('id') id: string,
+    @Body() body: { isActive: boolean },
+  ) {
+    return this.productService.changeProductStatus(id, body.isActive);
+  }
+
+  @UseGuards(JwtGuard, AdminGuard)
+  @Patch('variants/:variantId/status')
+  async changeVariantStatus(
+    @Param('variantId') variantId: string,
+    @Body() body: { isActive: boolean },
+  ) {
+    return this.productService.changeVariantStatus(variantId, body.isActive);
   }
 
   @UseGuards(JwtGuard, AdminGuard)
