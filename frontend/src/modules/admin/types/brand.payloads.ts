@@ -8,6 +8,8 @@ export type Brand = {
 export type CreateBrandPayload = {
   name: string;
   slug: string;
+  logo?: string
+  isActive: boolean;
 };
 
 export type UpdateBrandPayload = {

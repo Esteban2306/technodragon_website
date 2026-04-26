@@ -4,6 +4,7 @@ import { Plus, Boxes } from 'lucide-react';
 import { useState } from 'react';
 import VariantList from '../../../components/variants/VariantList';
 import { CreateVariantForm, Props } from '../types/fromProps.types';
+import { ProductCondition } from '@/src/shared/types/product-condition.enum';
 
 export default function StepVariants({ form, setForm }: Props) {
   const addVariant = () => {
@@ -12,6 +13,7 @@ export default function StepVariants({ form, setForm }: Props) {
       sku: '',
       price: 0,
       stock: 0,
+      condition: ProductCondition.NEW,
       attributes: [],
       isActive: true,
     };
@@ -19,7 +21,7 @@ export default function StepVariants({ form, setForm }: Props) {
     setForm((prev) => ({
       ...prev,
       variants: [...prev.variants, newVariant],
-    }));
+    })); 
   };
 
   return (

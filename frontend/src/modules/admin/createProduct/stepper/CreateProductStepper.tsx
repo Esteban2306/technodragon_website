@@ -10,6 +10,7 @@ import StepFinished from './steps/StepFinished';
 import { CreateProductForm } from './types/fromProps.types';
 import StepReview from './steps/StepReview';
 import { PackageCheck } from 'lucide-react';
+import { useCreateProduct } from '../../hooks/useProductMutations';
 
 type Props = {
   onFinish: () => void;
@@ -38,6 +39,8 @@ export default function CreateProductStepper({ onFinish }: Props) {
   const [currentStep, setCurrentStep] = useState(1);
 
   const [maxStepReached, setMaxStepReached] = useState(1);
+
+  const createProduct = useCreateProduct();
 
   const validateStep = () => {
     switch (currentStep) {
@@ -124,9 +127,41 @@ export default function CreateProductStepper({ onFinish }: Props) {
           setMaxStepReached((prev) => Math.max(prev, step));
         }
       }}
-      onFinalStepCompleted={() => {
-        console.log('payload listo:', form);
-        setCompleted(true);
+      onFinalStepCompleted={async () => {
+        const payload = {
+          name: form.name,
+          slug: form.name.toLowerCase().replace(/\s+/g, '-'),
+          description: form.description,
+          brandId: form.classification.brandId,
+          categoryId: form.classification.categoryId,
+          isFeatured: false,
+
+          variants: form.variants.map((v) => ({
+            sku: v.sku,
+            price: v.price,
+            stock: v.stock,
+            condition: v.condition,
+            attributes: v.attributes,
+          })),
+
+          images: [
+            {
+              url: form.images.main,
+              isMain: true,
+            },
+            ...form.images.gallery.map((url) => ({
+              url,
+              isMain: false,
+            })),
+          ],
+        };
+
+        try {
+          await createProduct.mutateAsync(payload);
+          setCompleted(true);
+        } catch (error) {
+          console.error('Create product failed:', error);
+        }
       }}
       nextButtonProps={{
         disabled: !validateStep(),

@@ -13,6 +13,8 @@ import {
 import { Button } from '@/src/shared/components/button';
 import { Input } from '@/src/shared/components/input';
 import { Label } from '@/src/shared/components/label';
+import { useCreateBrand } from '../hooks/useBrandMutations';
+import { useCreateCategory } from '../hooks/useCategoryMutations';
 
 type Mode = 'brand' | 'category';
 
@@ -23,12 +25,7 @@ type Props = {
   onCreateCategory?: (data: any) => void;
 };
 
-export default function CreateMetaDialog({
-  open,
-  onOpenChange,
-  onCreateBrand,
-  onCreateCategory,
-}: Props) {
+export default function CreateMetaDialog({ open, onOpenChange }: Props) {
   const [mode, setMode] = useState<Mode>('brand');
 
   const [form, setForm] = useState({
@@ -42,6 +39,13 @@ export default function CreateMetaDialog({
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
+  const { mutate: createBrand, isPending: isCreatingBrand } = useCreateBrand();
+
+  const { mutate: createCategory, isPending: isCreatingCategory } =
+    useCreateCategory();
+
+  const isLoading = mode === 'brand' ? isCreatingBrand : isCreatingCategory;
+
   const generateSlug = (value: string) => {
     return value
       .toLowerCase()
@@ -54,32 +58,7 @@ export default function CreateMetaDialog({
     handleChange('slug', generateSlug(value));
   };
 
-  const handleSubmit = () => {
-    if (mode === 'brand') {
-      const payload = {
-        name: form.name,
-        slug: form.slug,
-        logo: form.logo,
-        isActive: true,
-      };
-
-      console.log('CREATE_BRAND', payload);
-      onCreateBrand?.(payload);
-    }
-
-    if (mode === 'category') {
-      const payload = {
-        name: form.name,
-        slug: form.slug,
-        parentId: form.parentId || null,
-      };
-
-      console.log('CREATE_CATEGORY', payload);
-      onCreateCategory?.(payload);
-    }
-
-    onOpenChange(false);
-
+  const resetForm = () => {
     setForm({
       name: '',
       slug: '',
@@ -87,6 +66,43 @@ export default function CreateMetaDialog({
       parentId: '',
     });
     setMode('brand');
+  };
+
+  const handleSubmit = () => {
+    if (!isValid) return;
+
+    if (mode === 'brand') {
+      createBrand(
+        {
+          name: form.name,
+          slug: form.slug,
+          logo: form.logo,
+          isActive: true,
+        },
+        {
+          onSuccess: () => {
+            onOpenChange(false);
+            resetForm();
+          },
+        },
+      );
+    }
+
+    if (mode === 'category') {
+      createCategory(
+        {
+          name: form.name,
+          slug: form.slug,
+          parentId: form.parentId || undefined,
+        },
+        {
+          onSuccess: () => {
+            onOpenChange(false);
+            resetForm();
+          },
+        },
+      );
+    }
   };
 
   const isValid = form.name.trim() !== '' && form.slug.trim() !== '';
@@ -180,11 +196,11 @@ export default function CreateMetaDialog({
           </Button>
 
           <Button
-            disabled={!isValid}
+            disabled={!isValid || isLoading}
             onClick={handleSubmit}
             className="cursor-pointer"
           >
-            Crear
+            {isLoading ? 'Creando...' : 'Crear'}
           </Button>
         </DialogFooter>
       </DialogContent>

@@ -10,6 +10,12 @@ export const useProducts = (filters?: ProductFilters) => {
     queryFn: () => productApi.getAll(filters),
     staleTime: 1000 * 60 * 5,
     placeholderData: keepPreviousData,
+
+    select: (products) =>
+      products.map(product => ({
+        ...product,
+        variants: product.variants.filter(v => v.isActive),
+      })),
   });
 };
 
@@ -19,5 +25,12 @@ export const useProduct = (id: string) => {
     queryFn: () => productApi.getById(id),
     enabled: !!id,
     staleTime: 1000 * 60 * 10,
+
+    select: (data) => {
+      return {
+        ...data,
+        variants: data.variants.filter(v => v.isActive),
+      };
+    },
   });
 };

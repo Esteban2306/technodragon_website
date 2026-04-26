@@ -3,7 +3,10 @@ import { Props } from '../types/fromProps.types';
 import { formatPriceCOP } from '@/src/shared/helper/formatPrice';
 
 export default function StepReview({ form, setForm }: Props) {
-  const totalStock = form.variants.reduce((acc, v) => acc + v.stock, 0);
+  const totalStock = form.variants?.reduce((acc, v) => acc + v.stock, 0) ?? 0;
+  const validImages = [form.images.main, ...form.images.gallery].filter((img) =>
+    img.startsWith('http'),
+  );
 
   return (
     <div className="space-y-8 py-10">
@@ -29,6 +32,24 @@ export default function StepReview({ form, setForm }: Props) {
           <div>
             <p className="text-gray-500">Stock total</p>
             <p>{totalStock}</p>
+          </div>
+
+          <div className="space-y-3">
+            <h3 className="text-sm text-gray-400">Imágenes</h3>
+
+            <div className="flex gap-3 flex-wrap">
+              {validImages.length === 0 ? (
+                <p className="text-sm text-gray-500">No hay imágenes válidas</p>
+              ) : (
+                validImages.map((img, i) => (
+                  <img
+                    key={i}
+                    src={img}
+                    className="w-20 h-20 object-cover rounded-md border border-[#1a1a1a]"
+                  />
+                ))
+              )}
+            </div>
           </div>
 
           <div>

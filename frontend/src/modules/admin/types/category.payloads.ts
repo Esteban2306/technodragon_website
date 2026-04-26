@@ -14,5 +14,5 @@ export type CreateCategoryPayload = {
 export type UpdateCategoryPayload = {
   name?: string;
   slug?: string;
-  parentId?: string;
+  parentId?: string ;
 };

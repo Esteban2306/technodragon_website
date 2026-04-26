@@ -14,6 +14,7 @@ export const useCreateBrand = () => {
 
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['brands'] });
+      qc.invalidateQueries({ queryKey: ['products'] });
     },
   });
 };

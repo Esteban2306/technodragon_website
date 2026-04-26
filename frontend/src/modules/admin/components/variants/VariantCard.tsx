@@ -11,6 +11,7 @@ import {
 } from '../../createProduct/stepper/types/fromProps.types';
 import { useState } from 'react';
 import { formatPriceCOP, parseNumber } from '@/src/shared/helper/formatPrice';
+import { ProductCondition } from '@/src/shared/types/product-condition.enum';
 
 type VariantCardProps = {
   variant: CreateVariantForm;
@@ -30,6 +31,11 @@ export default function VariantCard({
   const [stockInput, setStockInput] = useState(
     variant.stock ? String(variant.stock) : '',
   );
+
+  const conditionOptions = [
+    { value: ProductCondition.NEW, label: 'Nuevo' },
+    { value: ProductCondition.REFURBISHED, label: 'Reacondicionado' },
+  ];
 
   const update = <K extends keyof CreateVariantForm>(
     field: K,
@@ -72,43 +78,67 @@ export default function VariantCard({
 
         <CollapsiblePanel className="space-y-4">
           <AttributeSelector variant={variant} update={update} />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div className="flex flex-col gap-1">
+              <label className="text-xs text-gray-400">Condición</label>
 
-          <div className="flex flex-col md:grid md:grid-cols-3 gap-3">
+              <select
+                value={variant.condition}
+                onChange={(e) =>
+                  update('condition', e.target.value as ProductCondition)
+                }
+                className="bg-[#111] border border-[#1a1a1a] rounded-md px-3 py-2 text-sm"
+              >
+                {conditionOptions.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <label className="text-xs text-gray-400">Stock</label>
+
+              <input
+                type="text"
+                inputMode="numeric"
+                value={stockInput}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setStockInput(value);
+                  update('stock', Number(value) || 0);
+                }}
+                className="bg-[#111] border border-[#1a1a1a] rounded-md px-3 py-2 text-sm"
+              />
+            </div>
+
+            <div className="flex flex-col gap-1">
+              <label className="text-xs text-gray-400">SKU</label>
+
+              <input
+                value={variant.sku ?? ''}
+                onChange={(e) => update('sku', e.target.value)}
+                className="bg-[#111] border border-[#1a1a1a] rounded-md px-3 py-2 text-sm"
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-1">
+            <label className="text-xs text-gray-400">Precio</label>
+
             <input
-              placeholder="Precio"
               type="text"
               inputMode="numeric"
               value={priceInput}
               onChange={(e) => {
                 const value = e.target.value;
-
                 const numericValue = parseNumber(value);
 
                 setPriceInput(formatPriceCOP(numericValue));
                 update('price', numericValue);
               }}
-              className="bg-[#111] border border-[#1a1a1a] rounded-md px-3 py-2"
-            />
-
-            <input
-              placeholder="Stock"
-              type="texxt"
-              inputMode="numeric"
-              value={stockInput}
-              onChange={(e) => {
-                const value = e.target.value;
-
-                setStockInput(value)
-                update('stock', Number(value) || 0)
-              }}
-              className="bg-[#111] border border-[#1a1a1a] rounded-md px-3 py-2"
-            />
-
-            <input
-              placeholder="SKU"
-              value={variant.sku ?? ''}
-              onChange={(e) => update('sku', e.target.value)}
-              className="bg-[#111] border border-[#1a1a1a] rounded-md px-3 py-2"
+              className="bg-[#111] border border-[#1a1a1a] rounded-md px-3 py-2 text-sm w-full"
             />
           </div>
         </CollapsiblePanel>

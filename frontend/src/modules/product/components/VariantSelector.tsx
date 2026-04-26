@@ -20,7 +20,6 @@ export default function VariantSelector({ attributes, selected, onChange }: Prop
       {attributes.map((attr) => (
         <div key={attr.name} className="flex flex-col gap-3 border-t border-neutral-800 pt-4">
 
-          {/* LABEL */}
           <div className="flex justify-between items-center">
             <span className="text-sm text-neutral-400">{attr.name}</span>
 
@@ -29,7 +28,6 @@ export default function VariantSelector({ attributes, selected, onChange }: Prop
             </span>
           </div>
 
-          {/* OPTIONS */}
           <div
             className={`
               grid gap-2

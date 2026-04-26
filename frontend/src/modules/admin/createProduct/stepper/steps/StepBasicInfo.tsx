@@ -1,22 +1,38 @@
 import { Package, FileText, Image as ImageIcon, Upload } from 'lucide-react';
 
-import { Props } from '../types/fromProps.types'; 
+import { Props } from '../types/fromProps.types';
+import { useUploadImage } from '@/src/modules/hooks/useUploadImage';
 
 export default function StepBasicInfo({ form, setForm }: Props) {
-  const handleMainImage = (file: File) => {
-    const url = URL.createObjectURL(file);
+  const uploadMutation = useUploadImage();
+
+  const handleMainImage = async (file: File) => {
+    const preview = URL.createObjectURL(file);
 
     setForm({
       ...form,
       images: {
         ...form.images,
-        main: url,
+        main: preview,
       },
     });
+
+    try {
+      const res = await uploadMutation.mutateAsync({ file });
+      setForm((prev) => ({
+        ...prev,
+        images: {
+          ...prev.images,
+          main: res.url,
+        },
+      }));
+    } catch {
+      console.error('Upload failed');
+    }
   };
 
-  const handleGallery = (file: File) => {
-    const url = URL.createObjectURL(file);
+  const handleGallery = async (file: File) => {
+    const preview = URL.createObjectURL(file);
 
     if (form.images.gallery.length >= 3) return;
 
@@ -24,9 +40,25 @@ export default function StepBasicInfo({ form, setForm }: Props) {
       ...form,
       images: {
         ...form.images,
-        gallery: [...form.images.gallery, url],
+        gallery: [...form.images.gallery, preview],
       },
     });
+
+    try {
+      const res = await uploadMutation.mutateAsync({ file });
+
+      setForm((prev) => ({
+        ...prev,
+        images: {
+          ...prev.images,
+          gallery: prev.images.gallery.map((img) =>
+            img === preview ? res.url : img,
+          ),
+        },
+      }));
+    } catch {
+      console.error('Upload failed');
+    }
   };
 
   return (

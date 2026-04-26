@@ -39,6 +39,8 @@ import {
   useDeleteProduct,
   useMarkAsFeatured,
   useToggleProductStatus,
+  useToggleVariantStatus,
+  useUpdateStock,
 } from '../../hooks/useProductMutations';
 
 export default function CardAdmin({
@@ -52,12 +54,14 @@ export default function CardAdmin({
   stockMode: boolean | undefined;
   onToggle: () => void;
 }) {
-  const [featured, setFeatured] = useState(false);
+  const [activePopoverId, setActivePopoverId] = useState<string | null>(null);
   const [variants, setVariants] = useState(product.variants);
   const [isEditOpen, setIsEditOpen] = useState(false);
 
   const { mutate: markAsFeatured } = useMarkAsFeatured();
   const { mutate: toggleProduct, isPending } = useToggleProductStatus();
+  const { mutate: updateStockMutation } = useUpdateStock();
+  const { mutate: toggleVariantMutation } = useToggleVariantStatus();
 
   const updateVariantStock = (id: string, newStock: number) => {
     setVariants((prev) =>
@@ -71,14 +75,40 @@ export default function CardAdmin({
           : v,
       ),
     );
+
+    updateStockMutation({
+      variantId: id,
+      stock: newStock,
+    });
   };
 
-  const handleDeactivate = (id: string) => {
+  const handleToggleVariant = (variantId: string) => {
     setVariants((prev) =>
-      prev.map((v) => (v.id === id ? { ...v, stock: 0, isActive: false } : v)),
+      prev.map((v) => {
+        if (v.id !== variantId) return v;
+
+        const isCurrentlyActive = v.stock > 0;
+
+        return {
+          ...v,
+          stock: isCurrentlyActive ? 0 : v.stock || 1,
+          isActive: !isCurrentlyActive,
+        };
+      }),
     );
+
+    const variant = variants.find((v) => v.id === variantId);
+    if (!variant) return;
+
+    const isCurrentlyActive = variant.stock > 0;
+
+    updateStockMutation({
+      variantId,
+      stock: isCurrentlyActive ? 0 : variant.stock || 1,
+    });
   };
-  const totalStock = product.variants.reduce((acc, v) => acc + v.stock, 0);
+
+  const totalStock = variants.reduce((acc, v) => acc + v.stock, 0);
 
   const getStockState = (stock: number) => {
     if (stock === 0) return 'out';
@@ -232,10 +262,9 @@ export default function CardAdmin({
                 {variants.map((v) => {
                   const state = getStockState(v.stock);
 
-                  const [openPopover, setOpenPopover] = useState(false);
-
                   const handleDelete = () => {
-                    console.log('Soft delete variant:', v.id);
+                    handleToggleVariant(v.id);
+                    setActivePopoverId(null);
                   };
 
                   return (
@@ -282,15 +311,14 @@ export default function CardAdmin({
                           </div>
                         ) : (
                           <Popover
-                            open={openPopover}
-                            onOpenChange={setOpenPopover}
+                            open={activePopoverId === v.id}
+                            onOpenChange={(open) =>
+                              setActivePopoverId(open ? v.id : null)
+                            }
                           >
                             <PopoverTrigger asChild>
                               <button
                                 disabled={isDisabled}
-                                onClick={() =>
-                                  !isDisabled && handleDeactivate(v.id)
-                                }
                                 className={`text-red-500 ${
                                   isDisabled
                                     ? 'opacity-40 cursor-not-allowed'
@@ -315,7 +343,7 @@ export default function CardAdmin({
 
                                 <div className="flex justify-end gap-2 mt-2">
                                   <button
-                                    onClick={() => setOpenPopover(false)}
+                                    onClick={() => setActivePopoverId(null)}
                                     className="px-3 py-1 text-xs rounded-md cursor-pointer bg-gray-700 hover:bg-gray-600"
                                   >
                                     Cancelar
