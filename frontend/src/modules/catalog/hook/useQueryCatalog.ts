@@ -47,6 +47,7 @@ export const useCatalog = (filters?: CatalogFilters) => {
       try {
         const mapped = mapCatalogToPreview(data.data);
 
+
         return {
           ...data,
           data: mapped,

@@ -1,16 +1,12 @@
 'use client';
 
-import { useCatalog } from '../../catalog/hook/useQueryCatalog';
+import { useFeaturedProducts, useProducts } from '../../admin/hooks/useProducts';
 import ProductsPreviewSection from './ProductsPreviewSection';
 import { EmptyState } from '@/src/shared/components/ui/EmptyState/ErrorState';
 import { ProductCardSkeleton } from '@/src/shared/components/ui/skeleton/ProductCardSkeleton';
 
 export default function FeaturedProductsSection() {
-  const { data, isLoading, isError } = useCatalog({
-    featured: true,
-    limit: 10,
-  });
-
+  const { data, isLoading, isError } = useFeaturedProducts();
   if (isLoading) {
     return (
       <section className="p-8">
@@ -32,7 +28,7 @@ export default function FeaturedProductsSection() {
     );
   }
 
-  if (!data || data.data.length === 0) {
+  if (!data || data.length === 0) {
     return (
       <EmptyState
         title="Sin productos destacados"
@@ -41,5 +37,5 @@ export default function FeaturedProductsSection() {
     );
   }
 
-  return <ProductsPreviewSection products={data.data} />;
+  return <ProductsPreviewSection products={data} />;
 }

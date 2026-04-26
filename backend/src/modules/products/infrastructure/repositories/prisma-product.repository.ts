@@ -100,8 +100,12 @@ export class PrismaProductRepository implements ProductRepository {
     const data = await this.prisma.product.findMany({
       where: {
         isActive: filters?.isActive,
+
+        isFeatured: filters?.isFeatured,
+
         brandId: filters?.brandId,
         categoryId: filters?.categoryId,
+
         variants: filters?.condition
           ? {
               some: {
@@ -300,10 +304,7 @@ export class PrismaProductRepository implements ProductRepository {
           try {
             await this.cloudinaryService.deleteImage(publicId);
           } catch (error) {
-            console.error(
-              'Error deleting image from Cloudinary:',
-              publicId,
-            );
+            console.error('Error deleting image from Cloudinary:', publicId);
           }
         }
       }
@@ -379,17 +380,21 @@ export class PrismaProductRepository implements ProductRepository {
       throw new Error('Product not found');
     }
 
-    const updated = await this.prisma.product.update({
-      where: { id: productId },
-      data: {
-        isFeatured: !current.isFeatured,
-      },
-      select: {
-        isFeatured: true,
-      },
-    });
+    const newValue = !current.isFeatured;
 
-    return updated.isFeatured;
+    await this.prisma.$transaction([
+      this.prisma.product.update({
+        where: { id: productId },
+        data: { isFeatured: newValue },
+      }),
+
+      this.prisma.catalogItem.updateMany({
+        where: { productId },
+        data: { isFeatured: newValue },
+      }),
+    ]);
+
+    return newValue;
   }
 
   async toggleActive(id: string, isActive: boolean): Promise<void> {

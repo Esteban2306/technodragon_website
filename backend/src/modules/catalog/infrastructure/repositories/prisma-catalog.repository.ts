@@ -136,7 +136,7 @@ export class PrismaCatalogRepository implements CatalogRepository {
       ];
     }
 
-    if (isFeatured !== undefined) {
+    if (typeof isFeatured === 'boolean') {
       where.isFeatured = isFeatured;
     }
 
@@ -148,6 +148,7 @@ export class PrismaCatalogRepository implements CatalogRepository {
         },
       }));
     }
+
 
     const skip = (safePage - 1) * safeLimit;
 

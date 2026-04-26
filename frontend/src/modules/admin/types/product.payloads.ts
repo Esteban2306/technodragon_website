@@ -61,6 +61,7 @@ export type UpdateBasicProductPayload = {
 export type ProductFilters = {
   search?: string;
   page?: number;
+  isFeatured?: boolean 
   limit?: number;
   isActive?: boolean;
 };

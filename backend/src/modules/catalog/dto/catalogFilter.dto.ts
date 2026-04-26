@@ -55,7 +55,7 @@ export class CatalogFilterDto {
   @Type(() => Number)
   @IsInt()
   @Min(1)
-  page?: number;
+  page?: number; 
 
   @IsOptional()
   @Type(() => Number)
@@ -64,8 +64,8 @@ export class CatalogFilterDto {
   limit?: number;
 
   @IsOptional()
-  @Transform(({ value }) => value === 'true' || value === true)
   @IsBoolean()
+  @Transform(({ value }) => value === 'true')
   isFeatured?: boolean;
 
   @IsOptional()

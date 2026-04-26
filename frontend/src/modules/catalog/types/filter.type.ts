@@ -36,7 +36,7 @@ export type CatalogFilters = {
   page?: number;
   limit?: number;
 
-  featured?: boolean;
+  isFeatured?: boolean;
 
   sortBy?: "price" | "createdAt";
   sortOrder?: "asc" | "desc";

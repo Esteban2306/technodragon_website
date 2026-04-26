@@ -4,6 +4,25 @@ import { CatalogFilters } from '@/src/modules/catalog/types/filter.type';
 export function normalizeFilters(filters?: CatalogFilters): CatalogQueryParams {
   if (!filters) return {};
 
+  const normalized: Record<string, any> = {};
+
+  Object.entries(filters).forEach(([key, value]) => {
+    if (value === undefined || value === null) return;
+
+    if (typeof value === 'boolean') {
+      normalized[key] = value.toString(); 
+      return;
+    }
+
+    if (Array.isArray(value)) {
+      normalized[key] = value.join(',');
+      return;
+    }
+
+    normalized[key] = value;
+  });
+
+
   const params: CatalogQueryParams = {};
 
   if (filters.page) params.page = filters.page;
@@ -29,8 +48,8 @@ export function normalizeFilters(filters?: CatalogFilters): CatalogQueryParams {
         : filters.condition.join(',');
   }
 
-  if (filters?.featured !== undefined) {
-    params.isFeatured = filters.featured;
+  if (filters?.isFeatured !== undefined) {
+    params.isFeatured = filters.isFeatured;
   }
 
   if (filters.attributes) {

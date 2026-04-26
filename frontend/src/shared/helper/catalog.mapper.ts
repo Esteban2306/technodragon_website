@@ -1,10 +1,11 @@
-import { CatalogItem } from "@/src/modules/catalog/types/catalog-item.type";
-import { ProductPreview, ProductVariant } from '@/src/shared/types/catalog.types';
+import { CatalogItem } from '@/src/modules/catalog/types/catalog-item.type';
+import {
+  ProductPreview,
+  ProductVariant,
+} from '@/src/shared/types/catalog.types';
 import { mapAttributesToArray } from './attribute.mapper';
 
-export function mapCatalogToPreview(
-  items: CatalogItem[]
-): ProductPreview[] {
+export function mapCatalogToPreview(items: CatalogItem[]): ProductPreview[] {
   const map = new Map<string, ProductPreview>();
 
   for (const item of items) {
@@ -14,6 +15,7 @@ export function mapCatalogToPreview(
       id: item.variantId,
       price: item.price,
       stock: item.stock,
+      isFeatured: item.isFeatured,
       image: item.images?.[0],
       attributes: mapAttributesToArray(item.attributes),
     };
@@ -24,6 +26,7 @@ export function mapCatalogToPreview(
         slug: item.slug,
         name: item.name,
 
+        isFeatured: item.isFeatured,
         brandId: item.brandId,
         brandName: item.brandName ?? 'Sin marca',
 
@@ -41,6 +44,10 @@ export function mapCatalogToPreview(
       });
     } else {
       existing.variants.push(variant);
+
+      if (item.isFeatured) {
+        existing.isFeatured = true;
+      }
 
       if (item.stock > 0) {
         existing.isAvailable = true;

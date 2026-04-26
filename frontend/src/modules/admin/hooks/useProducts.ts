@@ -3,6 +3,8 @@ import { productApi } from '../api/product.api';
 import { queryKeys } from '@/src/core/providers/react-query/queryKeys';
 import { ProductDetail } from '@/src/shared/types/product.types';
 import { ProductFilters } from '../types/product.payloads';
+import { ProductPreview } from '@/src/shared/types/catalog.types';
+import { mapProductToPreview } from '@/src/shared/helper/mapProductToPreview';
 
 export const useProducts = (filters?: ProductFilters) => {
   return useQuery<ProductDetail[]>({
@@ -16,6 +18,30 @@ export const useProducts = (filters?: ProductFilters) => {
         ...product,
         variants: product.variants.filter(v => v.isActive),
       })),
+  });
+};
+
+export const useFeaturedProducts = () => {
+  return useQuery<ProductDetail[], Error, ProductPreview[]>({
+    queryKey: queryKeys.products({ isFeatured: true }),
+
+    queryFn: () =>
+      productApi.getAll({
+        isFeatured: true,
+      }),
+
+    staleTime: 1000 * 60 * 5,
+
+    select: (products) => {
+      const featured = products.filter(p => p.isFeatured);
+
+      const activeProducts = featured.map(product => ({
+        ...product,
+        variants: product.variants.filter(v => v.isActive),
+      }));
+
+      return mapProductToPreview(activeProducts);
+    },
   });
 };
 
