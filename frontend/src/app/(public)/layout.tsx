@@ -1,4 +1,6 @@
-
+import Navbar from '@/src/shared/components/ui/navbar/navBar';
+import Footer from '@/src/shared/components/ui/footer/footer';
+import { CartProvider } from '@/src/shared/context/cartContext';
 
 export default function RootLayout({
   children,
@@ -6,7 +8,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    
-      <body className="min-h-full flex flex-col overflow-x-hidden">{children}</body>
+    <div className="min-h-full flex flex-col">
+      <CartProvider>
+        <Navbar></Navbar>
+        {children}
+        <Footer></Footer>
+      </CartProvider>
+    </div>
   );
 }

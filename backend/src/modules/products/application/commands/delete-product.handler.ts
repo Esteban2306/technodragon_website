@@ -14,8 +14,6 @@ export class DeleteProductHandler {
             throw new BadRequestException("Product id is required.")
         }
 
-        // se puede añadir aqui un guard o un comprobante para admin 
-
         await this.service.delete(command.productId)
     }
 }

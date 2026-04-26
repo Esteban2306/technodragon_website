@@ -11,7 +11,23 @@ export class PrismaCartRepository implements CartRepository {
   async findById(cartId: string): Promise<Cart | null> {
     const cart = await this.prisma.cart.findUnique({
       where: { id: cartId },
-      include: { items: true }
+      include: {
+        items: {
+          include: {
+            variant: {
+              include: {
+                attributes: true,
+                product: {
+                  include: {
+                    images: true,
+                    brand: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     });
 
     return cart ? this.toDomain(cart) : null;
@@ -24,55 +40,46 @@ export class PrismaCartRepository implements CartRepository {
       await tx.cart.upsert({
         where: { id: data.id },
         update: {
-          isActive: data.isActive
+          isActive: data.isActive,
         },
         create: {
           id: data.id,
-          isActive: data.isActive
-        }
+          isActive: data.isActive,
+        },
       });
 
-      // 2. EXISTENTES
       const existingItems = await tx.cartItem.findMany({
-        where: { cartId: data.id }
+        where: { cartId: data.id },
       });
 
-      const existingMap = new Map(
-        existingItems.map(i => [i.variantId, i])
-      );
+      const existingMap = new Map(existingItems.map((i) => [i.variantId, i]));
 
-      const incomingMap = new Map(
-        data.items.map(i => [i.variantId, i])
-      );
+      const incomingMap = new Map(data.items.map((i) => [i.variantId, i]));
 
-      // 3. DELETE DIFERENCIAL
       const toDelete = existingItems
-        .filter(i => !incomingMap.has(i.variantId))
-        .map(i => i.id);
+        .filter((i) => !incomingMap.has(i.variantId))
+        .map((i) => i.id);
 
       if (toDelete.length) {
         await tx.cartItem.deleteMany({
-          where: { id: { in: toDelete } }
+          where: { id: { in: toDelete } },
         });
       }
 
-      // 4. VALIDAR STOCK (ANTES de tocar DB)
-      const variantIds = data.items.map(i => i.variantId);
+      const variantIds = data.items.map((i) => i.variantId);
 
       const variants = await tx.productVariant.findMany({
         where: {
-          id: { in: variantIds }
+          id: { in: variantIds },
         },
         select: {
           id: true,
           stock: true,
-          isActive: true
-        }
+          isActive: true,
+        },
       });
 
-      const variantMap = new Map(
-        variants.map(v => [v.id, v])
-      );
+      const variantMap = new Map(variants.map((v) => [v.id, v]));
 
       for (const item of data.items) {
         const variant = variantMap.get(item.variantId);
@@ -86,22 +93,19 @@ export class PrismaCartRepository implements CartRepository {
         }
 
         if (variant.stock < item.quantity) {
-          throw new Error(
-            `Stock insuficiente para ${item.variantId}`
-          );
+          throw new Error(`Stock insuficiente para ${item.variantId}`);
         }
       }
 
-      // 5. UPSERT ITEMS
       await Promise.all(
-        data.items.map(item => {
+        data.items.map((item) => {
           const existing = existingMap.get(item.variantId);
 
           if (existing) {
             if (existing.quantity !== item.quantity) {
               return tx.cartItem.update({
                 where: { id: existing.id },
-                data: { quantity: item.quantity }
+                data: { quantity: item.quantity },
               });
             }
             return Promise.resolve();
@@ -112,10 +116,10 @@ export class PrismaCartRepository implements CartRepository {
               id: item.id,
               cartId: data.id,
               variantId: item.variantId,
-              quantity: item.quantity
-            }
+              quantity: item.quantity,
+            },
           });
-        })
+        }),
       );
     });
   }
@@ -125,31 +129,74 @@ export class PrismaCartRepository implements CartRepository {
       where: {
         cartId_variantId: {
           cartId,
-          variantId
-        }
-      }
+          variantId,
+        },
+      },
     });
   }
 
   async clear(cartId: string): Promise<void> {
     await this.prisma.cartItem.deleteMany({
-      where: { cartId }
+      where: { cartId },
     });
   }
 
   private toDomain(
-    cart: Prisma.CartGetPayload<{ include: { items: true } }>
+    cart: Prisma.CartGetPayload<{
+      include: {
+        items: {
+          include: {
+            variant: {
+              include: {
+                product: {
+                  include: {
+                    images: true;
+                    brand: true;
+                  };
+                };
+                attributes: true;
+              };
+            };
+          };
+        };
+      };
+    }>,
   ): Cart {
     return Cart.fromPersistence({
       id: cart.id,
       isActive: cart.isActive,
       createdAt: cart.createdAt,
       updatedAt: cart.updatedAt,
-      items: cart.items.map(i => ({
+
+      items: cart.items.map((i) => ({
         id: i.id,
         variantId: i.variantId,
-        quantity: i.quantity
-      }))
+        quantity: i.quantity,
+        variant: i.variant
+          ? {
+              id: i.variant.id,
+              price: Number(i.variant.price),
+
+              attributes: Object.fromEntries(
+                (i.variant.attributes ?? []).map((attr) => [
+                  attr.name,
+                  attr.value,
+                ]),
+              ),
+              product: i.variant.product
+                ? {
+                    name: i.variant.product.name,
+
+                    brand: i.variant.product.brand?.name ?? 'Unknown',
+
+                    images: i.variant.product.images.map((img) => ({
+                      url: img.url,
+                    })),
+                  }
+                : null,
+            }
+          : null,
+      })),
     });
   }
 }

@@ -119,6 +119,10 @@
   --sidebar-ring: oklch(0.556 0 0);
 } */
 
+html, body {
+  overflow-x: hidden;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -133,4 +137,41 @@
     font-family: var(--font-heading);
     letter-spacing: 0.05em;
   }
+}
+
+@keyframes star-movement-bottom {
+  0% {
+    transform: translate(0%, 0%);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-100%, 0%);
+    opacity: 0;
+  }
+}
+
+@keyframes star-movement-top {
+  0% {
+    transform: translate(0%, 0%);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(100%, 0%);
+    opacity: 0;
+  }
+}
+
+@layer utilities {
+  .animate-star-bottom {
+    animation: star-movement-bottom linear infinite alternate;
+  }
+
+  .animate-star-top {
+    animation: star-movement-top linear infinite alternate;
+  }
+}
+
+:root {
+  --sidebar-accent: #3e3e3e;
+  --sidebar-accent-foreground: #ffffff;
 }

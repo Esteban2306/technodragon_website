@@ -1,178 +1,191 @@
-import { CatalogAttributes } from "../../types/catalogItem.types";
-import { CatalogImages } from "../../types/catalogItem.types";
-import { ProductCondition } from "src/modules/products/domain/enums/product-condition.enum";
+import { CatalogAttributes } from '../../types/catalogItem.types';
+import { CatalogImages } from '../../types/catalogItem.types';
+import { ProductCondition } from 'src/modules/products/domain/enums/product-condition.enum';
 
 export class CatalogItem {
-    constructor (
-        private readonly id: string,
-        private readonly productId: string,
-        private readonly variantId: string,
+  constructor(
+    private readonly id: string,
+    private readonly productId: string,
+    private readonly variantId: string,
 
-        private name: string,
-        private slug: string,
+    private name: string,
+    private slug: string,
 
-        private brandId: string,
-        private brandName: string,
+    private brandId: string,
+    private brandName: string,
 
-        private categoryId: string,
-        private categoryName: string,
+    private categoryId: string,
+    private categoryName: string,
 
-        private price: number,
-        private stock: number,
-        private condition: ProductCondition,
+    private price: number,
+    private stock: number,
+    private condition: ProductCondition,
 
-        private attributes: CatalogAttributes,
-        private images: CatalogImages,
+    private attributes: CatalogAttributes,
+    private images: CatalogImages,
 
-        private isActive: boolean,
+    private isActive: boolean,
 
-        private createdAt: Date,
-        private updatedAt: Date
-    ) {
-        this.validate()
+    private isFeatured: boolean,
+
+    private createdAt: Date,
+    private updatedAt: Date,
+  ) {
+    this.validate();
+  }
+
+  static fromPersistence(data: {
+    id: string;
+    productId: string;
+    variantId: string;
+    name: string;
+    slug: string;
+    brandId: string;
+    brandName: string;
+    categoryId: string;
+    categoryName: string;
+    price: number;
+    stock: number;
+    condition: ProductCondition;
+    attributes: CatalogAttributes;
+    images: string[];
+    isActive: boolean;
+    isFeatured: boolean;
+    createdAt: Date;
+    updatedAt: Date;
+  }) {
+    return new CatalogItem(
+      data.id,
+      data.productId,
+      data.variantId,
+      data.name,
+      data.slug,
+      data.brandId,
+      data.brandName,
+      data.categoryId,
+      data.categoryName,
+      data.price,
+      data.stock,
+      data.condition,
+      data.attributes,
+      data.images,
+      data.isActive,
+      data.isFeatured,
+      data.createdAt,
+      data.updatedAt,
+    );
+  }
+
+  private validate() {
+    if (!this.productId) throw new Error('productId required');
+    if (!this.variantId) throw new Error('variantId required');
+
+    if (this.price < 0) throw new Error('invalid price');
+    if (this.stock < 0) throw new Error('invalid stock');
+
+    if (!Object.values(ProductCondition).includes(this.condition)) {
+      throw new Error('invalid condition');
     }
+  }
 
-    static fromPersistence(data: {
-        id: string,
-        productId: string,
-        variantId: string,
-        name: string,
-        slug: string,
-        brandId: string,
-        brandName: string,
-        categoryId: string,
-        categoryName: string,
-        price: number ,
-        stock: number,
-        condition: ProductCondition;
-        attributes: CatalogAttributes;
-        images: string[];
-        isActive: boolean;
-        createdAt: Date;
-        updatedAt: Date;
-    }) {
-        return new CatalogItem(
-            data.id,
-            data.productId,
-            data.variantId,
-            data.name,
-            data.slug,
-            data.brandId,
-            data.brandName,
-            data.categoryId,
-            data.categoryName,
-            data.price,
-            data.stock,
-            data.condition,
-            data.attributes,
-            data.images,
-            data.isActive,
-            data.createdAt,
-            data.updatedAt
-        );
-    }
+  toPersistence() {
+    return {
+      id: this.id,
+      productId: this.productId,
+      variantId: this.variantId,
 
-    private validate() {
-        if (!this.productId) throw new Error("productId required");
-        if (!this.variantId) throw new Error("variantId required");
+      name: this.name,
+      slug: this.slug,
 
-        if (this.price < 0) throw new Error("invalid price");
-        if (this.stock < 0) throw new Error("invalid stock");
+      brandId: this.brandId,
+      brandName: this.brandName,
 
-        if (!Object.values(ProductCondition).includes(this.condition)) {
-        throw new Error("invalid condition");
-        }
-    }
+      categoryId: this.categoryId,
+      categoryName: this.categoryName,
 
-    toPersistence() {
-        return {
-            id: this.id,
-            productId: this.productId,
-            variantId: this.variantId,
+      price: this.price,
+      stock: this.stock,
+      condition: this.condition,
 
-            name: this.name,
-            slug: this.slug,
+      attributes: this.attributes,
+      images: this.images ?? [],
 
-            brandId: this.brandId,
-            brandName: this.brandName,
+      isActive: this.isActive,
+      isFeatured: this.isFeatured,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt,
+    };
+  }
 
-            categoryId: this.categoryId,
-            categoryName: this.categoryName,
+  updateStock(stock: number) {
+    if (stock < 0) throw new Error('invalid stock');
 
-            price: this.price,
-            stock: this.stock,
-            condition: this.condition,
+    this.stock = stock;
+    this.isActive = stock > 0;
+    this.touch();
+  }
 
-            attributes: this.attributes,
-            images: this.images ?? [],
+  updatePrice(price: number) {
+    if (price <= 0) throw new Error('invalid price');
+    this.price = price;
+    this.touch();
+  }
 
-            isActive: this.isActive,
-            createdAt: this.createdAt,
-            updatedAt: this.updatedAt
-        };
-    }
+  updateAttributes(attrs: CatalogAttributes) {
+    this.attributes = attrs;
+    this.touch();
+  }
 
-    updateStock(stock: number) {
-        if(stock < 0) throw new Error("invalid stock")
+  markAsFeatured() {
+    this.isFeatured = true;
+    this.touch();
+  }
 
-        this.stock = stock;
-        this.isActive = stock > 0;
-        this.touch()
-    }
+  removeFeatured() {
+    this.isFeatured = false;
+    this.touch();
+  }
 
-    updatePrice(price: number) {
-        if (price <= 0) throw new Error("invalid price");
-        this.price = price;
-        this.touch()
-    }
+  updateImages(images: CatalogImages) {
+    this.images = images;
+    this.touch();
+  }
 
-    updateAttributes(attrs: CatalogAttributes) {
-        this.attributes = attrs;
-        this.touch()
-    }
+  deactivate() {
+    this.isActive = false;
+    this.touch();
+  }
 
-    updateImages(images: CatalogImages) {
-        this.images = images;
-        this.touch()
-    }
+  activate() {
+    this.isActive = true;
+    this.touch();
+  }
 
-    deactivate() {
-        this.isActive = false;
-        this.touch()
-    }
+  getId() {
+    return this.id;
+  }
 
-    activate() {
-        this.isActive = true;
-        this.touch()
-    }
+  getVariantId() {
+    return this.variantId;
+  }
 
+  getProductId() {
+    return this.productId;
+  }
 
-    getId() {
-        return this.id;
-    }
+  getPrice() {
+    return this.price;
+  }
 
-    getVariantId() {
-        return this.variantId;
-    }
+  getAttributes() {
+    return this.attributes;
+  }
 
-    getProductId() {
-        return this.productId;
-    }
+  isAvailable() {
+    return this.isActive && this.stock > 0;
+  }
 
-    getPrice() {
-        return this.price;
-    }
-
-    getAttributes() {
-        return this.attributes;
-    }
-
-    isAvailable() {
-        return this.isActive && this.stock > 0;
-    }
-    
-    private touch() {
-        this.updatedAt = new Date()
-    }
-
+  private touch() {
+    this.updatedAt = new Date();
+  }
 }

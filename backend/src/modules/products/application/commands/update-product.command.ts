@@ -23,6 +23,8 @@ export class UpdateProductCommand {
     public readonly images: {
       id?: string;
       url: string;
-    }[]
+      isMain?: boolean
+    }[],
+    public readonly isFeatured: boolean
   ) {}
 }

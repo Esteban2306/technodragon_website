@@ -1,34 +1,38 @@
-import { CartItemProps } from "../../types/cartPropsEntity.type";
+import { CartItemPersistence } from "../../types/cart.types";
 
 export class CartItem {
-  constructor(private props: CartItemProps) {
-    this.validate();
+  constructor(private props: CartItemPersistence) {}
+
+  getId(): string {
+    return this.props.id;
   }
 
-  private validate() {
-    if (!this.props.variantId) throw new Error("variantId required");
-    if (this.props.quantity <= 0) throw new Error("invalid quantity");
-  }
-
-  increase(qty: number) {
-    if (qty <= 0) throw new Error("invalid quantity");
-    this.props.quantity += qty;
-  }
-
-  update(qty: number) {
-    if (qty <= 0) throw new Error("invalid quantity");
-    this.props.quantity = qty;
-  }
-
-  getVariantId() {
+  getVariantId(): string {
     return this.props.variantId;
   }
 
-  getQuantity() {
+  getQuantity(): number {
     return this.props.quantity;
   }
 
+  getVariant() {
+    return this.props.variant ?? null;
+  }
+
+  increase(q: number) {
+    this.props.quantity += q;
+  }
+
+  update(q: number) {
+    this.props.quantity = q;
+  }
+
   toJSON() {
-    return { ...this.props };
+    return {
+      id: this.props.id,
+      variantId: this.props.variantId,
+      quantity: this.props.quantity,
+      variant: this.props.variant ?? null, 
+    };
   }
 }

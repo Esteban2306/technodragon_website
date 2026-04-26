@@ -8,21 +8,23 @@ export interface CatalogRepository {
 }
 
 export interface CatalogFilters {
-    minPrice: number;
-    maxPrice: number;
+  minPrice?: number;
+  maxPrice?: number;
 
-    brandId: string;
-    categoryId: string
+  brandId?: string;
+  categoryId?: string;
 
-    condition: ProductCondition;
+  condition?: ProductCondition;
 
-    attributes: string;
+  attributes?: Record<string, string>;
 
-    search: string;
+  search?: string;
 
-    page: number;
-    limit: number; 
+  page?: number;
+  limit?: number;
 
-    sortBy?: "price" | "createdAt"
-    sortorder?: "asc" | "desc"
+  isFeatured?: boolean;
+
+  sortBy?: "price" | "createdAt";
+  sortOrder?: "asc" | "desc";
 }

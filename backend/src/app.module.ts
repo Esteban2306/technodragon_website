@@ -10,6 +10,7 @@ import { WhatsAppModule } from './modules/whatsapp/whatsapp.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { EventsModule } from './infrastructure/events/events.module';
+import { CloudinaryModule } from './infrastructure/service/cloudinary/cloudinary.module';
 @Module({
   imports: [
     
@@ -22,6 +23,7 @@ import { EventsModule } from './infrastructure/events/events.module';
 
     AuthModule,
     EventsModule,
+    CloudinaryModule,
 
     CategoriesModule,
     BrandModule,

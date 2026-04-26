@@ -1,7 +1,9 @@
-import HeroSection from "@/src/modules/landing/hero/HeroSection";
+import LandingPage from "@/src/modules/landing/LandingPage";
 
 export default function Home() {
   return (
-    <HeroSection></HeroSection>
+    <>
+      <LandingPage />
+    </>
   );
 }

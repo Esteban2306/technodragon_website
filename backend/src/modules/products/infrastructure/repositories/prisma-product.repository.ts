@@ -1,435 +1,495 @@
-import { Injectable } from "@nestjs/common";
-import { PrismaService } from "src/infrastructure/database/prisma/prisma.service";
-import { Product } from "../../domain/entities/product.entity";
-import { ProductVariant } from "../../domain/entities/product-varian.entity";
-import { VariantAttribute } from "../../domain/entities/variant-attribute.entitt";
-import { ProductImage } from "../../domain/entities/product-image.entity";
-import { ProductRepository } from "../../domain/repositories/product.repository.interface";
-import { PrismaProductWithRelations } from "../../types/PrismaProductWithRelations";
-import { ProductFilters } from "../../types/ProductFilters.types";
-import { ProductCondition } from "../../domain/enums/product-condition.enum";
-
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from 'src/infrastructure/database/prisma/prisma.service';
+import { Product } from '../../domain/entities/product.entity';
+import { ProductVariant } from '../../domain/entities/product-varian.entity';
+import { VariantAttribute } from '../../domain/entities/variant-attribute.entitt';
+import { ProductImage } from '../../domain/entities/product-image.entity';
+import { ProductRepository } from '../../domain/repositories/product.repository.interface';
+import { PrismaProductWithRelations } from '../../types/PrismaProductWithRelations';
+import { ProductFilters } from '../../types/ProductFilters.types';
+import { ProductCondition } from '../../domain/enums/product-condition.enum';
+import { CloudinaryService } from 'src/infrastructure/service/cloudinary/cloudinary.service';
 @Injectable()
 export class PrismaProductRepository implements ProductRepository {
+  constructor(
+    private prisma: PrismaService,
+    private cloudinaryService: CloudinaryService,
+  ) {}
 
-    constructor (private prisma: PrismaService) {}
+  async save(product: Product): Promise<void> {
+    await this.prisma.product.create({
+      data: {
+        id: product.id,
+        name: product.getName(),
+        slug: product.getSlug(),
+        description: product.getDescription(),
+        isFeatured: product.isProductFeatured(),
+        brandId: product.getBrandId(),
+        categoryId: product.getCategoryId(),
+        isActive: product.isProductActive(),
+        images: {
+          create: product.getImages().map((img) => ({
+            id: img.getId(),
+            url: img.getUrl(),
+            isMain: img.isMain(),
+          })),
+        },
+        variants: {
+          create: product.getVariants().map((variant) => ({
+            id: variant.getId(),
+            sku: variant.getSku(),
+            price: variant.getPrice(),
+            stock: variant.getStock(),
+            isActive: variant.isVariantActive(),
+            condition: variant.getCondition() ?? ProductCondition.NEW,
 
-    async save (product: Product): Promise<void> {
-        await this.prisma.product.create({
-            data: {
-                id: product.id,
-                name: product.getName(),
-                slug: product.getSlug(),
-                description: product.getDescription(),
-                brandId: product.getBrandId(),
-                categoryId: product.getCategoryId(),
-                isActive: product.isProductActive(),
-                images: {
-                    create: product.getImages().map(img => ({
-                        id: img.getId(),
-                        url: img.getUrl()
-                    }))
-                },
-                variants: {
-                    create: product.getVariants().map(variant => ({
-                        id: variant.getId(),
-                        sku: variant.getSku(),
-                        price: variant.getPrice(),
-                        stock: variant.getStock(),
-                        isActive: variant.isVariantActive(),
-                        condition: variant.getCondition() ?? ProductCondition.NEW,
-
-                        attributes: {
-                            create: variant.getAttributes().map(attr => ({
-                                id: attr.id,
-                                name: attr.getName(),
-                                value: attr.getValue()
-                            }))
-                        }
-                    }))
-                }
+            attributes: {
+              create: variant.getAttributes().map((attr) => ({
+                id: attr.id,
+                name: attr.getName(),
+                value: attr.getValue(),
+              })),
             },
-        })
-    }
+          })),
+        },
+      },
+    });
+  }
 
-    async findById(id: string): Promise<Product | null> {
-        const data = await this.prisma.product.findUnique({
-            where: {id},
-            include: {
-                images: true,
-                variants: {
-                    include: {
-                        attributes: true
-                    }
-                }
+  async findById(id: string): Promise<any | null> {
+    const data = await this.prisma.product.findUnique({
+      where: { id },
+      include: {
+        brand: true,
+        category: true,
+        images: true,
+        variants: {
+          include: {
+            attributes: true,
+          },
+        },
+      },
+    });
+
+    if (!data) return null;
+
+    return this.toResponse(data);
+  }
+
+  async findDomainById(id: string): Promise<Product | null> {
+    const data = await this.prisma.product.findUnique({
+      where: { id },
+      include: {
+        brand: true,
+        category: true,
+        images: true,
+        variants: {
+          include: {
+            attributes: true,
+          },
+        },
+      },
+    });
+
+    if (!data) return null;
+
+    return this.toDomain(data);
+  }
+
+  async findAll(filters?: ProductFilters): Promise<any[]> {
+    const data = await this.prisma.product.findMany({
+      where: {
+        isActive: filters?.isActive,
+        brandId: filters?.brandId,
+        categoryId: filters?.categoryId,
+        variants: filters?.condition
+          ? {
+              some: {
+                condition: filters.condition,
+              },
             }
-        })
+          : undefined,
+      },
+      include: {
+        brand: true,
+        category: true,
+        images: true,
+        variants: {
+          include: {
+            attributes: true,
+          },
+        },
+      },
+    });
 
-        if(!data) return null
+    return data.map((d) => this.toResponse(d));
+  }
 
-        return this.toDomain(data)
-    }
+  async findByVariantId(variantId: string): Promise<Product | null> {
+    const data = await this.prisma.product.findFirst({
+      where: {
+        variants: {
+          some: {
+            id: variantId,
+          },
+        },
+      },
+      include: {
+        images: true,
+        variants: {
+          include: {
+            attributes: true,
+          },
+        },
+      },
+    });
 
-    async findAll(filters?: ProductFilters): Promise<Product[]> {
-        const data = await this.prisma.product.findMany({
-            where: {
-                isActive: filters?.isActive,
-                brandId: filters?.brandId,
-                categoryId: filters?.categoryId,
-                variants: filters?.condition
-                    ? {
-                        some: {
-                            condition: filters.condition
-                        }
-                    }
-                    : undefined
-            },
-            include: {
-                images: true,
-                variants: {
-                    include: {
-                        attributes: true
-                    }
-                }
-            }
-        })
+    if (!data) return null;
 
-        return data.map(d => this.toDomain(d))
-    }
+    return this.toDomain(data);
+  }
 
-    async findByVariantId(variantId: string): Promise<Product | null> {
-        const data = await this.prisma.product.findFirst({
-            where: {
-                variants: {
-                    some: {
-                        id: variantId
-                    }
-                }
-            },
-            include: {
-                images: true,
-                variants: {
-                    include: {
-                        attributes: true
-                    }
-                }
-            }
-        });
-
-        if (!data) return null;
-
-        return this.toDomain(data);
-    }
-
-   async update(product: Product): Promise<void> {
+  async update(product: Product): Promise<void> {
     await this.prisma.$transaction(async (tx) => {
-
-        const existing = await tx.product.findUnique({
+      const existing = await tx.product.findUnique({
         where: { id: product.id },
         include: {
-            images: true,
-            variants: {
-            include: { attributes: true }
-            }
-        }
-        });
+          images: true,
+          variants: {
+            include: { attributes: true },
+          },
+        },
+      });
 
-        if (!existing) {
-        throw new Error("Product not found");
-        }
+      if (!existing) {
+        throw new Error('Product not found');
+      }
 
-        const incomingVariants = product.getVariants();
-        const incomingImages = product.getImages();
+      const incomingVariants = product.getVariants();
+      const incomingImages = product.getImages();
 
-        const isSameBasicInfo =
-        existing.name === product.getName() &&
-        existing.slug === product.getSlug() &&
-        existing.description === product.getDescription() &&
-        existing.isActive === product.isProductActive();
-
-
-        const existingVariantIds = new Set(existing.variants.map(v => v.id));
-        const incomingVariantIds = new Set(incomingVariants.map(v => v.getId()));
-
-        const isSameVariantsStructure =
-        existingVariantIds.size === incomingVariantIds.size &&
-        [...existingVariantIds].every(id => incomingVariantIds.has(id));
-
-        const existingImageIds = new Set(existing.images.map(i => i.id));
-        const incomingImageIds = new Set(incomingImages.map(i => i.getId()));
-
-        const isSameImagesStructure =
-        existingImageIds.size === incomingImageIds.size &&
-        [...existingImageIds].every(id => incomingImageIds.has(id));
-
-        const isSameStructure = isSameVariantsStructure && isSameImagesStructure;
-
-
-        const onlyStockChanged = isSameVariantsStructure && incomingVariants.every(incoming => {
-        const current = existing.variants.find(v => v.id === incoming.getId());
-        if (!current) return false;
-
-        if (current.condition !== incoming.getCondition()) return false; 
-
-        const sameAttributes =
-            current.attributes.length === incoming.getAttributes().length &&
-            current.attributes.every(attr =>
-            incoming.getAttributes().some(i =>
-                i.getName() === attr.name && i.getValue() === attr.value
-            )
-            );
-
-        return (
-            current.stock !== incoming.getStock() &&
-
-            current.price.toNumber() === incoming.getPrice() &&
-            current.sku === incoming.getSku() &&
-            current.condition === incoming.getCondition() &&
-            current.isActive === incoming.isVariantActive() &&
-            sameAttributes
-        );
-        });
-
-
-        if (isSameStructure) {
-
-        if (!isSameBasicInfo) {
-            await tx.product.update({
-            where: { id: product.id },
-            data: {
-                name: product.getName(),
-                slug: product.getSlug(),
-                description: product.getDescription(),
-                isActive: product.isProductActive()
-            }
-            });
-        }
-
-        if (onlyStockChanged) {
-            for (const variant of incomingVariants) {
-            await tx.productVariant.update({
-                where: { id: variant.getId() },
-                data: {
-                stock: variant.getStock(),
-                isActive: variant.getStock() === 0 ? false : variant.isVariantActive()
-                }
-            });
-            }
-
-            return;
-        }
-
-        if (isSameBasicInfo) {
-            return;
-        }
-        }
-
-        await tx.product.update({
+      await tx.product.update({
         where: { id: product.id },
         data: {
-            name: product.getName(),
-            slug: product.getSlug(),
-            description: product.getDescription(),
-            isActive: product.isProductActive()
-        }
-        });
-
-        const existingMap = new Map(existing.variants.map(v => [v.id, v]));
-
-        const toDelete = existing.variants
-        .filter(v => !incomingVariants.some(i => i.getId() === v.id))
-        .map(v => v.id);
-
-        if (toDelete.length > 0) {
-        await tx.productVariant.deleteMany({
-            where: { id: { in: toDelete } }
-        });
-        }
-
-        for (const variant of incomingVariants) {
-        const exists = existingMap.get(variant.getId());
-
-        if (!exists) {
-            await tx.productVariant.create({
-            data: {
-                id: variant.getId(),
-                productId: product.id,
-                sku: variant.getSku(),
-                price: variant.getPrice(),
-                stock: variant.getStock(),
-                isActive: variant.isVariantActive(),
-                condition: variant.getCondition(),
-                attributes: {
-                create: variant.getAttributes().map(attr => ({
-                    id: attr.id,
-                    name: attr.getName(),
-                    value: attr.getValue()
-                }))
-                }
-            }
-            });
-        } else {
-
-            if (
-            exists.price.toNumber() !== variant.getPrice() ||
-            exists.sku !== variant.getSku() ||
-            exists.isActive !== variant.isVariantActive() ||
-            exists.condition !== variant.getCondition()
-            ) {
-            await tx.productVariant.update({
-                where: { id: variant.getId() },
-                data: {
-                price: variant.getPrice(),
-                sku: variant.getSku(),
-                isActive: variant.isVariantActive(),
-                condition: variant.getCondition() 
-                }
-            });
-            }
-
-            const existingAttrs = new Map(
-            exists.attributes.map(a => [`${a.name}-${a.value}`, a])
-            );
-
-            const incomingAttrs = variant.getAttributes();
-
-            const toDeleteAttrs = exists.attributes
-            .filter(a =>
-                !incomingAttrs.some(i =>
-                i.getName() === a.name && i.getValue() === a.value
-                )
-            )
-            .map(a => a.id);
-
-            if (toDeleteAttrs.length > 0) {
-            await tx.variantAttribute.deleteMany({
-                where: { id: { in: toDeleteAttrs } }
-            });
-            }
-
-            for (const attr of incomingAttrs) {
-            const key = `${attr.getName()}-${attr.getValue()}`;
-
-            if (!existingAttrs.has(key)) {
-                await tx.variantAttribute.create({
-                data: {
-                    id: attr.id,
-                    variantId: variant.getId(),
-                    name: attr.getName(),
-                    value: attr.getValue()
-                }
-                });
-            }
-            }
-        }
-        }
-
-    const existingImages = new Map(existing.images.map(i => [i.id, i]));
-
-    const imagesToDelete = existing.images
-      .filter(img => !incomingImages.some(i => i.getId() === img.id))
-      .map(img => img.id);
-
-    if (imagesToDelete.length > 0) {
-      await tx.productImage.deleteMany({
-        where: { id: { in: imagesToDelete } }
+          name: product.getName(),
+          slug: product.getSlug(),
+          description: product.getDescription(),
+          brandId: product.getBrandId(),
+          categoryId: product.getCategoryId(),
+          isActive: product.isProductActive(),
+          isFeatured: product.isProductFeatured(),
+        },
       });
-    }
 
-    for (const img of incomingImages) {
-      if (!existingImages.has(img.getId())) {
+      const isSameVariantsStructure =
+        existing.variants.length === incomingVariants.length &&
+        existing.variants.every((v) =>
+          incomingVariants.some((i) => i.getId() === v.id),
+        );
+
+      const onlyStockChanged =
+        isSameVariantsStructure &&
+        incomingVariants.every((incoming) => {
+          const current = existing.variants.find(
+            (v) => v.id === incoming.getId(),
+          );
+          if (!current) return false;
+
+          return (
+            current.stock !== incoming.getStock() &&
+            current.price.toNumber() === incoming.getPrice() &&
+            current.sku === incoming.getSku() &&
+            current.condition === incoming.getCondition()
+          );
+        });
+
+      if (onlyStockChanged) {
+        for (const variant of incomingVariants) {
+          await tx.productVariant.update({
+            where: { id: variant.getId() },
+            data: {
+              stock: variant.getStock(),
+              isActive: variant.getStock() > 0,
+            },
+          });
+        }
+        return;
+      }
+
+      const existingMap = new Map(existing.variants.map((v) => [v.id, v]));
+
+      const incomingMap = new Map(incomingVariants.map((v) => [v.getId(), v]));
+
+      for (const incoming of incomingVariants) {
+        const existingVariant = existingMap.get(incoming.getId());
+
+        if (existingVariant) {
+          await tx.productVariant.update({
+            where: { id: incoming.getId() },
+            data: {
+              sku: incoming.getSku(),
+              price: incoming.getPrice(),
+              stock: incoming.getStock(),
+              isActive: incoming.getStock() > 0,
+              condition: incoming.getCondition(),
+            },
+          });
+
+          await tx.variantAttribute.deleteMany({
+            where: { variantId: incoming.getId() },
+          });
+
+          await tx.variantAttribute.createMany({
+            data: incoming.getAttributes().map((attr) => ({
+              id: attr.id,
+              variantId: incoming.getId(),
+              name: attr.getName(),
+              value: attr.getValue(),
+            })),
+          });
+        } else {
+          await tx.productVariant.create({
+            data: {
+              id: incoming.getId(),
+              productId: product.id,
+              sku: incoming.getSku(),
+              price: incoming.getPrice(),
+              stock: incoming.getStock(),
+              isActive: incoming.isVariantActive(),
+              condition: incoming.getCondition(),
+              attributes: {
+                create: incoming.getAttributes().map((attr) => ({
+                  id: attr.id,
+                  name: attr.getName(),
+                  value: attr.getValue(),
+                })),
+              },
+            },
+          });
+        }
+      }
+
+      for (const existingVariant of existing.variants) {
+        const stillExists = incomingMap.has(existingVariant.id);
+
+        if (!stillExists) {
+          const inUse = await tx.cartItem.findFirst({
+            where: { variantId: existingVariant.id },
+          });
+
+          if (inUse) {
+            console.log('Variant in use, skipping delete:', existingVariant.id);
+            continue;
+          }
+
+          await tx.productVariant.delete({
+            where: { id: existingVariant.id },
+          });
+        }
+      }
+
+      const incomingUrls = new Set(incomingImages.map((img) => img.getUrl()));
+
+      const imagesToDelete = existing.images.filter(
+        (img) => !incomingUrls.has(img.url),
+      );
+
+      for (const img of imagesToDelete) {
+        const publicId = this.cloudinaryService.extractPublicId(img.url);
+        if (publicId) {
+          try {
+            await this.cloudinaryService.deleteImage(publicId);
+          } catch (error) {
+            console.error(
+              'Error deleting image from Cloudinary:',
+              publicId,
+            );
+          }
+        }
+      }
+
+      await tx.productImage.deleteMany({
+        where: { productId: product.id },
+      });
+
+      for (const img of incomingImages) {
         await tx.productImage.create({
           data: {
             id: img.getId(),
             productId: product.id,
-            url: img.getUrl()
-          }
+            url: img.getUrl(),
+            isMain: img.isMain(),
+          },
         });
       }
+    });
+  }
+
+  async updateStock(variantId: string, stock: number) {
+    await this.prisma.productVariant.update({
+      where: { id: variantId },
+      data: {
+        stock,
+        isActive: stock > 0,
+      },
+    });
+  }
+
+  async existsBySlug(slug: string): Promise<boolean> {
+    const count = await this.prisma.product.count({
+      where: { slug },
+    });
+
+    return count > 0;
+  }
+
+  async findBySlug(slug: string): Promise<any | null> {
+    const data = await this.prisma.product.findUnique({
+      where: { slug },
+      include: {
+        brand: true,
+        category: true,
+        images: true,
+        variants: {
+          include: {
+            attributes: true,
+          },
+        },
+      },
+    });
+
+    if (!data) return null;
+
+    return this.toResponse(data);
+  }
+
+  async delete(id: string): Promise<void> {
+    await this.prisma.product.delete({
+      where: { id },
+    });
+  }
+
+  async markProductAsFeatured(productId: string): Promise<boolean> {
+    const current = await this.prisma.product.findUnique({
+      where: { id: productId },
+      select: { isFeatured: true },
+    });
+
+    if (!current) {
+      throw new Error('Product not found');
     }
 
-  });
-    }
+    const updated = await this.prisma.product.update({
+      where: { id: productId },
+      data: {
+        isFeatured: !current.isFeatured,
+      },
+      select: {
+        isFeatured: true,
+      },
+    });
 
-    async updateStock(variantId: string, stock: number) {
-        await this.prisma.productVariant.update({
-            where: {id: variantId},
-            data: {
-                stock,
-                isActive: stock > 0
-            }
-        })
-    }
+    return updated.isFeatured;
+  }
 
-    async existsBySlug(slug: string): Promise<boolean> {
-        const count = await this.prisma.product.count({
-            where: {slug}
-        })
+  async toggleActive(id: string, isActive: boolean): Promise<void> {
+    await this.prisma.product.update({
+      where: { id },
+      data: {
+        isActive,
+      },
+    });
+  }
 
-        return count > 0
-    }
+  async toggleVariantStatus(
+    variantId: string,
+    isActive: boolean,
+  ): Promise<void> {
+    await this.prisma.productVariant.update({
+      where: { id: variantId },
+      data: { isActive },
+    });
+  }
 
-    async findBySlug(slug: string): Promise<Product | null> {
-        const data = await this.prisma.product.findUnique({
-            where: {slug},
-            include: {
-                images: true,
-                variants: {
-                    include: {
-                        attributes: true
-                    }
-                }
-            }
-        })
+  private toDomain(data: PrismaProductWithRelations): Product {
+    return new Product(
+      data.id,
+      data.name,
+      data.slug,
+      data.description ?? '',
 
-        if(!data) return null
+      data.brandId,
+      data.categoryId,
 
-        return this.toDomain(data)
-    }
+      data.variants.map(
+        (v) =>
+          new ProductVariant(
+            v.id,
+            v.sku,
+            Number(v.price),
+            v.stock,
+            v.condition as ProductCondition,
+            v.attributes.map(
+              (a) => new VariantAttribute(a.id, a.name, a.value),
+            ),
+            v.isActive,
+            v.createdAt,
+            v.updatedAt,
+          ),
+      ),
 
-    async delete(id: string): Promise<void> {
-        await this.prisma.product.update({
-            where: {id},
-            data: {
-                isActive: false
-            }
-        })
-    }
+      data.images.map((img) => new ProductImage(img.id, img.url, img.isMain)),
 
-    private toDomain(data: PrismaProductWithRelations): Product {
-        return new Product(
-            data.id,
-            data.name,
-            data.slug,
-            data.description ?? '',
-            data.brandId,
-            data.categoryId,
+      data.isActive,
+      data.isFeatured,
+      data.createdAt,
+      data.updatedAt,
+    );
+  }
 
-            data.variants.map(v => new ProductVariant(
-                v.id,
-                v.sku,
-                Number(v.price),
-                v.stock,
-                v.condition as ProductCondition,
-                v.attributes.map(a => new VariantAttribute(
-                    a.id,
-                    a.name,
-                    a.value
-                )),
-                v.isActive,
-                v.createdAt,
-                v.updatedAt
-            )),
+  private toResponse(data: any) {
+    return {
+      id: data.id,
+      name: data.name,
+      slug: data.slug,
+      description: data.description ?? '',
 
-            data.images.map(img => new ProductImage(
-            img.id,
-            img.url
-            )),
+      brand: {
+        id: data.brand.id,
+        name: data.brand.name,
+      },
 
-            data.isActive,
-            data.createdAt,
-            data.updatedAt
-        );
-    }
+      category: {
+        id: data.category.id,
+        name: data.category.name,
+      },
 
+      variants: data.variants.map((v) => ({
+        id: v.id,
+        sku: v.sku,
+        price: Number(v.price),
+        stock: v.stock,
+        isActive: v.isActive,
+        condition: v.condition,
+        attributes: v.attributes.map((a) => ({
+          id: a.id,
+          name: a.name,
+          value: a.value,
+        })),
+        createdAt: v.createdAt,
+        updatedAt: v.updatedAt,
+      })),
+
+      images: data.images.map((img) => ({
+        id: img.id,
+        url: img.url,
+        isFeatured: img.isFeatured,
+      })),
+
+      isActive: data.isActive,
+      isFeatured: data.isFeatured,
+      createdAt: data.createdAt,
+      updatedAt: data.updatedAt,
+    };
+  }
 }
