@@ -49,11 +49,24 @@ async function bootstrap() {
         transform: true,
         whitelist: true,
     }));
+    const allowedOrigins = [
+        'http://localhost:3000',
+        'https://technodragon-website.vercel.app',
+    ];
     app.enableCors({
-        origin: 'http://localhost:3000',
+        origin: (origin, callback) => {
+            if (!origin || allowedOrigins.includes(origin)) {
+                callback(null, true);
+            }
+            else {
+                callback(new Error('Not allowed by CORS'));
+            }
+        },
         credentials: true,
+        methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+        allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
     });
-    await app.listen(process.env.PORT ?? 3001);
+    await app.listen(process.env.PORT ?? 3001, '0.0.0.0');
 }
 bootstrap();
 //# sourceMappingURL=main.js.map
