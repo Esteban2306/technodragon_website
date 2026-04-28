@@ -1,0 +1,1 @@
+{"version":3,"file":"normalize-attribute.js","sourceRoot":"","sources":["../../../../../src/modules/catalog/helpers/normalize-attribute.ts"],"names":[],"mappings":";;AAAA,gDAOC;AAPD,SAAgB,kBAAkB,CAAC,KAAa;IAC9C,OAAO,KAAK;SACT,IAAI,EAAE;SACN,WAAW,EAAE;SACb,SAAS,CAAC,KAAK,CAAC;SAChB,OAAO,CAAC,kBAAkB,EAAE,EAAE,CAAC;SAC/B,OAAO,CAAC,MAAM,EAAE,GAAG,CAAC,CAAC;AAC1B,CAAC"}

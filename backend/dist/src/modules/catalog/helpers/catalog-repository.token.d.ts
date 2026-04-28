@@ -1,0 +1,1 @@
+export declare const CATALOG_REPOSITORY = "CATALOG_REPOSITORY";

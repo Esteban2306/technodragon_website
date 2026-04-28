@@ -1,0 +1,36 @@
+import { ProductCondition } from "../enums/product-condition.enum";
+import { VariantAttribute } from "./variant-attribute.entitt";
+export declare class ProductVariant {
+    readonly id: string;
+    private sku;
+    private price;
+    private stock;
+    private isActive;
+    private condition;
+    private attributes;
+    private createdAt;
+    private updatedAt;
+    constructor(id: string, sku: string, price: number, stock: number, condition?: ProductCondition, attributes?: VariantAttribute[], isActive?: boolean, createdAt?: Date, updatedAt?: Date);
+    increaseStock(quantity: number): void;
+    decreaseStock(quantity: number): void;
+    updatePrice(newprice: number): void;
+    activate(): void;
+    deactivate(): void;
+    addAtribute(attribute: VariantAttribute): void;
+    removeAttribute(attributeId: string): void;
+    private validateSku;
+    private validateCondition;
+    private validateAttributes;
+    private validatePrice;
+    private validateStock;
+    private touch;
+    getId(): string;
+    getSku(): string;
+    getCondition(): ProductCondition;
+    getPrice(): number;
+    getStock(): number;
+    isVariantActive(): boolean;
+    getAttributes(): VariantAttribute[];
+    getCreatedAt(): Date;
+    getUpdatedAt(): Date;
+}

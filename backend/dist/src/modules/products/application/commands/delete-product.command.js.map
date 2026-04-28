@@ -1,0 +1,1 @@
+{"version":3,"file":"delete-product.command.js","sourceRoot":"","sources":["../../../../../../src/modules/products/application/commands/delete-product.command.ts"],"names":[],"mappings":";;;AAAA,MAAa,oBAAoB;IAET;IACA;IACA;IAHpB,YACoB,SAAiB,EACjB,WAAoB,EACpB,MAAe;QAFf,cAAS,GAAT,SAAS,CAAQ;QACjB,gBAAW,GAAX,WAAW,CAAS;QACpB,WAAM,GAAN,MAAM,CAAS;IAChC,CAAC;CACP;AAND,oDAMC"}
