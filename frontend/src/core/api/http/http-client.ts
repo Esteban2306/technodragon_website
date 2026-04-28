@@ -163,7 +163,6 @@ export class HttpClient {
     }
   }
 }
-console.log(process.env.NEXT_PUBLIC_API_URL)
 export const httpClient = new HttpClient({
   baseUrl: process.env.NEXT_PUBLIC_API_URL!,
   refreshEndpoint: '/auth/refresh',
