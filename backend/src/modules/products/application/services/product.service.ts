@@ -47,7 +47,7 @@ export class ProductService {
     });
   }
 
-  async update(product: Product): Promise<Product> {
+  async update(product: Product): Promise<ProductResponse> {
     const existing = await this.productRepository.findDomainById(product.id);
 
     if (!existing) {
@@ -99,7 +99,7 @@ export class ProductService {
       description?: string;
       slug?: string;
     },
-  ): Promise<Product> {
+  ): Promise<ProductResponse> {
     const product = await this.productRepository.findDomainById(id);
 
     if (!product) {
