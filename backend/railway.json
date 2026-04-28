@@ -5,6 +5,6 @@
     "buildCommand": "bun install && bun run build"
   },
   "deploy": {
-    "startCommand": "npx prisma migrate deploy && bun run start:prod"
+    "startCommand": "npx prisma migrate deploy && node dist/main"
   }
 }
