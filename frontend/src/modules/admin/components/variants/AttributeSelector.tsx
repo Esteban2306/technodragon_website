@@ -53,13 +53,13 @@ export default function AttributeSelector({ variant, update }: Props) {
       <p className="text-sm text-gray-400">Atributos</p>
 
       <div className="flex flex-wrap gap-2">
-        {variant.attributes.map((attr: any, i: number) => (
+        {variant.attributes.map((attr: Attribute, i: number) => (
           <AttributeItem
             key={i}
             attr={attr}
             onRemove={() => {
               const updated = variant.attributes.filter(
-                (_: any, index: number) => index !== i,
+                (_: Attribute, index: number) => index !== i,
               );
 
               update('attributes', updated);

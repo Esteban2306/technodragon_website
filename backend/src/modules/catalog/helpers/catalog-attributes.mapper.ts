@@ -1,4 +1,4 @@
-export function mapJsonToAttributes(json: any): Record<string, string[]> {
+export function mapJsonToAttributes(json: Record<string, unknown>): Record<string, string[]> {
   const result: Record<string, string[]> = {};
 
   if (!json || typeof json !== "object") return result;

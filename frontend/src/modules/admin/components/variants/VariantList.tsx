@@ -1,9 +1,10 @@
 import { CreateVariantForm, Props } from "../../createProduct/stepper/types/fromProps.types";
+import { EditProductForm } from "../../types/editProductForm.types";
 import VariantCard from "./VariantCard";
 
 type VariantListProps = {
   variants: CreateVariantForm[];
-  setForm: Props['setForm'];
+  setForm: React.Dispatch<React.SetStateAction<EditProductForm | null>>;
 };
 
 export default function VariantList({ variants, setForm }: VariantListProps) {

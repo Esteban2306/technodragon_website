@@ -18,7 +18,10 @@ import { Textarea } from '@/src/shared/components/textarea';
 import VariantList from '../variants/VariantList';
 
 import type { ProductCardData } from '../cards/mockProducts';
-import type { CreateVariantForm } from '../../createProduct/stepper/types/fromProps.types';
+import type {
+  CreateVariantForm,
+  CreateProductForm,
+} from '../../createProduct/stepper/types/fromProps.types';
 import { Upload, X } from 'lucide-react';
 import {
   useUpdateBasicProduct,
@@ -31,6 +34,7 @@ import AddVariantButton from './AddVariantButton';
 import { useBrands } from '../../hooks/useBrands';
 import { useCategories } from '../../hooks/useCategories';
 import { useUploadImage } from '@/src/modules/hooks/useUploadImage';
+import { EditProductForm } from '../../types/editProductForm.types';
 
 type Props = {
   open: boolean;
@@ -67,7 +71,7 @@ export default function EditProductDialog({
   const { data: brands = [] } = useBrands();
   const { data: categories = [] } = useCategories();
 
-  const [form, setForm] = useState<FormState | null>(null);
+  const [form, setForm] = useState<EditProductForm | null>(null);
   const selectedIndexRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -100,7 +104,10 @@ export default function EditProductDialog({
 
   if (!form || !product) return null;
 
-  const handleChange = (field: keyof FormState, value: any) => {
+  const handleChange = <K extends keyof EditProductForm>(
+    field: K,
+    value: EditProductForm[K],
+  ) => {
     setForm((prev) => prev && { ...prev, [field]: value });
   };
 
@@ -249,7 +256,7 @@ export default function EditProductDialog({
               options={brands}
               onChange={(id) => {
                 const selected = brands.find((b) => b.id === id);
-                handleChange('brand', selected);
+                if (selected) handleChange('brand', selected);
               }}
             />
 
@@ -259,7 +266,7 @@ export default function EditProductDialog({
               options={categories}
               onChange={(id) => {
                 const selected = categories.find((c) => c.id === id);
-                handleChange('category', selected);
+                if (selected) handleChange('category', selected);
               }}
             />
           </div>
@@ -335,7 +342,7 @@ export default function EditProductDialog({
             />
           </div>
 
-          <VariantList variants={form.variants} setForm={setForm as any} />
+          <VariantList variants={form.variants} setForm={setForm} />
           <div className="flex justify-end">
             <AddVariantButton setForm={setForm} />
           </div>

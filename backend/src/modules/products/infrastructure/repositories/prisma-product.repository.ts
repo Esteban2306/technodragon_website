@@ -63,7 +63,7 @@ export class PrismaProductRepository implements ProductRepository {
     });
   }
 
-  async findById(id: string): Promise<any | null> {
+  async findById(id: string): Promise<ProductResponse | null> {
     const data = await this.prisma.product.findUnique({
       where: { id },
       include: {
@@ -426,7 +426,7 @@ export class PrismaProductRepository implements ProductRepository {
     return count > 0;
   }
 
-  async findBySlug(slug: string): Promise<any | null> {
+  async findBySlug(slug: string): Promise<ProductResponse | null> {
     const data = await this.prisma.product.findUnique({
       where: { slug },
       include: {

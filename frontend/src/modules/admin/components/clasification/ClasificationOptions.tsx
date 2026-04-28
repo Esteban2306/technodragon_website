@@ -1,27 +1,44 @@
 import { Check } from 'lucide-react';
+import { useCollapsible } from '@/src/shared/components/collapsible';
+import { CreateProductForm } from '../../createProduct/stepper/types/fromProps.types';
 
-import {
-  useCollapsible,
-} from '@/src/shared/components/collapsible';
+type Brand = {
+  id: string;
+  name: string;
+};
 
-import { Props } from '../../createProduct/stepper/types/fromProps.types';
+type Category = {
+  id: string;
+  name: string;
+};
 
-const mockBrands = [
+type BrandOptionsProps = {
+  brands: Brand[];
+  form: CreateProductForm;
+  setForm: React.Dispatch<React.SetStateAction<CreateProductForm>>;
+};
+
+type CategoryOptionsProps = {
+  categories: Category[];
+  form: CreateProductForm;
+  setForm: React.Dispatch<React.SetStateAction<CreateProductForm>>;
+};
+
+const mockBrands: Brand[] = [
   { id: '1', name: 'Logitech' },
   { id: '2', name: 'Razer' },
 ];
 
-const mockCategories = [
-  'Electrónica > Periféricos > Teclados',
-  'Electrónica > Periféricos > Mouse',
-  'Electrónica > Audio > Audífonos',
+const mockCategories: Category[] = [
+  { id: '1', name: 'Electrónica > Periféricos > Teclados' },
+  { id: '2', name: 'Electrónica > Periféricos > Mouse' },
+  { id: '3', name: 'Electrónica > Audio > Audífonos' },
 ];
 
-
-export function BrandOptions({ brands, form, setForm }: any) {
+export function BrandOptions({ brands, form, setForm }: BrandOptionsProps) {
   return (
     <>
-      {brands.map((brand: any) => (
+      {brands.map((brand: Brand) => (
         <button
           key={brand.id}
           onClick={() =>
@@ -29,7 +46,7 @@ export function BrandOptions({ brands, form, setForm }: any) {
               ...form,
               classification: {
                 ...form.classification,
-                brandId: brand.id, // 🔥 FIX
+                brandId: brand.id,
               },
             })
           }
@@ -43,7 +60,6 @@ export function BrandOptions({ brands, form, setForm }: any) {
           `}
         >
           {brand.name}
-
           {form.classification?.brandId === brand.id && (
             <Check className="size-4" />
           )}
@@ -53,10 +69,10 @@ export function BrandOptions({ brands, form, setForm }: any) {
   );
 }
 
-export function CategoryOptions({ categories, form, setForm }: any) {
+export function CategoryOptions({ categories, form, setForm }: CategoryOptionsProps) {
   return (
     <>
-      {categories.map((cat: any) => (
+      {categories.map((cat: Category) => (
         <button
           key={cat.id}
           onClick={() =>
@@ -64,7 +80,7 @@ export function CategoryOptions({ categories, form, setForm }: any) {
               ...form,
               classification: {
                 ...form.classification,
-                categoryId: cat.id, // 🔥 FIX
+                categoryId: cat.id,
               },
             })
           }
@@ -78,7 +94,6 @@ export function CategoryOptions({ categories, form, setForm }: any) {
           `}
         >
           {cat.name}
-
           {form.classification?.categoryId === cat.id && (
             <Check className="size-4" />
           )}

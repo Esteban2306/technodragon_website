@@ -11,11 +11,12 @@ import {
   Gamepad2,
   Camera,
   Package,
+  LucideIcon,
 } from 'lucide-react';
 
 type Rule = {
   match: string[];
-  icon: any;
+  icon: LucideIcon;
 };
 
 export const categoryIconRules: Rule[] = [
