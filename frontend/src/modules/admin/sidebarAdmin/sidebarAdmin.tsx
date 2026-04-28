@@ -31,6 +31,8 @@ import logo from '../../../../public/landing/logoPage.png';
 
 import { AdminSidebarProps } from '../types/Admin.types';
 import CreateMetaDialog from '../productManagment/CreateProductDialog';
+import { useAuth } from '../../auth/provider/AuthProvider';
+import Link from 'next/link';
 
 export default function AdminSidebar({
   active,
@@ -39,6 +41,8 @@ export default function AdminSidebar({
   setStockMode,
 }: AdminSidebarProps) {
   const [openMetaDialog, setOpenMetaDialog] = useState(false);
+  const { logout } = useAuth();
+
   return (
     <>
       <SidebarProvider>
@@ -109,7 +113,7 @@ export default function AdminSidebar({
 
                   <SidebarMenuItem>
                     <SidebarMenuButton
-                      onClick={() => setOpenMetaDialog(true)} 
+                      onClick={() => setOpenMetaDialog(true)}
                       className="hover:bg-[#7a1c1c]/80 cursor-pointer"
                     >
                       <Tags />
@@ -124,10 +128,18 @@ export default function AdminSidebar({
           <SidebarFooter>
             <SidebarMenu className="text-white">
               <SidebarMenuItem>
-                <SidebarMenuButton className="hover:bg-[#7a1c1c]/80">
-                  <LogOut />
-                  <span>Salir</span>
-                </SidebarMenuButton>
+                <Link href={'/'}>
+                  <SidebarMenuButton
+                    onClick={() => logout.mutate()}
+                    className="hover:bg-[#7a1c1c]/80 cursor-pointer"
+                  >
+                    <div className=" flex gap-4 ">
+                      <LogOut className="text-red-600 size-5" />
+
+                      <span className="text-red-600">Salir</span>
+                    </div>
+                  </SidebarMenuButton>
+                </Link>
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarFooter>
@@ -137,13 +149,8 @@ export default function AdminSidebar({
       <CreateMetaDialog
         open={openMetaDialog}
         onOpenChange={setOpenMetaDialog}
-        onCreateBrand={(brand) => {
-          console.log('brand creada', brand);
-          
-        }}
-        onCreateCategory={(category) => {
-          console.log('category creada', category);
-        }}
+        onCreateBrand={(brand) => {}}
+        onCreateCategory={(category) => {}}
       />
     </>
   );

@@ -11,6 +11,7 @@ export type FormType = {
 
 export type CreateProductForm = {
   name: string;
+  slug: string;
   description: string;
 
   classification: {

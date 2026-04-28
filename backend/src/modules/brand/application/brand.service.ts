@@ -26,7 +26,6 @@ export class BrandService {
             throw error;
           }
     
-          console.error(`[BrandService] ${context}`, error);
     
           throw new InternalServerErrorException(`Internal error in ${context}`);
         }

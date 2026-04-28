@@ -27,4 +27,5 @@ export type CatalogItem = {
   attributes: Record<string, string[]>;
 
   isActive: boolean;
+  isFeatured: boolean
 };

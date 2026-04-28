@@ -37,7 +37,7 @@ export const useCatalog = (filters?: CatalogFilters) => {
   const queryClient = useQueryClient();
 
   const stableFilters = useMemo(() => normalizeFilters(filters), [filters]);
-
+  
   const query = useQuery({
     queryKey: ['catalog', stableFilters],
 
@@ -46,6 +46,7 @@ export const useCatalog = (filters?: CatalogFilters) => {
     select: (data) => {
       try {
         const mapped = mapCatalogToPreview(data.data);
+
 
         return {
           ...data,

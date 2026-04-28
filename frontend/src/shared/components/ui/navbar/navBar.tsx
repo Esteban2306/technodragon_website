@@ -19,22 +19,35 @@ import {
   NavigationMenuLink,
 } from '../../navigation-menu';
 
-import { catalogCategories } from './catalog-categorie.data';
 import { useScrolled } from '@/src/shared/hooks/useScrolled';
 import { NavbarMobile } from './NavbarMobile';
 import { useCart } from '@/src/modules/hooks/useCart';
 
 import AuthDialog from '@/src/modules/auth/components/AuthDialog';
 import { useAuth } from '@/src/modules/auth/provider/AuthProvider';
+import { useCategories } from '@/src/modules/admin/hooks/useCategories';
+import { getCategoryDescription } from '@/src/shared/utils/categoryDescriptions';
 
 export default function Navbar() {
   const { data: cart } = useCart();
+  const { data: categories, isLoading } = useCategories();
 
   const totalItems =
     cart?.items.reduce((acc, item) => acc + item.quantity, 0) || 0;
   const [cartOpen, setCartOpen] = useState(false);
   const { user } = useAuth();
   const scrolled = useScrolled(20);
+
+  const navCategories =
+    categories?.map((cat) => {
+      return {
+        id: cat.id,
+        title: cat.name,
+        href: `/catalog?categoryId=${cat.id}`,
+        description: getCategoryDescription(cat.name),
+        icon: getCategoryIcon(cat.name),
+      };
+    }) || [];
 
   return (
     <>
@@ -77,32 +90,36 @@ export default function Navbar() {
 
                   <NavigationMenuContent>
                     <div className="grid w-100 gap-3 p-4 md:w-125 md:grid-cols-2">
-                      {catalogCategories.map((category) => {
-                        const Icon = getCategoryIcon(category.title);
+                      {isLoading && (
+                        <span className="text-sm text-gray-400 px-4">
+                          Cargando categorías...
+                        </span>
+                      )}
+
+                      {navCategories.map((category) => {
+                        const Icon = category.icon;
 
                         return (
-                          <NavigationMenuLink asChild key={category.title}>
-                            <Link
-                              href={category.href}
-                              className="
-                            flex items-start gap-3 p-2 rounded-lg
-                            hover:bg-white/5 transition
+                          <Link
+                            key={category.id}
+                            href={category.href}
+                            className="
+                              flex items-start gap-3
+                              bg-white/5 hover:bg-white/10
+                              px-4 py-2 rounded-lg
                             "
-                            >
-                              <div className="mt-1">
-                                <Icon className="w-5 h-5 text-red-500" />
-                              </div>
+                          >
+                            <Icon className="w-8 h-8 text-red-400 mt-1 min-w-4.75 min-h-4.75" />
 
-                              <div className="flex flex-col">
-                                <span className="font-medium text-white">
-                                  {category.title}
-                                </span>
-                                <span className="text-sm text-muted-foreground">
-                                  {category.description}
-                                </span>
-                              </div>
-                            </Link>
-                          </NavigationMenuLink>
+                            <div>
+                              <span className="block text-sm font-medium text-white">
+                                {category.title}
+                              </span>
+                              <span className="text-xs text-gray-400">
+                                {category.description}
+                              </span>
+                            </div>
+                          </Link>
                         );
                       })}
                     </div>

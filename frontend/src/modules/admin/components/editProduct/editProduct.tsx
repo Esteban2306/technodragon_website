@@ -18,7 +18,10 @@ import { Textarea } from '@/src/shared/components/textarea';
 import VariantList from '../variants/VariantList';
 
 import type { ProductCardData } from '../cards/mockProducts';
-import type { CreateVariantForm } from '../../createProduct/stepper/types/fromProps.types';
+import type {
+  CreateVariantForm,
+  CreateProductForm,
+} from '../../createProduct/stepper/types/fromProps.types';
 import { Upload, X } from 'lucide-react';
 import {
   useUpdateBasicProduct,
@@ -31,6 +34,7 @@ import AddVariantButton from './AddVariantButton';
 import { useBrands } from '../../hooks/useBrands';
 import { useCategories } from '../../hooks/useCategories';
 import { useUploadImage } from '@/src/modules/hooks/useUploadImage';
+import { EditProductForm } from '../../types/editProductForm.types';
 
 type Props = {
   open: boolean;
@@ -67,8 +71,7 @@ export default function EditProductDialog({
   const { data: brands = [] } = useBrands();
   const { data: categories = [] } = useCategories();
 
-  const [form, setForm] = useState<FormState | null>(null);
-
+  const [form, setForm] = useState<EditProductForm | null>(null);
   const selectedIndexRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -78,7 +81,7 @@ export default function EditProductDialog({
       name: product.name,
       slug: product.slug ?? '',
       description: product.description ?? '',
-      images: [product.image],
+      images: [product.image].filter(Boolean) as string[],
       brand: product.brand,
       category: product.category,
       variants: product.variants.map((v) => ({
@@ -101,7 +104,10 @@ export default function EditProductDialog({
 
   if (!form || !product) return null;
 
-  const handleChange = (field: keyof FormState, value: any) => {
+  const handleChange = <K extends keyof EditProductForm>(
+    field: K,
+    value: EditProductForm[K],
+  ) => {
     setForm((prev) => prev && { ...prev, [field]: value });
   };
 
@@ -115,16 +121,13 @@ export default function EditProductDialog({
     if (!file || selectedIndexRef.current === null) return;
 
     const index = selectedIndexRef.current;
-
-    // preview inmediato (UX)
     const preview = URL.createObjectURL(file);
 
+    // Preview inmediato
     setForm((prev) => {
       if (!prev) return prev;
-
       const newImages = [...prev.images];
       newImages[index] = preview;
-
       return { ...prev, images: newImages };
     });
 
@@ -133,24 +136,21 @@ export default function EditProductDialog({
 
       setForm((prev) => {
         if (!prev) return prev;
-
         const newImages = [...prev.images];
         newImages[index] = result.url;
-
         return { ...prev, images: newImages };
       });
     } catch (error) {
       console.error('Upload failed:', error);
 
-      // rollback visual
       setForm((prev) => {
         if (!prev) return prev;
-
         const newImages = [...prev.images];
-        newImages[index] = '';
-
+        newImages.splice(index, 1);
         return { ...prev, images: newImages };
       });
+    } finally {
+      if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
@@ -164,10 +164,18 @@ export default function EditProductDialog({
     });
   };
 
-  const buildSlug = (name: string) =>
-    name.toLowerCase().trim().replace(/\s+/g, '-');
-
   const handleSave = async () => {
+    const validImages = form.images.filter(
+      (img) => img && img.startsWith('http'),
+    );
+
+    const imagesToSend =
+      validImages.length > 0
+        ? validImages
+        : product.image
+          ? [product.image]
+          : [];
+
     const basicPayload = {
       name: form.name,
       slug: form.slug,
@@ -190,13 +198,11 @@ export default function EditProductDialog({
         attributes: v.attributes,
       })),
 
-      images: form.images
-        .filter((img) => img.startsWith('http'))
-        .map((img, i) => ({
-          id: crypto.randomUUID(),
-          url: img,
-          isMain: i === 0,
-        })),
+      images: imagesToSend.map((img, i) => ({
+        id: crypto.randomUUID(),
+        url: img,
+        isMain: i === 0,
+      })),
     };
 
     const onlyBasicChanged =
@@ -206,26 +212,22 @@ export default function EditProductDialog({
 
     const brandChanged = form.brand.id !== product.brand.id;
     const categoryChanged = form.category.id !== product.category.id;
+    const imagesChanged =
+      JSON.stringify(imagesToSend) !== JSON.stringify([product.image]);
 
     const shouldUseFullUpdate =
-      !onlyBasicChanged || brandChanged || categoryChanged;
+      brandChanged || categoryChanged || imagesChanged || onlyBasicChanged;
 
     try {
       if (shouldUseFullUpdate) {
-        await updateFull.mutateAsync({
-          id: product.id,
-          data: fullPayload,
-        });
+        await updateFull.mutateAsync({ id: product.id, data: fullPayload });
       } else {
-        await updateBasic.mutateAsync({
-          id: product.id,
-          data: basicPayload,
-        });
+        await updateBasic.mutateAsync({ id: product.id, data: basicPayload });
       }
 
       onOpenChange(false);
     } catch (err) {
-      console.error(err);
+      console.error('Save failed:', err);
     }
   };
 
@@ -254,7 +256,7 @@ export default function EditProductDialog({
               options={brands}
               onChange={(id) => {
                 const selected = brands.find((b) => b.id === id);
-                handleChange('brand', selected);
+                if (selected) handleChange('brand', selected);
               }}
             />
 
@@ -264,7 +266,7 @@ export default function EditProductDialog({
               options={categories}
               onChange={(id) => {
                 const selected = categories.find((c) => c.id === id);
-                handleChange('category', selected);
+                if (selected) handleChange('category', selected);
               }}
             />
           </div>
@@ -340,7 +342,7 @@ export default function EditProductDialog({
             />
           </div>
 
-          <VariantList variants={form.variants} setForm={setForm as any} />
+          <VariantList variants={form.variants} setForm={setForm} />
           <div className="flex justify-end">
             <AddVariantButton setForm={setForm} />
           </div>

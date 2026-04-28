@@ -18,24 +18,29 @@ import { useCreateCategory } from '../hooks/useCategoryMutations';
 
 type Mode = 'brand' | 'category';
 
+type FormFields = {
+  name: string;
+  slug: string;
+  logo: string;
+  parentId: string;
+};
+
 type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onCreateBrand?: (data: any) => void;
-  onCreateCategory?: (data: any) => void;
 };
 
 export default function CreateMetaDialog({ open, onOpenChange }: Props) {
   const [mode, setMode] = useState<Mode>('brand');
 
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<FormFields>({
     name: '',
     slug: '',
     logo: '',
     parentId: '',
   });
 
-  const handleChange = (field: string, value: string) => {
+  const handleChange = (field: keyof FormFields, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 

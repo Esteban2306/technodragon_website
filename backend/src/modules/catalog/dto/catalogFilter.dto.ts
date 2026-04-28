@@ -10,6 +10,7 @@ import {
   IsBoolean,
 } from 'class-validator';
 import { ProductCondition } from 'src/modules/products/domain/enums/product-condition.enum';
+import { normalizeAttribute } from '../helpers/normalize-attribute';
 
 export class CatalogFilterDto {
   @IsOptional()
@@ -41,7 +42,7 @@ export class CatalogFilterDto {
     return Object.fromEntries(
       value.split(',').map((pair: string) => {
         const [key, val] = pair.split(':');
-        return [key, val];
+        return [normalizeAttribute(key), normalizeAttribute(val)];
       }),
     );
   })
@@ -55,7 +56,7 @@ export class CatalogFilterDto {
   @Type(() => Number)
   @IsInt()
   @Min(1)
-  page?: number;
+  page?: number; 
 
   @IsOptional()
   @Type(() => Number)
@@ -64,8 +65,8 @@ export class CatalogFilterDto {
   limit?: number;
 
   @IsOptional()
-  @Transform(({ value }) => value === 'true' || value === true)
   @IsBoolean()
+  @Transform(({ value }) => value === 'true')
   isFeatured?: boolean;
 
   @IsOptional()

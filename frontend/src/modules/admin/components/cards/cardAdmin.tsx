@@ -130,21 +130,19 @@ export default function CardAdmin({
         className={`
         relative
         rounded-xl overflow-hidden bg-[#0b0b0c] mb-5 min-w-76.75 max-w-100 mx-auto border border-[#1a1a1a]
-        transition-all duration-300
+        transition-all duration-300 min-h-111.25
         ${!product.isActive ? 'opacity-60 grayscale' : ''}
       `}
       >
-        <div className="aspect-square relative">
+        <div className="relative">
           <div className="relative w-full h-48 md:h-56 lg:h-60">
             <Image
               src={product.image}
               alt={product.name}
               fill
-              className="object-cover "
+              className="object-cover"
             />
           </div>
-
-          <div className="absolute inset-0 bg-linear-to-t from-black/80 to-transparent" />
 
           <div className="absolute top-2 right-2 flex gap-2 ">
             <TooltipProvider>

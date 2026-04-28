@@ -12,11 +12,12 @@ import {
 import { useState } from 'react';
 import { formatPriceCOP, parseNumber } from '@/src/shared/helper/formatPrice';
 import { ProductCondition } from '@/src/shared/types/product-condition.enum';
+import { SetEditFormFn } from '../../types/editProductForm.types';
 
 type VariantCardProps = {
   variant: CreateVariantForm;
   index: number;
-  setForm: Props['setForm'];
+  setForm: SetEditFormFn;
 };
 
 export default function VariantCard({
@@ -42,6 +43,7 @@ export default function VariantCard({
     value: CreateVariantForm[K],
   ) => {
     setForm((prev) => {
+      if (!prev) return prev;
       const updated = [...prev.variants];
       updated[index] = { ...updated[index], [field]: value };
       return { ...prev, variants: updated };
@@ -49,10 +51,13 @@ export default function VariantCard({
   };
 
   const remove = () => {
-    setForm((prev) => ({
-      ...prev,
-      variants: prev.variants.filter((_, i) => i !== index),
-    }));
+    setForm((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        variants: prev.variants.filter((_, i) => i !== index),
+      };
+    });
   };
 
   const stockColor =

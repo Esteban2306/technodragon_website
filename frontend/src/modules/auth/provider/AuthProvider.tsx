@@ -2,9 +2,10 @@
 
 import { createContext, useContext } from 'react'
 import { useMe, useLogin, useLogout, useRegister } from '../hooks/useAuth'
+import { AuthUser } from '../types/auth.types'
 
 type AuthContextType = {
-  user: any
+  user: AuthUser | undefined
   isLoading: boolean
   login: ReturnType<typeof useLogin>
   register: ReturnType<typeof useRegister>

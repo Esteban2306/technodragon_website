@@ -19,21 +19,43 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/src/shared/components/pagination';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { SlidersHorizontal } from 'lucide-react';
 import MobileFilters from './MobileFilter';
 import { buildDynamicFilters } from '@/src/shared/helper/buildDynamicFilters';
 import { CatalogFilters } from './types/filter.type';
 import { ProductSkeletonGrid } from './components/ProductSkeletonGrid';
 import { EmptyState } from '@/src/shared/components/ui/EmptyState/ErrorState';
+import { useSearchParams } from 'next/navigation';
 
-export default function CatalogPage() {
+type Props = {
+  initialCategoryId?: string;
+};
+
+export default function CatalogPage({ initialCategoryId }: Props) {
   const [filters, setFilters] = useState<CatalogFilters>({
     page: 1,
     limit: 9,
   });
-
   const { data, isLoading, isError } = useCatalog(filters);
+
+  const searchParams = useSearchParams();
+  const categoryFromUrl = searchParams.get('categoryId');
+
+  useEffect(() => {
+    if (!categoryFromUrl) return;
+
+    setFilters((prev) => {
+      if (prev.categoryId === categoryFromUrl) return prev;
+
+      return {
+        ...prev,
+        categoryId: categoryFromUrl,
+        page: 1,
+      };
+    });
+  }, [categoryFromUrl]);
+
   const totalPages = data?.meta.totalPages ?? 1;
 
   const dynamicFilters = useMemo(() => {

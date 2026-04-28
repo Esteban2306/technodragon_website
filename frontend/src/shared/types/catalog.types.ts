@@ -8,6 +8,7 @@ export type CatalogAttribute = {
 export type ProductVariant = {
   id: string; 
   price: number;
+  isFeatured: boolean;
   image?: string;
   stock: number;
   attributes: CatalogAttribute[];
@@ -16,6 +17,7 @@ export type ProductVariant = {
 export type ProductPreview = {
   id: string; 
   slug: string;
+  isFeatured: boolean;
 
   name: string;
 

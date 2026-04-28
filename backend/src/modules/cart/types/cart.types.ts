@@ -11,7 +11,7 @@ export interface ProductInfo {
 export interface VariantInfo {
   id: string;
   price: number;
-  attributes: Record<string, any>;
+  attributes: Record<string, string>;
   product: ProductInfo | null;
 }
 

@@ -2,10 +2,16 @@
 
 import { Button } from '@/src/shared/components/button';
 import { ProductCondition } from '@/src/shared/types/product-condition.enum';
+import { EditProductForm } from '../../types/editProductForm.types';
 
-export default function AddVariantButton({ setForm }: any) {
+type AddVariantButtonProps = {
+  setForm: React.Dispatch<React.SetStateAction<EditProductForm | null>>;
+};
+
+
+export default function AddVariantButton({ setForm }: AddVariantButtonProps) {
   const handleAdd = () => {
-    setForm((prev: any) => {
+    setForm((prev) => {
       if (!prev) return prev;
 
       return {
@@ -19,6 +25,7 @@ export default function AddVariantButton({ setForm }: any) {
             stock: 0,
             condition: ProductCondition.NEW,
             attributes: [],
+            isActive: true,
           },
         ],
       };

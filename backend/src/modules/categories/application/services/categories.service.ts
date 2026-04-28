@@ -29,7 +29,6 @@ export class CategoriesService {
         throw error;
       }
 
-      console.error(`[CategoriesService] ${context}`, error);
 
       throw new InternalServerErrorException(`Internal error in ${context}`);
     }
