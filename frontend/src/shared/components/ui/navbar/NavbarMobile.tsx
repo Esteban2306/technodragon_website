@@ -9,22 +9,35 @@ import { ShoppingCart } from 'lucide-react';
 
 import { Sheet, SheetTrigger, SheetContent, SheetTitle } from '../../sheet';
 
-import { catalogCategories } from './catalog-categorie.data';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { getCategoryIcon } from '@/src/shared/utils/categoryIcons';
 import CartSidebar from '@/src/modules/catalog/cart/CartSidebar';
 import { useCart } from '@/src/modules/hooks/useCart';
 import { useAuth } from '@/src/modules/auth/provider/AuthProvider';
 import AuthDialog from '@/src/modules/auth/components/AuthDialog';
+import { useCategories } from '@/src/modules/admin/hooks/useCategories';
+import { getCategoryDescription } from '@/src/shared/utils/categoryDescriptions';
 
 export function NavbarMobile() {
   const { data: cart } = useCart();
   const { user } = useAuth();
+  const { data: categories, isLoading } = useCategories();
 
   const totalItems =
     cart?.items.reduce((acc, item) => acc + item.quantity, 0) || 0;
   const [openCatalog, setOpenCatalog] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
+
+  const navCategories =
+    categories?.map((cat) => {
+      return {
+        id: cat.id,
+        title: cat.name,
+        href: `/catalog?categoryId=${cat.id}`,
+        description: getCategoryDescription(cat.name),
+        icon: getCategoryIcon(cat.name),
+      };
+    }) || [];
 
   return (
     <div className="flex items-center justify-between w-full ">
@@ -126,20 +139,26 @@ export function NavbarMobile() {
                 `}
               >
                 <div className="flex flex-col gap-2">
-                  {catalogCategories.map((category) => {
-                    const Icon = getCategoryIcon(category.title);
+                  {isLoading && (
+                    <span className="text-sm text-gray-400 px-4">
+                      Cargando categorías...
+                    </span>
+                  )}
+
+                  {navCategories.map((category) => {
+                    const Icon = category.icon;
 
                     return (
                       <Link
-                        key={category.title}
+                        key={category.id}
                         href={category.href}
                         className="
-                            flex items-start gap-3
-                            bg-white/5 hover:bg-white/10
-                            px-4 py-2 rounded-lg
+                          flex items-start gap-3
+                          bg-white/5 hover:bg-white/10
+                          px-4 py-2 rounded-lg
                         "
                       >
-                        <Icon className="w-8 h-8 text-red-400 mt-1 min-w-4.75 min-h-4.75 max-w-4.75 max-h-4.75 " />
+                        <Icon className="w-8 h-8 text-red-400 mt-1 min-w-4.75 min-h-4.75 max-w-4.75 max-h-4.75" />
 
                         <div>
                           <span className="block text-sm font-medium">

@@ -26,6 +26,7 @@ export function mapCatalogItemToProductDetail(item: CatalogItem): ProductDetail 
     slug: item.slug,
     name: item.name,
     description: item.description ?? "",
+    condition: item.condition as ProductCondition,
 
     brand: {
         id: item.brandId,

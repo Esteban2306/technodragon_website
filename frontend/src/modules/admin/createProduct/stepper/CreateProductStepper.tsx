@@ -19,6 +19,7 @@ type Props = {
 export default function CreateProductStepper({ onFinish }: Props) {
   const [form, setForm] = useState<CreateProductForm>({
     name: '',
+    slug: '',
     description: '',
 
     classification: {

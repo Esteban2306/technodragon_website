@@ -11,3 +11,9 @@ export type EditProductForm = {
 };
 
 export type SetEditFormFn = React.Dispatch<React.SetStateAction<EditProductForm | null>>;
+
+export type WithVariants = { variants: CreateVariantForm[] };
+
+export type SetFormWithVariants<T extends WithVariants> =
+  React.Dispatch<React.SetStateAction<T | null>> |
+  React.Dispatch<React.SetStateAction<T>>;

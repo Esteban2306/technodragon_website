@@ -12,8 +12,8 @@ import {
   type SpringOptions,
 } from 'motion/react';
 
-import { getStrictContext } from '@/lib/get-strict-context';
-import { useControlledState } from '@/hooks/use-controlled-state';
+import { getStrictContext } from '@/src/shared/hooks/get-strict-context';
+import { useControlledState } from '@/src/shared/hooks/use-controlled-state';
 
 type TooltipContextType = {
   isOpen: boolean;

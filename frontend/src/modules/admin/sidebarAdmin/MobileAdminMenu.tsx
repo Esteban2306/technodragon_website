@@ -101,10 +101,6 @@ export default function MobileAdminMenu({
       <CreateMetaDialog
         open={openMetaDialog}
         onOpenChange={setOpenMetaDialog}
-        onCreateBrand={(brand) => {
-        }}
-        onCreateCategory={(category) => {
-        }}
       />
     </div>
   );

@@ -1,13 +1,13 @@
-import { CreateVariantForm, Props } from "../../createProduct/stepper/types/fromProps.types";
-import { EditProductForm } from "../../types/editProductForm.types";
-import VariantCard from "./VariantCard";
+import { CreateVariantForm } from '../../createProduct/stepper/types/fromProps.types';
+import { WithVariants, SetFormWithVariants, EditProductForm } from '../../types/editProductForm.types';
+import VariantCard from './VariantCard';
 
-type VariantListProps = {
+type VariantListProps<T extends WithVariants> = {
   variants: CreateVariantForm[];
-  setForm: React.Dispatch<React.SetStateAction<EditProductForm | null>>;
+  setForm: SetFormWithVariants<T>;
 };
 
-export default function VariantList({ variants, setForm }: VariantListProps) {
+export default function VariantList<T extends WithVariants>({ variants, setForm }: VariantListProps<T>) {
   return (
     <div className="space-y-4">
       {variants.map((variant, i) => (
@@ -15,7 +15,7 @@ export default function VariantList({ variants, setForm }: VariantListProps) {
           key={variant.id}
           variant={variant}
           index={i}
-          setForm={setForm}
+          setForm={setForm as React.Dispatch<React.SetStateAction<EditProductForm | null>>}
         />
       ))}
     </div>

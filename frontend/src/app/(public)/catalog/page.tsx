@@ -1,4 +1,5 @@
 import CatalogPage from '@/src/modules/catalog/CatalogPage';
+import { Suspense } from 'react';
 
 export default function Catalog({
   searchParams,
@@ -7,7 +8,9 @@ export default function Catalog({
 }) {
   return (
     <>
-      <CatalogPage initialCategoryId={searchParams.categoryId} />
+      <Suspense>
+        <CatalogPage initialCategoryId={searchParams.categoryId} />
+      </Suspense>
     </>
   );
 }

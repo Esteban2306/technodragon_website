@@ -149,8 +149,6 @@ export default function AdminSidebar({
       <CreateMetaDialog
         open={openMetaDialog}
         onOpenChange={setOpenMetaDialog}
-        onCreateBrand={(brand) => {}}
-        onCreateCategory={(category) => {}}
       />
     </>
   );

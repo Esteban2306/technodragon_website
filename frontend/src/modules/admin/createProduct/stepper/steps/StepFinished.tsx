@@ -34,6 +34,7 @@ export default function StepFinished({ onFinish, setForm, setCompleted }: Props)
             onClick={() => {
               setForm({
                 name: '',
+                slug: '',
                 description: '',
                 classification: {
                   brandId: '',
