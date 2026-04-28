@@ -31,6 +31,7 @@ import { AdminGuard } from 'src/modules/auth/guards/admin.guard';
 import { CreateProductCommand } from '../application/commands/product.command';
 import { UpdateProductDto } from '../dto/update-product.dto';
 import { ProductService } from '../application/services/product.service';
+import { ProductFilterDto } from '../dto/filter-product.dto';
 
 @Controller('products')
 export class ProductController {
@@ -63,8 +64,13 @@ export class ProductController {
   }
 
   @Get()
-  async findAll(@Query() query: ProductFilters) {
+  async findAll(@Query() query: ProductFilterDto) {
     return this.getProductsHandler.execute(new GetProductsQuery(query));
+  }
+
+  @Get('paginated')
+  async findAllPaginated(@Query() query: ProductFilterDto) {
+    return this.productService.findAllPaginated(query);
   }
 
   @Get(':id')

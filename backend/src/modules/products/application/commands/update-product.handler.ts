@@ -17,6 +17,14 @@ export class UpdateProductHandler {
       throw new BadRequestException('Product id is requires.');
     }
 
+    if (!command.variants || !Array.isArray(command.variants)) {
+      throw new BadRequestException('Variants are required');
+    }
+
+    if (!command.images || !Array.isArray(command.images)) {
+      throw new BadRequestException('Images are required');
+    }
+
     const variants = command.variants.map(
       (v) =>
         new ProductVariant(
@@ -25,7 +33,8 @@ export class UpdateProductHandler {
           v.price,
           v.stock,
           v.condition ?? ProductCondition.NEW,
-          v.attributes.map(
+          
+          (v.attributes ?? []).map(
             (attr) =>
               new VariantAttribute(crypto.randomUUID(), attr.name, attr.value),
           ),

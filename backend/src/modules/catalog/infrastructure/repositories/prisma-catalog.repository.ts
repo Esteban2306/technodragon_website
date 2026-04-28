@@ -9,6 +9,7 @@ import { Prisma } from '@prisma/client';
 import { mapPrismaConditionToDomain } from '../../helpers/catalog-condition.mapper';
 import { mapJsonToAttributes } from '../../helpers/catalog-attributes.mapper';
 import { PaginatedResult } from '../../types/pagination.types';
+import { normalizeAttribute } from '../../helpers/normalize-attribute';
 
 @Injectable()
 export class PrismaCatalogRepository implements CatalogRepository {
@@ -143,12 +144,13 @@ export class PrismaCatalogRepository implements CatalogRepository {
     if (attributes) {
       where.AND = Object.entries(attributes).map(([key, values]) => ({
         attributes: {
-          path: [key],
-          array_contains: values,
+          path: [normalizeAttribute(key)],
+          array_contains: Array.isArray(values)
+            ? values.map(normalizeAttribute)
+            : [normalizeAttribute(values)],
         },
       }));
     }
-
 
     const skip = (safePage - 1) * safeLimit;
 

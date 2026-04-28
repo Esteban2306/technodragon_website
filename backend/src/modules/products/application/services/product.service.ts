@@ -12,6 +12,7 @@ import { ProductFilters } from '../../types/ProductFilters.types';
 import { EventTypes } from 'src/infrastructure/events/event.types';
 import { PRODUCT_REPOSITORY } from '../../constants/product.tokens';
 import { ProductCondition } from '../../domain/enums/product-condition.enum';
+import { ProductResponse } from '../../types/product-response.types';
 
 @Injectable()
 export class ProductService {
@@ -74,6 +75,14 @@ export class ProductService {
 
     await this.productRepository.update(existing);
 
+    this.eventBus.emit({
+      name: EventTypes.PRODUCT_UPDATED,
+      occurredAt: new Date(),
+      payload: {
+        productId: existing.id,
+      },
+    });
+
     const updated = await this.productRepository.findById(existing.id);
 
     if (!updated) {
@@ -100,7 +109,6 @@ export class ProductService {
     if (data.name) product.updateName(data.name);
     if (data.slug) product.updateSlug(data.slug);
     if (data.description) product.updateDescription(data.description);
-
 
     await this.ensureSlugIsUniqueOnUpdate(product, product);
     this.ensureValidConditions(product);
@@ -157,7 +165,7 @@ export class ProductService {
     }
   }
 
-  async findById(id: string): Promise<Product> {
+  async findById(id: string): Promise<ProductResponse> {
     const product = await this.productRepository.findById(id);
 
     if (!product) {
@@ -167,8 +175,14 @@ export class ProductService {
     return product;
   }
 
-  async findAll(filters: ProductFilters): Promise<Product[]> {
+  async findAll(filters: ProductFilters): Promise<ProductResponse[]> {
     return this.productRepository.findAll(filters);
+  }
+
+  async findAllPaginated(
+    filters: ProductFilters,
+  ): Promise<{ data: ProductResponse[]; total: number }> {
+    return this.productRepository.findAllPaginated(filters);
   }
 
   async delete(id: string): Promise<void> {

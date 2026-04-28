@@ -9,6 +9,13 @@ import { PrismaProductWithRelations } from '../../types/PrismaProductWithRelatio
 import { ProductFilters } from '../../types/ProductFilters.types';
 import { ProductCondition } from '../../domain/enums/product-condition.enum';
 import { CloudinaryService } from 'src/infrastructure/service/cloudinary/cloudinary.service';
+import { Prisma } from '@prisma/client';
+import {
+  PrismaProductFull,
+  ProductResponse,
+} from '../../types/product-response.types';
+import { mapPrismaConditionToDomain } from 'src/modules/catalog/helpers/catalog-condition.mapper';
+
 @Injectable()
 export class PrismaProductRepository implements ProductRepository {
   constructor(
@@ -96,24 +103,41 @@ export class PrismaProductRepository implements ProductRepository {
     return this.toDomain(data);
   }
 
-  async findAll(filters?: ProductFilters): Promise<any[]> {
+  async findAll(filters?: ProductFilters): Promise<ProductResponse[]> {
+    const page = Math.max(Number(filters?.page ?? 1), 1);
+    const limit = Math.min(Math.max(Number(filters?.limit ?? 20), 1), 100);
+    const skip = (page - 1) * limit;
+
+    const where: Prisma.ProductWhereInput = {
+      ...(filters?.isActive !== undefined && { isActive: filters.isActive }),
+      ...(filters?.isFeatured !== undefined && {
+        isFeatured: filters.isFeatured,
+      }),
+      ...(filters?.brandId && { brandId: filters.brandId }),
+      ...(filters?.categoryId && { categoryId: filters.categoryId }),
+      ...(filters?.condition && {
+        variants: {
+          some: {
+            condition: filters.condition as ProductCondition,
+          },
+        },
+      }),
+      ...(filters?.search && {
+        OR: [
+          { name: { contains: filters.search, mode: 'insensitive' } },
+          { slug: { contains: filters.search, mode: 'insensitive' } },
+          {
+            brand: { name: { contains: filters.search, mode: 'insensitive' } },
+          },
+        ],
+      }),
+    };
+
     const data = await this.prisma.product.findMany({
-      where: {
-        isActive: filters?.isActive,
-
-        isFeatured: filters?.isFeatured,
-
-        brandId: filters?.brandId,
-        categoryId: filters?.categoryId,
-
-        variants: filters?.condition
-          ? {
-              some: {
-                condition: filters.condition,
-              },
-            }
-          : undefined,
-      },
+      where,
+      skip,
+      take: limit,
+      orderBy: { updatedAt: 'desc' },
       include: {
         brand: true,
         category: true,
@@ -122,11 +146,69 @@ export class PrismaProductRepository implements ProductRepository {
           include: {
             attributes: true,
           },
+          where: { isActive: true },
+          orderBy: { price: 'asc' },
         },
       },
     });
 
-    return data.map((d) => this.toResponse(d));
+    return data.map((d) => this.toResponse(d as PrismaProductFull));
+  }
+
+  async findAllPaginated(
+    filters?: ProductFilters,
+  ): Promise<{ data: ProductResponse[]; total: number }> {
+    const page = Math.max(Number(filters?.page ?? 1), 1);
+    const limit = Math.min(Math.max(Number(filters?.limit ?? 20), 1), 100);
+    const skip = (page - 1) * limit;
+
+    const where: Prisma.ProductWhereInput = {
+      ...(filters?.isActive !== undefined && { isActive: filters.isActive }),
+      ...(filters?.isFeatured !== undefined && {
+        isFeatured: filters.isFeatured,
+      }),
+      ...(filters?.brandId && { brandId: filters.brandId }),
+      ...(filters?.categoryId && { categoryId: filters.categoryId }),
+      ...(filters?.condition && {
+        variants: {
+          some: { condition: filters.condition as ProductCondition },
+        },
+      }),
+      ...(filters?.search && {
+        OR: [
+          { name: { contains: filters.search, mode: 'insensitive' } },
+          { slug: { contains: filters.search, mode: 'insensitive' } },
+          {
+            brand: { name: { contains: filters.search, mode: 'insensitive' } },
+          },
+        ],
+      }),
+    };
+
+    const [rows, total] = await this.prisma.$transaction([
+      this.prisma.product.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { updatedAt: 'desc' },
+        include: {
+          brand: true,
+          category: true,
+          images: true,
+          variants: {
+            include: { attributes: true },
+            where: { isActive: true },
+            orderBy: { price: 'asc' },
+          },
+        },
+      }),
+      this.prisma.product.count({ where }),
+    ]);
+
+    return {
+      data: rows.map((d) => this.toResponse(d as PrismaProductFull)),
+      total,
+    };
   }
 
   async findByVariantId(variantId: string): Promise<Product | null> {
@@ -452,7 +534,7 @@ export class PrismaProductRepository implements ProductRepository {
     );
   }
 
-  private toResponse(data: any) {
+  private toResponse(data: PrismaProductFull): ProductResponse {
     return {
       id: data.id,
       name: data.name,
@@ -475,7 +557,7 @@ export class PrismaProductRepository implements ProductRepository {
         price: Number(v.price),
         stock: v.stock,
         isActive: v.isActive,
-        condition: v.condition,
+        condition: mapPrismaConditionToDomain(v.condition),
         attributes: v.attributes.map((a) => ({
           id: a.id,
           name: a.name,
@@ -488,7 +570,7 @@ export class PrismaProductRepository implements ProductRepository {
       images: data.images.map((img) => ({
         id: img.id,
         url: img.url,
-        isFeatured: img.isFeatured,
+        isMain: img.isMain,
       })),
 
       isActive: data.isActive,

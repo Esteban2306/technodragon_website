@@ -1,11 +1,12 @@
 import { ProductCondition } from "../domain/enums/product-condition.enum";
 
-export interface ProductFilters {
+export type ProductFilters = {
+  search?: string;
+  page?: number;
+  limit?: number;
+  isFeatured?: boolean;
   isActive?: boolean;
   brandId?: string;
   categoryId?: string;
-  isFeatured?: boolean; 
-  condition?:ProductCondition
-  minPrice?: number;
-  maxPrice?: number;
-}
+  condition?: string;
+};

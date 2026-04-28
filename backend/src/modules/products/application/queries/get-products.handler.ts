@@ -2,7 +2,7 @@ import { Inject, Injectable } from "@nestjs/common";
 import { PrismaProductRepository } from "../../infrastructure/repositories/prisma-product.repository";
 import { PRODUCT_REPOSITORY } from "../../constants/product.tokens";
 import { GetProductsQuery } from "./get-products.query";
-import { Product } from "../../domain/entities/product.entity";
+import { ProductResponse } from "../../types/product-response.types";
 
 @Injectable()
 export class GetProductHandler {
@@ -11,7 +11,9 @@ export class GetProductHandler {
         private readonly repository: PrismaProductRepository
     ) {}
 
-    async execute (query: GetProductsQuery): Promise<Product[]> {
-        return this.repository.findAll(query.filters)
+    async execute(query: GetProductsQuery): Promise<ProductResponse[]> {
+        return this.repository.findAll(query.filters);
     }
 }
+
+
