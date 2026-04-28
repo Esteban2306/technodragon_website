@@ -32,13 +32,13 @@ let AuthController = class AuthController {
         res.cookie('accessToken', accessToken, {
             httpOnly: true,
             secure: true,
-            sameSite: 'lax',
+            sameSite: 'none',
             maxAge: 1000 * 60 * 60,
         });
         res.cookie('refreshToken', refreshToken, {
             httpOnly: true,
             secure: true,
-            sameSite: 'lax',
+            sameSite: 'none',
             maxAge: 1000 * 60 * 60 * 24 * 7,
         });
         return user;
@@ -54,7 +54,7 @@ let AuthController = class AuthController {
         res.cookie('accessToken', accessToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
+            sameSite: 'none',
         });
         return { ok: true };
     }
