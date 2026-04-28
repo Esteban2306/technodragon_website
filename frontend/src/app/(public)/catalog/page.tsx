@@ -1,9 +1,13 @@
-import CatalogPage from "@/src/modules/catalog/CatalogPage"
+import CatalogPage from '@/src/modules/catalog/CatalogPage';
 
-export default function Catalog () {
-    return (
-        <>
-           <CatalogPage></CatalogPage> 
-        </>
-    )
+export default function Catalog({
+  searchParams,
+}: {
+  searchParams: { categoryId?: string };
+}) {
+  return (
+    <>
+      <CatalogPage initialCategoryId={searchParams.categoryId} />
+    </>
+  );
 }

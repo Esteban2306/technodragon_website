@@ -4,25 +4,6 @@ import { CatalogFilters } from '@/src/modules/catalog/types/filter.type';
 export function normalizeFilters(filters?: CatalogFilters): CatalogQueryParams {
   if (!filters) return {};
 
-  const normalized: Record<string, any> = {};
-
-  Object.entries(filters).forEach(([key, value]) => {
-    if (value === undefined || value === null) return;
-
-    if (typeof value === 'boolean') {
-      normalized[key] = value.toString(); 
-      return;
-    }
-
-    if (Array.isArray(value)) {
-      normalized[key] = value.join(',');
-      return;
-    }
-
-    normalized[key] = value;
-  });
-
-
   const params: CatalogQueryParams = {};
 
   if (filters.page) params.page = filters.page;
@@ -37,18 +18,18 @@ export function normalizeFilters(filters?: CatalogFilters): CatalogQueryParams {
   if (filters.sortBy) params.sortBy = filters.sortBy;
   if (filters.sortOrder) params.sortOrder = filters.sortOrder;
 
-  if (filters.brandId && filters.brandId.length > 0) {
+  if (filters.brandId?.length) {
     params.brandId = filters.brandId.join(',');
   }
 
-  if (filters.condition && filters.condition.length > 0) {
+  if (filters.condition?.length) {
     params.condition =
       filters.condition.length === 1
         ? filters.condition[0]
         : filters.condition.join(',');
   }
 
-  if (filters?.isFeatured !== undefined) {
+  if (filters.isFeatured !== undefined) {
     params.isFeatured = filters.isFeatured;
   }
 
@@ -61,7 +42,7 @@ export function normalizeFilters(filters?: CatalogFilters): CatalogQueryParams {
       });
     });
 
-    if (pairs.length > 0) {
+    if (pairs.length) {
       params.attributes = pairs.join(',');
     }
   }

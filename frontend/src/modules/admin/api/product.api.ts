@@ -7,11 +7,24 @@ import {
 } from '../types/product.payloads';
 import { ProductDetail } from '@/src/shared/types/product.types';
 
+export type PaginatedProducts = {
+  data: ProductDetail[];
+  total: number;
+};
+
 export const productApi = {
   getAll: (params?: ProductFilters) =>
     httpClient.request<ProductDetail[]>('/products', 'GET', undefined, {
       params,
     }),
+
+  getAllPaginated: (params?: ProductFilters) =>
+    httpClient.request<PaginatedProducts>(
+      '/products/paginated',
+      'GET',
+      undefined,
+      { params },
+    ),
 
   getById: (id: string) =>
     httpClient.request<ProductDetail>(`/products/${id}`, 'GET'),
@@ -20,6 +33,7 @@ export const productApi = {
     httpClient.request<void>('/products', 'POST', data, { auth: true }),
 
   update: (id: string, data: UpdateProductPayload) => {
+    console.log('BODY ENVIADO:', data);
     return httpClient.request<ProductDetail>(`/products/${id}`, 'PUT', data, {
       auth: true,
     });

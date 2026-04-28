@@ -29,6 +29,7 @@ export type ProductDetail = {
   name: string;
   slug: string;
   description: string;
+  condition: ProductCondition;
 
   brand: {
     id: string;

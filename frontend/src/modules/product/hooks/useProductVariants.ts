@@ -20,7 +20,16 @@ export function useProductVariant(
   product: ProductDetail,
 ): UseProductVariantReturn {
   const [selectedAttributes, setSelectedAttributes] =
-    useState<SelectedAttributes>({});
+    useState<SelectedAttributes>(() => {
+      const firstVariant =
+        product.variants.find((v) => v.isActive) ?? product.variants[0];
+
+      if (!firstVariant) return {};
+
+      return Object.fromEntries(
+        firstVariant.attributes.map((attr) => [attr.name, attr.value]),
+      );
+    });
 
   const selectedVariant = useMemo(() => {
     return product.variants.find((v) =>

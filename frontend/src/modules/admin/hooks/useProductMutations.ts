@@ -124,7 +124,7 @@ export const useUpdateProduct = () => {
           isFeatured: data.isFeatured ?? old.isFeatured,
           brand: {
             id: data.brandId,
-            name: old.brand.name, // o búscalo del cache global si quieres hacerlo bien
+            name: old.brand.name,
           },
 
           category: {
@@ -136,7 +136,7 @@ export const useUpdateProduct = () => {
             sku: v.sku,
             price: v.price,
             stock: v.stock,
-            isActive: v.stock > 0,
+            isActive: v.stock > 0, 
           })),
         };
       });

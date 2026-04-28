@@ -18,7 +18,7 @@ export const catalogApi = {
       'GET',
       undefined,
       {
-        signal,
+        signal, 
         params,
       },
     );

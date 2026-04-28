@@ -37,7 +37,7 @@ export const useCatalog = (filters?: CatalogFilters) => {
   const queryClient = useQueryClient();
 
   const stableFilters = useMemo(() => normalizeFilters(filters), [filters]);
-
+  
   const query = useQuery({
     queryKey: ['catalog', stableFilters],
 

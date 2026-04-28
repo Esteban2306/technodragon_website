@@ -15,7 +15,7 @@ export default function ProductDetailView({ product }: { product: ProductDetail 
   const attributes = groupAttributes(product.variants)
 
   return (
-    <div className="container mx-auto py-10 mt-12">
+    <div className="container mx-auto py-10 mt-12 p-2">
       <div className="grid lg:grid-cols-2 gap-12">
 
         <ProductGallery

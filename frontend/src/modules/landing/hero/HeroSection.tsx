@@ -5,6 +5,7 @@ import { motion, easeOut, easeIn } from 'framer-motion';
 import dragonImage from '../../../../public/landing/hero/dragon.png';
 import Orb from '@/src/shared/components/Orb';
 import { useIsVisible } from '@/src/shared/hooks/useIsViseble';
+import Link from 'next/link';
 
 export default function HeroSection() {
   const { ref, isVisible } = useIsVisible<HTMLDivElement>();
@@ -133,12 +134,17 @@ export default function HeroSection() {
             variants={item}
             className="flex flex-col sm:flex-row gap-4 max-w-75 sm:max-w-125"
           >
+            <Link href={'/catalog'}>
             <button className="bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary-hover transition cursor-pointer">
               Ver Productos
             </button>
+            </Link>
+            
+            <Link href={'/#service'}>
             <button className="bg-white/10 px-6 py-3 rounded-lg hover:bg-white/20 transition cursor-pointer">
               Servicio Técnico
             </button>
+            </Link>
           </motion.div>
 
           <motion.ul

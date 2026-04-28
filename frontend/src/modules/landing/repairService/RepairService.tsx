@@ -88,7 +88,6 @@ export default function RepairService() {
         </motion.p>
       </motion.div>
 
-      {/* 🔥 CARDS + BACKGROUND */}
       <div className="relative mt-12">
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
           <div className="w-[120%] h-[140%] opacity-30 blur-lg">

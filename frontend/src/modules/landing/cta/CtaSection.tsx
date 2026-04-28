@@ -8,46 +8,26 @@ export default function CTASection() {
   const wrapper = {
     hidden: {
       opacity: 0,
-      scale: 0.96,
-      y: 30,
-      filter: 'blur(10px)',
+      scale: 0.97,
+      y: 20,
     },
     visible: {
       opacity: 1,
       scale: 1,
       y: 0,
-      filter: 'blur(0px)',
       transition: {
-        duration: 0.6,
+        duration: 0.45,
         ease: [0.22, 1, 0.36, 1] as const,
-        when: 'beforeChildren', 
-      },
-    },
-    exit: {
-      opacity: 0,
-      scale: 0.98,
-      y: -30,
-      filter: 'blur(8px)',
-      transition: {
-        duration: 0.35,
-        ease: [0.4, 0, 1, 1] as const,
-        when: 'afterChildren',
+        when: 'beforeChildren',
       },
     },
   };
 
   const container = {
-    hidden: {},
     visible: {
       transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.15,
-      },
-    },
-    exit: {
-      transition: {
         staggerChildren: 0.06,
-        staggerDirection: -1,
+        delayChildren: 0.1,
       },
     },
   };
@@ -55,28 +35,14 @@ export default function CTASection() {
   const item = {
     hidden: {
       opacity: 0,
-      y: 40,
-      filter: 'blur(10px)',
-      clipPath: 'inset(100% 0% 0% 0%)',
+      y: 20,
     },
     visible: {
       opacity: 1,
       y: 0,
-      filter: 'blur(0px)',
-      clipPath: 'inset(0% 0% 0% 0%)',
       transition: {
-        duration: 0.55,
-        ease: [0.22, 1, 0.36, 1] as const,
-      },
-    },
-    exit: {
-      opacity: 0,
-      y: -40,
-      filter: 'blur(8px)',
-      clipPath: 'inset(0% 0% 100% 0%)',
-      transition: {
-        duration: 0.35,
-        ease: [0.4, 0, 1, 1] as const,
+        duration: 0.4,
+        ease: [0.22, 1, 0.36, 1] as const ,
       },
     },
   };
@@ -88,9 +54,8 @@ export default function CTASection() {
         variants={wrapper}
         initial="hidden"
         whileInView="visible"
-        exit="exit"
-        viewport={{ once: false, amount: 0.3 }}
-        className="transform-gpu will-change-[transform,opacity,filter]"
+        viewport={{ once: true, amount: 0.3 }} // 🔥 clave para rendimiento
+        className="transform-gpu will-change-transform"
       >
 
         <motion.div
@@ -98,7 +63,8 @@ export default function CTASection() {
           className="relative w-full max-w-4xl bg-[#121317] rounded-2xl px-6 sm:px-10 py-10 sm:py-14 text-center overflow-hidden border border-white/5"
         >
 
-          <div className="absolute -right-15 -top-15 w-56 h-56 bg-red-600/20 rounded-full blur-3xl" />
+          {/* 🔥 glow estático (no animado) */}
+          <div className="absolute -right-15 -top-15 w-56 h-56 bg-red-600/20 rounded-full blur-2xl pointer-events-none" />
 
           <motion.div variants={item}>
             <div className="inline-block mb-6 px-4 py-1.5 rounded-full border border-red-500/40 text-red-400 text-sm">
@@ -130,7 +96,7 @@ export default function CTASection() {
           >
             <Link
               href="/productos"
-              className="px-6 py-3 rounded-xl bg-red-600 text-white text-sm font-medium shadow-lg shadow-red-600/30 hover:bg-red-500 transition-all"
+              className="px-6 py-3 rounded-xl bg-red-600 text-white text-sm font-medium shadow-lg shadow-red-600/30 hover:bg-red-500 transition-colors"
             >
               ver productos
             </Link>
@@ -143,7 +109,7 @@ export default function CTASection() {
             </Link>
           </motion.div>
 
-          <div className="absolute -left-12.5 -bottom-20 w-56 h-56 bg-red-600/20 rounded-full blur-3xl" />
+          <div className="absolute -left-12.5 -bottom-20 w-56 h-56 bg-red-600/20 rounded-full blur-2xl pointer-events-none" />
 
         </motion.div>
       </motion.div>
