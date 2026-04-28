@@ -38,14 +38,14 @@ const cardData: BentoCardProps[] = [
     title: 'Equipos usados',
     description: 'Certificados y listos para rendir',
     label: 'Reacondicionados',
-    link: '/catalogo'
+    link: '/catalog'
   },
   {
     color: '#060010',
     title: 'Componentes',
     description: 'Todo para armar o mejorar tu PC',
     label: 'Hardware',
-    link: '/catalogo'
+    link: '/catalog'
   },
   {
     color: '#060010',
@@ -53,14 +53,14 @@ const cardData: BentoCardProps[] = [
     description:
       'Explora laptops de las mejores marcas para estudio, trabajo y gaming.',
     label: 'portatiles',
-    link: '/catalogo'
+    link: '/catalog'
   },
   {
     color: '#060010',
     title: 'Servicio técnico',
     description: 'Reparación, mantenimiento y diagnóstico',
     label: 'Soporte',
-    link: '/catalogo'
+    link: '/#service'
   },
 
   {
@@ -68,14 +68,14 @@ const cardData: BentoCardProps[] = [
     title: 'Accesorios',
     description: 'Monitores, teclados y más',
     label: 'Extras',
-    link: '/catalogo'
+    link: '/catalog'
   },
 
   {
     color: '#060010',
     description: 'Visítanos y prueba los equipos antes de comprar',
     label: 'Tienda fisica',
-    link: '/catalogo'
+    link: '/#contact'
   },
 ];
 

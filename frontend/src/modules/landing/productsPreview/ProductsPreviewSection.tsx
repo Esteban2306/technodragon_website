@@ -1,5 +1,6 @@
 'use client';
 
+import { memo, useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useMediaQuery } from '@/src/shared/hooks/useMediaQuery';
 import { ProductCardMobile } from '@/src/shared/components/ui/product-card/ProductCardMobile';
@@ -13,7 +14,6 @@ import {
   CarouselPrevious,
 } from '@/src/shared/components/carousel';
 import SwipeHint from './swipeHint';
-import { useState } from 'react';
 import { useIsVisible } from '@/src/shared/hooks/useIsViseble';
 import {
   cardItem,
@@ -21,23 +21,34 @@ import {
   textContainer,
   textItem,
 } from '@/src/shared/animations/card.animations';
-import FeaturedProductsSection from './FeaturedProductsSection';
 
 type Props = {
   products: ProductPreview[];
 };
 
+const ProductCard = memo(
+  ({ product, isMobile }: { product: ProductPreview; isMobile: boolean }) =>
+    isMobile ? (
+      <ProductCardMobile product={product} />
+    ) : (
+      <ProductCardDesktop product={product} />
+    ),
+);
+ProductCard.displayName = 'ProductCard';
+
 export default function ProductsPreviewSection({ products }: Props) {
   const isMobile = useMediaQuery('(max-width: 768px)');
   const { ref, isVisible } = useIsVisible<HTMLDivElement>();
- 
-
   const [hasInteracted, setHasInteracted] = useState(false);
 
+  const handlePointerDown = useCallback(() => {
+    setTimeout(() => setHasInteracted(true), 300);
+  }, []);
+
   return (
-    <section ref={ref} className="relative p-8">
-      <div className="absolute -right-30 -top-1 w-100 h-100 bg-red-600/20 rounded-full blur-3xl" />
-      <div className="absolute -left-30 -top-1 w-100 h-100 bg-red-600/20 rounded-full blur-3xl" />
+    <section ref={ref} className="relative p-8 overflow-hidden">
+      <div className="absolute -right-30 top-9 w-100 h-100 bg-red-600/20 rounded-full blur-2xl pointer-events-none will-change-auto" />
+      <div className="absolute -left-30 top-9 w-100 h-100 bg-red-600/20 rounded-full blur-2xl pointer-events-none will-change-auto" />
 
       <motion.div
         className="flex flex-col justify-center text-center mb-12"
@@ -46,9 +57,7 @@ export default function ProductsPreviewSection({ products }: Props) {
         animate={isVisible ? 'visible' : 'hidden'}
       >
         <motion.h1
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
+          variants={textItem}
           className="text-3xl max-w-125 m-auto mb-4"
         >
           Portátiles y computadores destacados
@@ -64,13 +73,8 @@ export default function ProductsPreviewSection({ products }: Props) {
       </motion.div>
 
       <Carousel
-        opts={{
-          align: 'start',
-          dragFree: true,
-        }}
-        onPointerDown={() => {
-          setTimeout(() => setHasInteracted(true), 300);
-        }}
+        opts={{ align: 'start', dragFree: true }}
+        onPointerDown={handlePointerDown}
         className="max-w-6xl mx-auto"
       >
         <motion.div
@@ -84,12 +88,11 @@ export default function ProductsPreviewSection({ products }: Props) {
                 key={product.id}
                 className="basis-[80%] sm:basis-1/2 md:basis-1/3 lg:basis-1/4 px-3 py-6"
               >
-                <motion.div variants={cardItem}>
-                  {isMobile ? (
-                    <ProductCardMobile product={product} />
-                  ) : (
-                    <ProductCardDesktop product={product} />
-                  )}
+                <motion.div
+                  variants={cardItem}
+                  style={{ willChange: 'opacity, transform' }}
+                >
+                  <ProductCard product={product} isMobile={isMobile} />
                 </motion.div>
               </CarouselItem>
             ))}

@@ -31,7 +31,7 @@ export default function RepairService() {
       filter: 'blur(0px)',
       transition: {
         duration: 0.5,
-        ease: [0.25, 0.1, 0.25, 1] as const, 
+        ease: [0.25, 0.1, 0.25, 1] as const,
       },
     },
   };
@@ -56,9 +56,18 @@ export default function RepairService() {
     },
   };
 
-  return (
-    <section ref={ref} id='service' className="flex flex-col gap-6 p-8 overflow-hidden">
+  const phoneNumber = '573013968682';
+  const message = encodeURIComponent(
+    'Hola, me gustaría solicitar una revisión técnica para un problema con mi dispositivo. ¿Podría indicarme disponibilidad y proceso para agendar un diagnóstico? Muchas gracias.',
+  );
+  const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
 
+  return (
+    <section
+      ref={ref}
+      id="service"
+      className="flex flex-col gap-6 p-8 overflow-hidden"
+    >
       <motion.div
         variants={container}
         initial="hidden"
@@ -77,14 +86,16 @@ export default function RepairService() {
           variants={item}
           className="text-lg text-red-600 max-w-162.5 mx-auto"
         >
-          Soporte técnico rápido, fiable y profesional para portátiles y computadores de mesa
+          Soporte técnico rápido, fiable y profesional para portátiles y
+          computadores de mesa
         </motion.p>
 
         <motion.p
           variants={item}
           className="text-sm text-gray-500 max-w-200 mx-auto"
         >
-          Reparamos, mantenemos y actualizamos portátiles y computadores utilizando herramientas profesionales y componentes certificados.
+          Reparamos, mantenemos y actualizamos portátiles y computadores
+          utilizando herramientas profesionales y componentes certificados.
         </motion.p>
       </motion.div>
 
@@ -114,7 +125,6 @@ export default function RepairService() {
         </div>
       </div>
 
-      {/* 🔥 BOTÓN */}
       <motion.div
         variants={buttonAnim}
         initial="hidden"
@@ -122,15 +132,17 @@ export default function RepairService() {
         viewport={{ once: false, amount: 0.4 }}
         className="flex justify-center"
       >
-        <StarBorder
-          as="button"
-          className="max-w-lg m-auto cursor-pointer"
-          color="rgba(120, 0, 40, 0.1)"
-          speed="5s"
-          background="linear-gradient(180deg, #2a0a0f 0%, #120406 100%)"
-        >
-          Solicitud de Diagnostico
-        </StarBorder>
+        <a href={whatsappUrl} target="_blank" rel="noopener noreferrer">
+          <StarBorder
+            as="button"
+            className="max-w-lg m-auto cursor-pointer"
+            color="rgba(120, 0, 40, 0.1)"
+            speed="5s"
+            background="linear-gradient(180deg, #2a0a0f 0%, #120406 100%)"
+          >
+            Solicitar Diagnóstico
+          </StarBorder>
+        </a>
       </motion.div>
     </section>
   );

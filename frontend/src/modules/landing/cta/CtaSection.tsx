@@ -63,7 +63,6 @@ export default function CTASection() {
           className="relative w-full max-w-4xl bg-[#121317] rounded-2xl px-6 sm:px-10 py-10 sm:py-14 text-center overflow-hidden border border-white/5"
         >
 
-          {/* 🔥 glow estático (no animado) */}
           <div className="absolute -right-15 -top-15 w-56 h-56 bg-red-600/20 rounded-full blur-2xl pointer-events-none" />
 
           <motion.div variants={item}>
@@ -95,14 +94,14 @@ export default function CTASection() {
             className="flex flex-col sm:flex-row items-center justify-center gap-4"
           >
             <Link
-              href="/productos"
+              href="/catalog"
               className="px-6 py-3 rounded-xl bg-red-600 text-white text-sm font-medium shadow-lg shadow-red-600/30 hover:bg-red-500 transition-colors"
             >
               ver productos
             </Link>
 
             <Link
-              href="/servicios"
+              href="#service"
               className="text-gray-300 text-sm hover:text-white transition-colors"
             >
               solicitar un servicio

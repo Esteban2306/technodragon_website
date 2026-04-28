@@ -12,7 +12,7 @@ import FeaturedProductsSection from './productsPreview/FeaturedProductsSection';
 export default function LandingPage() {
   return (
     <>
-      <div className="flex flex-col gap-10">
+      <div className="flex flex-col gap-10 overflow-x-hidden">
         <HeroSection></HeroSection>
         <LogoLoopSection></LogoLoopSection>
         <FeaturedProductsSection />

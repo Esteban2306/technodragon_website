@@ -4,7 +4,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import logo from '../../../../../public/landing/logoPage.png';
 import { Menu, ChevronDown } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ShoppingCart } from 'lucide-react';
 
 import { Sheet, SheetTrigger, SheetContent, SheetTitle } from '../../sheet';
@@ -17,6 +17,7 @@ import { useAuth } from '@/src/modules/auth/provider/AuthProvider';
 import AuthDialog from '@/src/modules/auth/components/AuthDialog';
 import { useCategories } from '@/src/modules/admin/hooks/useCategories';
 import { getCategoryDescription } from '@/src/shared/utils/categoryDescriptions';
+import { usePathname } from 'next/navigation';
 
 export function NavbarMobile() {
   const { data: cart } = useCart();
@@ -27,6 +28,12 @@ export function NavbarMobile() {
     cart?.items.reduce((acc, item) => acc + item.quantity, 0) || 0;
   const [openCatalog, setOpenCatalog] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
+  const pathname = usePathname();
+  const [sheetOpen, setSheetOpen] = useState(false);
+
+  useEffect(() => {
+    setSheetOpen(false);
+  }, [pathname]);
 
   const navCategories =
     categories?.map((cat) => {
@@ -41,11 +48,11 @@ export function NavbarMobile() {
 
   return (
     <div className="flex items-center justify-between w-full ">
-      <Link href="/">
+      <Link href="/" onClick={() => setSheetOpen(false)}>
         <Image src={logo} alt="logo" className="max-w-25" />
       </Link>
 
-      <Sheet>
+      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
         <div className="flex items-center gap-2">
           <button
             onClick={() => setCartOpen(true)}
@@ -102,6 +109,7 @@ export function NavbarMobile() {
           <div className="mt-10 flex flex-col items-center gap-6">
             <Link
               href="/"
+              onClick={() => setSheetOpen(false)}
               className="
                 w-full text-center
                 bg-red-900/20 hover:bg-red-800/80
@@ -151,6 +159,7 @@ export function NavbarMobile() {
                     return (
                       <Link
                         key={category.id}
+                        onClick={() => setSheetOpen(false)}
                         href={category.href}
                         className="
                           flex items-start gap-3
@@ -176,7 +185,8 @@ export function NavbarMobile() {
             </div>
 
             <Link
-              href="#"
+              href="/#service"
+              onClick={() => setSheetOpen(false)}
               className="
                 w-full text-center
                 bg-red-900/20 hover:bg-red-800/80
@@ -189,7 +199,8 @@ export function NavbarMobile() {
             </Link>
 
             <Link
-              href="#"
+              href="/#contact"
+              onClick={() => setSheetOpen(false)}
               className="
                 w-full text-center
                 bg-red-900/20 hover:bg-red-800/80
