@@ -48,7 +48,8 @@ export const useLogout = () => {
     mutationFn: authApi.logout,
 
     onSuccess: () => {
-      queryClient.removeQueries({ queryKey: authKeys.me() });
+      queryClient.setQueryData(authKeys.me(), null);
+      queryClient.cancelQueries({ queryKey: authKeys.me() });
     },
   });
 };

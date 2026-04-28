@@ -10,6 +10,9 @@ import { useProductsPaginated } from './hooks/useProducts';
 import { ProductFilters } from './types/product.payloads';
 import { ProductCardData } from './components/cards/mockProducts';
 import ProductFilterBar from './components/filters/ProductFilterBar';
+import { useAuth } from '../auth/provider/AuthProvider';
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 import {
   Pagination,
   PaginationContent,
@@ -23,6 +26,8 @@ import {
 const LIMIT = 20;
 
 export default function AdminPage() {
+  const { user } = useAuth();
+  const router = useRouter();
   const [view, setView] = useState<AdminView>('product');
   const [openCardId, setOpenCardId] = useState<string | null>(null);
   const [stockMode, setStockMode] = useState(false);
@@ -32,6 +37,16 @@ export default function AdminPage() {
   });
 
   const { data, isLoading, isError } = useProductsPaginated(filters);
+
+  useEffect(() => {
+    if (!isLoading && (!user || user.role !== 'ADMIN')) {
+      router.replace('/');
+    }
+  }, [user, isLoading, router]);
+
+  if (isLoading || !user || user.role !== 'ADMIN') {
+    return null;
+  }
 
   const products = data?.data ?? [];
   const total = data?.total ?? 0;
