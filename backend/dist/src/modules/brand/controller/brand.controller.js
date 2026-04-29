@@ -25,6 +25,7 @@ let BrandController = class BrandController {
         this.brandService = brandService;
     }
     async create(dto) {
+        console.log('controller dto req:', dto);
         return this.brandService.create(dto);
     }
     async findAll(search, isActive, page, limit) {
