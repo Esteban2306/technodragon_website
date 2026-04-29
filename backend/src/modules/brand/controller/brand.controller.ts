@@ -22,6 +22,7 @@ export class BrandController {
   @UseGuards(JwtGuard, AdminGuard)
   @Post()
   async create(@Body() dto: CreateBrandDto) {
+    console.log('controller dto req:', dto)
     return this.brandService.create(dto);
   }
 
