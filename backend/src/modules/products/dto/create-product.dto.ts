@@ -1,27 +1,32 @@
-import { ProductCondition } from "../domain/enums/product-condition.enum";
+import { IsString, IsBoolean, IsOptional, IsArray, ValidateNested, IsNumber, IsEnum } from 'class-validator';
+import { Type } from 'class-transformer';
+import { ProductCondition } from '../domain/enums/product-condition.enum';
+
+class AttributeDto {
+  @IsString() name: string;
+  @IsString() value: string;
+}
+
+class VariantDto {
+  @IsString() sku: string;
+  @IsNumber() price: number;
+  @IsNumber() stock: number;
+  @IsEnum(ProductCondition) condition: ProductCondition;
+  @IsArray() @ValidateNested({ each: true }) @Type(() => AttributeDto) attributes: AttributeDto[];
+}
+
+class ImageDto {
+  @IsString() url: string;
+  @IsOptional() @IsBoolean() isMain?: boolean;
+}
 
 export class CreateProductDto {
-  name: string;
-  slug: string;
-  description: string;
-  categoryId: string;
-  brandId: string;
-
-  isFeatured?: boolean;
-
-  variants: {
-    sku: string;
-    price: number;
-    stock: number;
-    condition: ProductCondition;
-    attributes: {
-      name: string;
-      value: string;
-    }[];
-  }[];
-
-  images: {
-    url: string;
-    isMain?: boolean; 
-  }[];
+  @IsString() name: string;
+  @IsString() slug: string;
+  @IsString() description: string;
+  @IsString() categoryId: string;
+  @IsString() brandId: string;
+  @IsOptional() @IsBoolean() isFeatured?: boolean;
+  @IsArray() @ValidateNested({ each: true }) @Type(() => VariantDto) variants: VariantDto[];
+  @IsArray() @ValidateNested({ each: true }) @Type(() => ImageDto) images: ImageDto[];
 }

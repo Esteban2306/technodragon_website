@@ -163,7 +163,7 @@ export default function CreateProductStepper({ onFinish }: Props) {
           ],
         };
 
-        console.log('payload name:', form.name, 'slug:', form.slug);
+        console.log('payload completo:', JSON.stringify(payload));
 
         try {
           await createProduct.mutateAsync(payload);
