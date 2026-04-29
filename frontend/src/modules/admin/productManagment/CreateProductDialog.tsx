@@ -94,6 +94,7 @@ export default function CreateMetaDialog({ open, onOpenChange }: Props) {
     }
 
     if (mode === 'category') {
+      console.log('calling createCategory with:', form.name, form.slug);
       createCategory(
         {
           name: form.name,
