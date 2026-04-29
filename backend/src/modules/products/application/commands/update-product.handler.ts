@@ -36,7 +36,7 @@ export class UpdateProductHandler {
           
           (v.attributes ?? []).map(
             (attr) =>
-              new VariantAttribute(crypto.randomUUID(), attr.name, attr.value),
+              new VariantAttribute(randomUUID(), attr.name, attr.value),
           ),
         ),
     );

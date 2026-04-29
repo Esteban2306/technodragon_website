@@ -10,6 +10,7 @@ import { Category } from '../../domain/entities/category.entity';
 import { UpdateCategoryDto } from '../../dto/update-category.dto';
 import { EventBusService } from 'src/infrastructure/events/event-bus.service';
 import { EventTypes } from 'src/infrastructure/events/event.types';
+import { randomUUID } from 'crypto';
 
 @Injectable()
 export class CategoriesService {
@@ -47,7 +48,7 @@ export class CategoriesService {
       }
 
       const category = new Category(
-        crypto.randomUUID(),
+        randomUUID(),
         dto.name,
         dto.slug,
         dto.parentId,

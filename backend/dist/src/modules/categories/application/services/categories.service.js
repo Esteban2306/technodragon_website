@@ -15,6 +15,7 @@ const category_repository_1 = require("../../domain/repositories/category.reposi
 const category_entity_1 = require("../../domain/entities/category.entity");
 const event_bus_service_1 = require("../../../../infrastructure/events/event-bus.service");
 const event_types_1 = require("../../../../infrastructure/events/event.types");
+const crypto_1 = require("crypto");
 let CategoriesService = class CategoriesService {
     categoryRepo;
     eventBus;
@@ -43,7 +44,7 @@ let CategoriesService = class CategoriesService {
             if (dto.parentId) {
                 await this.findById(dto.parentId);
             }
-            const category = new category_entity_1.Category(crypto.randomUUID(), dto.name, dto.slug, dto.parentId);
+            const category = new category_entity_1.Category((0, crypto_1.randomUUID)(), dto.name, dto.slug, dto.parentId);
             const created = await this.categoryRepo.create(category);
             this.eventBus.emit({
                 name: event_types_1.EventTypes.CATEGORY_CREATED,

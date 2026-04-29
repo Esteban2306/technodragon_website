@@ -28,14 +28,14 @@ export class CreateProductHandler {
     const variants = command.variants.map(
       (v) =>
         new ProductVariant(
-          crypto.randomUUID(),
+          randomUUID(),
           v.sku,
           v.price,
           v.stock,
           v.condition ?? ProductCondition.NEW,
           v.attributes.map(
             (attr) =>
-              new VariantAttribute(crypto.randomUUID(), attr.name, attr.value),
+              new VariantAttribute(randomUUID(), attr.name, attr.value),
           ),
         ),
     );
@@ -45,7 +45,7 @@ export class CreateProductHandler {
     );
 
     const product = new Product(
-      crypto.randomUUID(),
+      randomUUID(),
       command.name,
       command.slug,
       command.description,

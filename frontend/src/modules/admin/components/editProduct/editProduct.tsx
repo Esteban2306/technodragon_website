@@ -35,6 +35,7 @@ import { useBrands } from '../../hooks/useBrands';
 import { useCategories } from '../../hooks/useCategories';
 import { useUploadImage } from '@/src/modules/hooks/useUploadImage';
 import { EditProductForm } from '../../types/editProductForm.types';
+import { randomUUID } from 'crypto';
 
 type Props = {
   open: boolean;
@@ -199,7 +200,7 @@ export default function EditProductDialog({
       })),
 
       images: imagesToSend.map((img, i) => ({
-        id: crypto.randomUUID(),
+        id: randomUUID(),
         url: img,
         isMain: i === 0,
       })),

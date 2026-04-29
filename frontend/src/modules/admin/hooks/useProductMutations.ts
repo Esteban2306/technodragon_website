@@ -5,6 +5,7 @@ import {
   UpdateBasicProductPayload,
   UpdateProductPayload,
 } from '../types/product.payloads';
+import { randomUUID } from 'crypto';
 
 type Variant = {
   id: string;
@@ -132,7 +133,7 @@ export const useUpdateProduct = () => {
             name: old.category.name,
           },
           variants: data.variants.map((v, index) => ({
-            id: v.id ?? old.variants[index]?.id ?? crypto.randomUUID(),
+            id: v.id ?? old.variants[index]?.id ?? randomUUID(),
             sku: v.sku,
             price: v.price,
             stock: v.stock,

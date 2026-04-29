@@ -5,6 +5,7 @@ import { CatalogItem } from '../../domain/entities/catalog.entity';
 import { OnEvent } from '@nestjs/event-emitter';
 import { EventTypes } from 'src/infrastructure/events/event.types';
 import { mapPrismaConditionToDomain } from '../../helpers/catalog-condition.mapper';
+import { randomUUID } from 'crypto';
 
 @Injectable()
 export class catalogListener {
@@ -58,7 +59,7 @@ export class catalogListener {
       });
 
       return new CatalogItem(
-        crypto.randomUUID(), 
+        randomUUID(), 
         product.id,
         variant.id,
 

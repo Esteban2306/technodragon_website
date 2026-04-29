@@ -17,6 +17,7 @@ const catalog_entity_1 = require("../../domain/entities/catalog.entity");
 const event_emitter_1 = require("@nestjs/event-emitter");
 const event_types_1 = require("../../../../infrastructure/events/event.types");
 const catalog_condition_mapper_1 = require("../../helpers/catalog-condition.mapper");
+const crypto_1 = require("crypto");
 let catalogListener = class catalogListener {
     prisma;
     catalogRepository;
@@ -57,7 +58,7 @@ let catalogListener = class catalogListener {
                 }
                 attributesMap[attr.name].push(attr.value);
             });
-            return new catalog_entity_1.CatalogItem(crypto.randomUUID(), product.id, variant.id, product.name, product.slug, product.brandId, product.brand.name, product.categoryId, product.category.name, Number(variant.price), variant.stock, (0, catalog_condition_mapper_1.mapPrismaConditionToDomain)(variant.condition), attributesMap, product.images.map(img => img.url), variant.stock > 0, product.isFeatured, new Date(), new Date());
+            return new catalog_entity_1.CatalogItem((0, crypto_1.randomUUID)(), product.id, variant.id, product.name, product.slug, product.brandId, product.brand.name, product.categoryId, product.category.name, Number(variant.price), variant.stock, (0, catalog_condition_mapper_1.mapPrismaConditionToDomain)(variant.condition), attributesMap, product.images.map(img => img.url), variant.stock > 0, product.isFeatured, new Date(), new Date());
         });
         await this.catalogRepository.upsertMany(items);
     }

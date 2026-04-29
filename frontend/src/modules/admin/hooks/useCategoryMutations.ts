@@ -6,6 +6,7 @@ import {
   CreateCategoryPayload,
   UpdateCategoryPayload,
 } from '../types/category.payloads';
+import { randomUUID } from 'crypto';
 
 export const useCreateCategory = () => {
   const qc = useQueryClient();
@@ -20,7 +21,7 @@ export const useCreateCategory = () => {
       const prev = qc.getQueryData<Category[]>(['categories']);
 
       const optimisticCategory: Category = {
-        id: crypto.randomUUID(),
+        id: randomUUID(),
         name: newCategory.name,
         slug: newCategory.slug,
       };

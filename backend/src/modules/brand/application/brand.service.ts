@@ -10,6 +10,7 @@ import { EventBusService } from 'src/infrastructure/events/event-bus.service';
 import { EventTypes } from 'src/infrastructure/events/event.types';
 import { CreateBrandDto } from '../dto/create-brand.dto';
 import { UpdateBrandDto } from '../dto/update-brand.dto';
+import { randomUUID } from 'crypto';
 
 @Injectable()
 export class BrandService {
@@ -44,7 +45,7 @@ export class BrandService {
       }
 
       const brand = new Brand(
-        crypto.randomUUID(),
+        randomUUID(),
         dto.name,
         dto.slug,
         dto.logo,

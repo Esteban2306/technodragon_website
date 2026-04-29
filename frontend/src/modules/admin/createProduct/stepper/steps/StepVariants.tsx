@@ -5,11 +5,12 @@ import { useState } from 'react';
 import VariantList from '../../../components/variants/VariantList';
 import { CreateVariantForm, Props } from '../types/fromProps.types';
 import { ProductCondition } from '@/src/shared/types/product-condition.enum';
+import { randomUUID } from 'crypto';
 
 export default function StepVariants({ form, setForm }: Props) {
   const addVariant = () => {
     const newVariant: CreateVariantForm = {
-      id: crypto.randomUUID(),
+      id: randomUUID(),
       sku: '',
       price: 0,
       stock: 0,

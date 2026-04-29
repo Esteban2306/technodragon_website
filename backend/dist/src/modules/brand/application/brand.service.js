@@ -15,6 +15,7 @@ const brand_repository_1 = require("../domain/repositories/brand.repository");
 const brand_entity_1 = require("../domain/entities/brand.entity");
 const event_bus_service_1 = require("../../../infrastructure/events/event-bus.service");
 const event_types_1 = require("../../../infrastructure/events/event.types");
+const crypto_1 = require("crypto");
 let BrandService = class BrandService {
     brandRepo;
     eventBus;
@@ -41,7 +42,7 @@ let BrandService = class BrandService {
             if (existing) {
                 throw new common_1.ConflictException('Slug already exists');
             }
-            const brand = new brand_entity_1.Brand(crypto.randomUUID(), dto.name, dto.slug, dto.logo);
+            const brand = new brand_entity_1.Brand((0, crypto_1.randomUUID)(), dto.name, dto.slug, dto.logo);
             const created = await this.brandRepo.create(brand);
             this.eventBus.emit({
                 name: event_types_1.EventTypes.BRAND_CREATED,
