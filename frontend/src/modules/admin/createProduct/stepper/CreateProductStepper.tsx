@@ -131,7 +131,13 @@ export default function CreateProductStepper({ onFinish }: Props) {
       onFinalStepCompleted={async () => {
         const payload = {
           name: form.name,
-          slug: form.name.toLowerCase().replace(/\s+/g, '-'),
+          slug: form.name
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/[^a-z0-9\s-]/g, '')
+            .trim()
+            .replace(/\s+/g, '-'),
           description: form.description,
           brandId: form.classification.brandId,
           categoryId: form.classification.categoryId,
@@ -156,6 +162,8 @@ export default function CreateProductStepper({ onFinish }: Props) {
             })),
           ],
         };
+
+        console.log('payload name:', form.name, 'slug:', form.slug);
 
         try {
           await createProduct.mutateAsync(payload);
