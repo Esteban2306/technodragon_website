@@ -64,7 +64,12 @@ export default function AdminPage() {
     brand: { id: product.brand?.id ?? '', name: product.brand?.name ?? '' },
     isFeatured: product.isFeatured,
     isActive: product.isActive,
-    image: product.images?.[0]?.url ?? '',
+    images:
+      product.images?.map((img, index) => ({
+        id: img.id,
+        url: img.url,
+        isMain: index === 0,
+      })) ?? [],
     variants: product.variants.map((v) => ({
       id: v.id,
       sku: v.sku,

@@ -13,16 +13,20 @@ export type ProductCardData = {
   slug: string;
   description?: string;
   brand: {
-    id: string,
-    name: string
-  }
+    id: string;
+    name: string;
+  };
   category: {
-    id: string
-    name: string
-  }
+    id: string;
+    name: string;
+  };
   isFeatured?: boolean;
   isActive: boolean;
-  image: string;
+  images: {
+    id: string;
+    url: string;
+    isMain?: boolean;
+  }[];
   variants: {
     id: string;
     sku: string;
@@ -36,4 +40,3 @@ export type ProductCardData = {
     }[];
   }[];
 };
-

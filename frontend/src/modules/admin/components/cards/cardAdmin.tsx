@@ -137,7 +137,7 @@ export default function CardAdmin({
         <div className="relative">
           <div className="relative w-full h-48 md:h-56 lg:h-60">
             <Image
-              src={product.image}
+              src={product.images[0]?.url || ''}
               alt={product.name}
               fill
               className="object-cover"

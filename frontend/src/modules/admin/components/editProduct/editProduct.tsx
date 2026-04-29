@@ -42,22 +42,6 @@ type Props = {
   product: ProductCardData | null;
 };
 
-type FormState = {
-  name: string;
-  slug: string;
-  description: string;
-  brand: {
-    id: string;
-    name: string;
-  };
-  category: {
-    id: string;
-    name: string;
-  };
-  images: string[];
-  variants: CreateVariantForm[];
-};
-
 export default function EditProductDialog({
   open,
   onOpenChange,
@@ -81,7 +65,7 @@ export default function EditProductDialog({
       name: product.name,
       slug: product.slug ?? '',
       description: product.description ?? '',
-      images: [product.image].filter(Boolean) as string[],
+      images: product.images?.map((img) => img.url) ?? [],
       brand: product.brand,
       category: product.category,
       variants: product.variants.map((v) => ({
@@ -123,7 +107,6 @@ export default function EditProductDialog({
     const index = selectedIndexRef.current;
     const preview = URL.createObjectURL(file);
 
-    // Preview inmediato
     setForm((prev) => {
       if (!prev) return prev;
       const newImages = [...prev.images];
@@ -172,15 +155,15 @@ export default function EditProductDialog({
     const imagesToSend =
       validImages.length > 0
         ? validImages
-        : product.image
-          ? [product.image]
-          : [];
+        : (product.images?.map((img) => img.url) ?? []);
 
     const basicPayload = {
       name: form.name,
       slug: form.slug,
       description: form.description,
     };
+
+    const originalImages = product.images ?? [];
 
     const fullPayload = {
       ...basicPayload,
@@ -198,11 +181,15 @@ export default function EditProductDialog({
         attributes: v.attributes,
       })),
 
-      images: imagesToSend.map((img, i) => ({
-        id: crypto.randomUUID(),
-        url: img,
-        isMain: i === 0,
-      })),
+      images: imagesToSend.map((img, i) => {
+        const existingImage = originalImages.find((o) => o.url === img);
+
+        return {
+          id: existingImage?.id ?? crypto.randomUUID(),
+          url: img,
+          isMain: i === 0,
+        };
+      }),
     };
 
     const onlyBasicChanged =
@@ -212,8 +199,13 @@ export default function EditProductDialog({
 
     const brandChanged = form.brand.id !== product.brand.id;
     const categoryChanged = form.category.id !== product.category.id;
+
     const imagesChanged =
-      JSON.stringify(imagesToSend) !== JSON.stringify([product.image]);
+      JSON.stringify(imagesToSend.sort()) !==
+      JSON.stringify(originalImages.sort());
+
+    console.log('FORM IMAGES:', form.images);
+    console.log('SENDING IMAGES:', imagesToSend);
 
     const shouldUseFullUpdate =
       brandChanged || categoryChanged || imagesChanged || onlyBasicChanged;
