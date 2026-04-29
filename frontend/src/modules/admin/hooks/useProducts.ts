@@ -10,7 +10,7 @@ export const useProductsPaginated = (filters?: ProductFilters) => {
   return useQuery<PaginatedProducts>({
     queryKey: ['products-paginated', filters],
     queryFn: () => productApi.getAllPaginated(filters),
-    staleTime: 1000 * 60 * 2,
+    staleTime: 0,
     placeholderData: keepPreviousData,
     refetchOnWindowFocus: false,
   });

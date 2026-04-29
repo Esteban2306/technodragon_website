@@ -49,6 +49,7 @@ export const useCreateProduct = () => {
 
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['products'] });
+      qc.invalidateQueries({ queryKey: ['products-paginated'] });
     },
   });
 };
@@ -93,6 +94,8 @@ export const useUpdateBasicProduct = () => {
 
     onSuccess: (data, { id }) => {
       qc.setQueryData(queryKeys.product(id), data);
+      qc.invalidateQueries({ queryKey: ['products'] });
+      qc.invalidateQueries({ queryKey: ['products-paginated'] });
     },
 
     onSettled: (_data, _err, { id }) => {
@@ -152,6 +155,8 @@ export const useUpdateProduct = () => {
 
     onSuccess: (data, { id }) => {
       qc.setQueryData(queryKeys.product(id), data);
+      qc.invalidateQueries({ queryKey: ['products'] });
+      qc.invalidateQueries({ queryKey: ['products-paginated'] });
     },
 
     onSettled: (_data, _err, { id }) => {
@@ -221,6 +226,7 @@ export const useMarkAsFeatured = () => {
 
     onSettled: (_data, _err, id) => {
       qc.invalidateQueries({ queryKey: ['products'] });
+      qc.invalidateQueries({ queryKey: ['products-paginated'] });
       qc.invalidateQueries({ queryKey: queryKeys.product(id) });
     },
   });
@@ -318,6 +324,7 @@ export const useToggleProductStatus = () => {
 
     onSettled: (_data, _err, { id }) => {
       qc.invalidateQueries({ queryKey: ['products'] });
+      qc.invalidateQueries({ queryKey: ['products-paginated'] });
       qc.invalidateQueries({ queryKey: queryKeys.product(id) });
     },
   });
@@ -360,6 +367,7 @@ export const useToggleVariantStatus = () => {
 
     onSettled: () => {
       qc.invalidateQueries({ queryKey: ['products'] });
+      qc.invalidateQueries({ queryKey: ['products-paginated'] });
     },
   });
 };
