@@ -31,6 +31,7 @@ let BrandService = class BrandService {
                 error instanceof common_1.ConflictException) {
                 throw error;
             }
+            console.error(`Error in ${context}:`, error);
             throw new common_1.InternalServerErrorException(`Internal error in ${context}`);
         }
     }
@@ -55,7 +56,7 @@ let BrandService = class BrandService {
         }, 'Create Brand');
     }
     async findAll(params) {
-        return this.execute(() => this.brandRepo.findAll(params), "findAll Brands");
+        return this.execute(() => this.brandRepo.findAll(params), 'findAll Brands');
     }
     async findById(id) {
         return this.execute(async () => {

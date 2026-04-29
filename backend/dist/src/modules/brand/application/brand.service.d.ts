@@ -1,8 +1,8 @@
-import { BrandRepository } from "../domain/repositories/brand.repository";
-import { Brand } from "../domain/entities/brand.entity";
-import { EventBusService } from "src/infrastructure/events/event-bus.service";
-import { CreateBrandDto } from "../dto/create-brand.dto";
-import { UpdateBrandDto } from "../dto/update-brand.dto";
+import { BrandRepository } from '../domain/repositories/brand.repository';
+import { Brand } from '../domain/entities/brand.entity';
+import { EventBusService } from 'src/infrastructure/events/event-bus.service';
+import { CreateBrandDto } from '../dto/create-brand.dto';
+import { UpdateBrandDto } from '../dto/update-brand.dto';
 export declare class BrandService {
     private readonly brandRepo;
     private readonly eventBus;
