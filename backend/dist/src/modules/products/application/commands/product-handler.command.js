@@ -24,19 +24,25 @@ let CreateProductHandler = class CreateProductHandler {
         this.service = service;
     }
     async execute(command) {
-        if (!command.name || !command.slug) {
-            throw new common_1.BadRequestException('Name and slug are required.');
+        try {
+            if (!command.name || !command.slug) {
+                throw new common_1.BadRequestException('Name and slug are required.');
+            }
+            if (command.variants.length === 0) {
+                throw new common_1.BadRequestException('At last of variants required.');
+            }
+            if (command.images.length === 0) {
+                throw new common_1.BadRequestException('At last of images required.');
+            }
+            const variants = command.variants.map((v) => new product_varian_entity_1.ProductVariant(crypto.randomUUID(), v.sku, v.price, v.stock, v.condition ?? product_condition_enum_1.ProductCondition.NEW, v.attributes.map((attr) => new variant_attribute_entitt_1.VariantAttribute(crypto.randomUUID(), attr.name, attr.value))));
+            const images = command.images.map((img) => new product_image_entity_1.ProductImage((0, crypto_1.randomUUID)(), img.url, img.isMain ?? false));
+            const product = new product_entity_1.Product(crypto.randomUUID(), command.name, command.slug, command.description, command.brandId, command.categoryId, variants, images, true, false, new Date(), new Date());
+            await this.service.create(product);
         }
-        if (command.variants.length === 0) {
-            throw new common_1.BadRequestException('At last of variants required.');
+        catch (error) {
+            console.error('CreateProductHandler error:', error);
+            throw error;
         }
-        if (command.images.length === 0) {
-            throw new common_1.BadRequestException('At last of images required.');
-        }
-        const variants = command.variants.map((v) => new product_varian_entity_1.ProductVariant((0, crypto_1.randomUUID)(), v.sku, v.price, v.stock, v.condition ?? product_condition_enum_1.ProductCondition.NEW, v.attributes.map((attr) => new variant_attribute_entitt_1.VariantAttribute((0, crypto_1.randomUUID)(), attr.name, attr.value))));
-        const images = command.images.map((img) => new product_image_entity_1.ProductImage((0, crypto_1.randomUUID)(), img.url, img.isMain ?? false));
-        const product = new product_entity_1.Product((0, crypto_1.randomUUID)(), command.name, command.slug, command.description, command.brandId, command.categoryId, variants, images, true, false, new Date(), new Date());
-        await this.service.create(product);
     }
 };
 exports.CreateProductHandler = CreateProductHandler;
