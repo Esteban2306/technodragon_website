@@ -1,4 +1,19 @@
-import { ProductCondition } from "../domain/enums/product-condition.enum";
+import { ProductCondition } from '../domain/enums/product-condition.enum';
+declare class AttributeDto {
+    name: string;
+    value: string;
+}
+declare class VariantDto {
+    sku: string;
+    price: number;
+    stock: number;
+    condition: ProductCondition;
+    attributes: AttributeDto[];
+}
+declare class ImageDto {
+    url: string;
+    isMain?: boolean;
+}
 export declare class CreateProductDto {
     name: string;
     slug: string;
@@ -6,18 +21,7 @@ export declare class CreateProductDto {
     categoryId: string;
     brandId: string;
     isFeatured?: boolean;
-    variants: {
-        sku: string;
-        price: number;
-        stock: number;
-        condition: ProductCondition;
-        attributes: {
-            name: string;
-            value: string;
-        }[];
-    }[];
-    images: {
-        url: string;
-        isMain?: boolean;
-    }[];
+    variants: VariantDto[];
+    images: ImageDto[];
 }
+export {};
