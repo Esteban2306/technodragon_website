@@ -51,8 +51,20 @@ async function bootstrap() {
     }));
     const allowedOrigins = [
         'http://localhost:3000',
+        'https://technodragon.co',
+        'https://www.technodragon.co',
         'https://technodragon-website.vercel.app',
     ];
+    app.use((req, res, next) => {
+        if (req.method === 'OPTIONS') {
+            res.header('Access-Control-Allow-Origin', req.headers.origin);
+            res.header('Access-Control-Allow-Credentials', 'true');
+            res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
+            res.header('Access-Control-Allow-Headers', 'Content-Type,Authorization,Accept');
+            return res.sendStatus(200);
+        }
+        next();
+    });
     app.enableCors({
         origin: (origin, callback) => {
             if (!origin || allowedOrigins.includes(origin)) {

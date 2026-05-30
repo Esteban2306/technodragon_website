@@ -25,9 +25,6 @@ async function bootstrap() {
     'https://technodragon-website.vercel.app',
   ];
 
-  console.log('CORS CONFIGURADO');
-  console.log(allowedOrigins);
-
   app.use((req, res, next) => {
     if (req.method === 'OPTIONS') {
       res.header('Access-Control-Allow-Origin', req.headers.origin);
