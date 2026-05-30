@@ -20,6 +20,8 @@ async function bootstrap() {
 
   const allowedOrigins = [
     'http://localhost:3000',
+    'https://technodragon.co',
+    'https://www.technodragon.co/',
     'https://technodragon-website.vercel.app',
   ];
 
