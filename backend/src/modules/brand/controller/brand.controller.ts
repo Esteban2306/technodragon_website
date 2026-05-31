@@ -14,6 +14,7 @@ import { CreateBrandDto } from '../dto/create-brand.dto';
 import { UpdateBrandDto } from '../dto/update-brand.dto';
 import { JwtGuard } from 'src/modules/auth/guards/jwt-auth.guard';
 import { AdminGuard } from 'src/modules/auth/guards/admin.guard';
+import { FindBrandsQueryDto } from '../dto/find-brand.dto';
 
 @Controller('brands')
 export class BrandController {
@@ -26,18 +27,8 @@ export class BrandController {
   }
 
   @Get()
-  async findAll(
-    @Query('search') search?: string,
-    @Query('isActive') isActive?: string,
-    @Query('page') page?: string,
-    @Query('limit') limit?: string,
-  ) {
-    return this.brandService.findAll({
-      search,
-      isActive: isActive !== undefined ? isActive === 'true' : undefined,
-      page: page ? Number(page) : undefined,
-      limit: limit ? Number(limit) : undefined,
-    });
+  async findAll(@Query() query: FindBrandsQueryDto) {
+    return this.brandService.findAll(query);
   }
 
   @Get('slug/:slug')
@@ -52,10 +43,7 @@ export class BrandController {
 
   @UseGuards(JwtGuard, AdminGuard)
   @Patch(':id')
-  async update(
-    @Param('id') id: string,
-    @Body() dto: UpdateBrandDto,
-  ) {
+  async update(@Param('id') id: string, @Body() dto: UpdateBrandDto) {
     return this.brandService.update(id, dto);
   }
 

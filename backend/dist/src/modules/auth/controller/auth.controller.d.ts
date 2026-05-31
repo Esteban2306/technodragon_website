@@ -8,8 +8,8 @@ export declare class AuthController {
     constructor(authService: AuthService);
     register(dto: RegisterDto): Promise<{
         name: string | null;
-        id: string;
         createdAt: Date;
+        id: string;
         updatedAt: Date;
         email: string;
         password: string;

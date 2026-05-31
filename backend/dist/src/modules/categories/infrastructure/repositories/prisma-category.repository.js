@@ -24,24 +24,51 @@ let PrismaCategoryRepository = class PrismaCategoryRepository {
                 id: category.id,
                 name: category.getName(),
                 slug: category.getSlug(),
-                parentId: category.getParentId()
-            }
+                parentId: category.getParentId(),
+            },
         });
         return this.toDomain(data);
     }
-    async findAll() {
-        const data = await this.prisma.category.findMany();
-        return data.map(this.toDomain);
+    async findAll(query) {
+        const { search, parentId, page = 1, limit = 20, sortBy = 'createdAt', order = 'desc', } = query;
+        const where = {
+            ...(search && {
+                name: { contains: search, mode: 'insensitive' },
+            }),
+            ...(parentId === 'root'
+                ? { parentId: null }
+                : parentId
+                    ? { parentId }
+                    : {}),
+        };
+        const [items, total] = await this.prisma.$transaction([
+            this.prisma.category.findMany({
+                where,
+                skip: (page - 1) * limit,
+                take: limit,
+                orderBy: { [sortBy]: order },
+            }),
+            this.prisma.category.count({ where }),
+        ]);
+        return {
+            data: items.map(this.toDomain),
+            meta: {
+                total,
+                page,
+                limit,
+                totalPages: Math.ceil(total / limit),
+            },
+        };
     }
     async findById(id) {
         const data = await this.prisma.category.findUnique({
-            where: { id }
+            where: { id },
         });
         return data ? this.toDomain(data) : null;
     }
     async findBySlug(slug) {
         const data = await this.prisma.category.findUnique({
-            where: { slug }
+            where: { slug },
         });
         return data ? this.toDomain(data) : null;
     }
@@ -51,14 +78,14 @@ let PrismaCategoryRepository = class PrismaCategoryRepository {
             data: {
                 name: category.getName(),
                 slug: category.getSlug(),
-                parentId: category.getParentId()
-            }
+                parentId: category.getParentId(),
+            },
         });
         return this.toDomain(data);
     }
     async delete(id) {
         await this.prisma.category.delete({
-            where: { id }
+            where: { id },
         });
     }
     async getTree() {

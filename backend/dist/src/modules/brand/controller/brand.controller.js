@@ -19,6 +19,7 @@ const create_brand_dto_1 = require("../dto/create-brand.dto");
 const update_brand_dto_1 = require("../dto/update-brand.dto");
 const jwt_auth_guard_1 = require("../../auth/guards/jwt-auth.guard");
 const admin_guard_1 = require("../../auth/guards/admin.guard");
+const find_brand_dto_1 = require("../dto/find-brand.dto");
 let BrandController = class BrandController {
     brandService;
     constructor(brandService) {
@@ -27,13 +28,8 @@ let BrandController = class BrandController {
     async create(dto) {
         return this.brandService.create(dto);
     }
-    async findAll(search, isActive, page, limit) {
-        return this.brandService.findAll({
-            search,
-            isActive: isActive !== undefined ? isActive === 'true' : undefined,
-            page: page ? Number(page) : undefined,
-            limit: limit ? Number(limit) : undefined,
-        });
+    async findAll(query) {
+        return this.brandService.findAll(query);
     }
     async findBySlug(slug) {
         return this.brandService.findBySlug(slug);
@@ -65,12 +61,9 @@ __decorate([
 ], BrandController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
-    __param(0, (0, common_1.Query)('search')),
-    __param(1, (0, common_1.Query)('isActive')),
-    __param(2, (0, common_1.Query)('page')),
-    __param(3, (0, common_1.Query)('limit')),
+    __param(0, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String, String]),
+    __metadata("design:paramtypes", [find_brand_dto_1.FindBrandsQueryDto]),
     __metadata("design:returntype", Promise)
 ], BrandController.prototype, "findAll", null);
 __decorate([

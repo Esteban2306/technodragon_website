@@ -7,12 +7,14 @@ import {
   Body,
   Param,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { CategoriesService } from '../application/services/categories.service';
 import { CreateCategoryDto } from '../dto/create-category.dto';
 import { UpdateCategoryDto } from '../dto/update-category.dto';
 import { JwtGuard } from 'src/modules/auth/guards/jwt-auth.guard';
 import { AdminGuard } from 'src/modules/auth/guards/admin.guard';
+import { FindCategoriesQueryDto } from '../dto/find-categories.dto';
 
 @Controller('categories')
 export class CategoriesController {
@@ -25,8 +27,8 @@ export class CategoriesController {
   }
 
   @Get()
-  findAll() {
-    return this.service.findAll();
+  findAll(@Query() query: FindCategoriesQueryDto) {
+    return this.service.findAll(query);
   }
 
   @Get('tree')
@@ -43,7 +45,7 @@ export class CategoriesController {
   findById(@Param('id') id: string) {
     return this.service.findById(id);
   }
-  
+
   @UseGuards(JwtGuard, AdminGuard)
   @Patch(':id')
   update(@Param('id') id: string, @Body() dto: UpdateCategoryDto) {

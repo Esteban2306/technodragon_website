@@ -19,6 +19,7 @@ const create_category_dto_1 = require("../dto/create-category.dto");
 const update_category_dto_1 = require("../dto/update-category.dto");
 const jwt_auth_guard_1 = require("../../auth/guards/jwt-auth.guard");
 const admin_guard_1 = require("../../auth/guards/admin.guard");
+const find_categories_dto_1 = require("../dto/find-categories.dto");
 let CategoriesController = class CategoriesController {
     service;
     constructor(service) {
@@ -27,8 +28,8 @@ let CategoriesController = class CategoriesController {
     create(dto) {
         return this.service.create(dto);
     }
-    findAll() {
-        return this.service.findAll();
+    findAll(query) {
+        return this.service.findAll(query);
     }
     getTree() {
         return this.service.getTree();
@@ -57,8 +58,9 @@ __decorate([
 ], CategoriesController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
+    __param(0, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [find_categories_dto_1.FindCategoriesQueryDto]),
     __metadata("design:returntype", void 0)
 ], CategoriesController.prototype, "findAll", null);
 __decorate([

@@ -11,6 +11,8 @@ import { EventTypes } from 'src/infrastructure/events/event.types';
 import { CreateBrandDto } from '../dto/create-brand.dto';
 import { UpdateBrandDto } from '../dto/update-brand.dto';
 import { randomUUID } from 'crypto';
+import { FindBrandsQueryDto } from '../dto/find-brand.dto';
+import { PaginatedResponseDto } from 'src/common/shared/paginated-response.dto';
 
 @Injectable()
 export class BrandService {
@@ -44,12 +46,7 @@ export class BrandService {
         throw new ConflictException('Slug already exists');
       }
 
-      const brand = new Brand(
-        randomUUID(),
-        dto.name,
-        dto.slug,
-        dto.logo,
-      );
+      const brand = new Brand(randomUUID(), dto.name, dto.slug, dto.logo);
 
       const created = await this.brandRepo.create(brand);
 
@@ -67,12 +64,9 @@ export class BrandService {
     }, 'Create Brand');
   }
 
-  async findAll(params?: {
-    search?: string;
-    isActive?: boolean;
-    page?: number;
-    limit?: number;
-  }): Promise<Brand[]> {
+  async findAll(
+    params?: FindBrandsQueryDto,
+  ): Promise<PaginatedResponseDto<Brand>> {
     return this.execute(() => this.brandRepo.findAll(params), 'findAll Brands');
   }
 

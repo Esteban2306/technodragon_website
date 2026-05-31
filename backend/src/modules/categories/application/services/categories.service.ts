@@ -11,6 +11,8 @@ import { UpdateCategoryDto } from '../../dto/update-category.dto';
 import { EventBusService } from 'src/infrastructure/events/event-bus.service';
 import { EventTypes } from 'src/infrastructure/events/event.types';
 import { randomUUID } from 'crypto';
+import { FindCategoriesQueryDto } from '../../dto/find-categories.dto';
+import { PaginatedResponseDto } from 'src/common/shared/paginated-response.dto';
 
 @Injectable()
 export class CategoriesService {
@@ -29,7 +31,6 @@ export class CategoriesService {
       ) {
         throw error;
       }
-
 
       throw new InternalServerErrorException(`Internal error in ${context}`);
     }
@@ -69,9 +70,11 @@ export class CategoriesService {
     }, 'create category');
   }
 
-  async findAll(): Promise<Category[]> {
+  async findAll(
+    query: FindCategoriesQueryDto,
+  ): Promise<PaginatedResponseDto<Category>> {
     return this.execute(
-      () => this.categoryRepo.findAll(),
+      () => this.categoryRepo.findAll(query),
       'findAll categories',
     );
   }

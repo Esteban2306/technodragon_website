@@ -25,40 +25,42 @@ let PrismaBrandRepository = class PrismaBrandRepository {
                 name: brand.getName(),
                 slug: brand.getSlug(),
                 logo: brand.getLogo(),
-                isActive: brand.isBrandActive()
-            }
+                isActive: brand.isBrandActive(),
+            },
         });
         return this.toDomain(data);
     }
     async findAll(params) {
-        const { isActive, search, page = 1, limit = 10 } = params || {};
-        const data = await this.prisma.brand.findMany({
-            where: {
-                ...(isActive !== undefined && { isActive }),
-                ...(search && {
-                    name: {
-                        contains: search,
-                        mode: "insensitive"
-                    }
-                })
-            },
-            skip: (page - 1) * limit,
-            take: limit,
-            orderBy: {
-                createdAt: "desc"
-            }
-        });
-        return data.map((item) => this.toDomain(item));
+        const { isActive, search, page = 1, limit = 10, sortBy = 'createdAt', order = 'desc', } = params || {};
+        const where = {
+            ...(isActive !== undefined && { isActive }),
+            ...(search && {
+                name: { contains: search, mode: 'insensitive' },
+            }),
+        };
+        const [items, total] = await this.prisma.$transaction([
+            this.prisma.brand.findMany({
+                where,
+                skip: (page - 1) * limit,
+                take: limit,
+                orderBy: { [sortBy]: order },
+            }),
+            this.prisma.brand.count({ where }),
+        ]);
+        return {
+            data: items.map((item) => this.toDomain(item)),
+            meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
+        };
     }
     async findById(id) {
         const data = await this.prisma.brand.findUnique({
-            where: { id }
+            where: { id },
         });
         return data ? this.toDomain(data) : null;
     }
     async findBySlug(slug) {
         const data = await this.prisma.brand.findUnique({
-            where: { slug }
+            where: { slug },
         });
         return data ? this.toDomain(data) : null;
     }
@@ -70,7 +72,7 @@ let PrismaBrandRepository = class PrismaBrandRepository {
                 slug: brand.getSlug(),
                 logo: brand.getLogo(),
                 isActive: brand.isBrandActive(),
-            }
+            },
         });
         return this.toDomain(data);
     }
@@ -78,23 +80,20 @@ let PrismaBrandRepository = class PrismaBrandRepository {
         await this.prisma.brand.update({
             where: { id },
             data: {
-                isActive: false
-            }
+                isActive: false,
+            },
         });
     }
     async activate(id) {
         await this.prisma.brand.update({
             where: { id },
             data: {
-                isActive: true
-            }
+                isActive: true,
+            },
         });
     }
     async delete(id) {
-        const data = await this.prisma.brand.delete({
-            where: { id }
-        });
-        return this.toDomain(data);
+        await this.prisma.brand.delete({ where: { id } });
     }
     toDomain(data) {
         return new brand_entity_1.Brand(data.id, data.name, data.slug, data.logo ?? undefined, data.isActive, data.createdAt, data.updatedAt);

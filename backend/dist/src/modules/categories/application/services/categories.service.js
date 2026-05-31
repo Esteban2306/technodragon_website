@@ -58,8 +58,8 @@ let CategoriesService = class CategoriesService {
             return created;
         }, 'create category');
     }
-    async findAll() {
-        return this.execute(() => this.categoryRepo.findAll(), 'findAll categories');
+    async findAll(query) {
+        return this.execute(() => this.categoryRepo.findAll(query), 'findAll categories');
     }
     async findById(id) {
         return this.execute(async () => {
