@@ -39,6 +39,12 @@ export const metadata: Metadata = {
 
   creator: 'TechnoDragon',
 
+  icons: {
+    icon: '/favicon.ico',
+    shortcut: '/favicon.ico',
+    apple: '/apple-touch-icon.png',
+  },
+
   metadataBase: new URL('https://technodragon.co'),
 
   openGraph: {

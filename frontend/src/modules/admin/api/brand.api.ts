@@ -1,7 +1,9 @@
 import { httpClient } from '@/src/core/api/http/http-client';
 import {
   Brand,
+  BrandQueryParams,
   CreateBrandPayload,
+  PaginatedBrands,
   UpdateBrandPayload,
 } from '../types/brand.payloads';
 
@@ -9,12 +11,17 @@ export const brandApi = {
   create: (data: CreateBrandPayload) =>
     httpClient.request<Brand>('/brands', 'POST', data, { auth: true }),
 
-  getAll: (params?: {
-    search?: string;
-    isActive?: boolean;
-    page?: number;
-    limit?: number;
-  }) => httpClient.request<Brand[]>('/brands', 'GET', undefined, { params }),
+  getAll: (params?: BrandQueryParams) =>
+    httpClient.request<PaginatedBrands>('/brands', 'GET', {
+      params,
+    }),
+
+  getAllList: (params?: BrandQueryParams) =>
+    httpClient
+      .request<PaginatedBrands>('/brands', 'GET', undefined, {
+        params: { limit: 100, ...params },
+      })
+      .then((res) => res.data),
 
   getById: (id: string) => httpClient.request<Brand>(`/brands/${id}`, 'GET'),
 

@@ -1,7 +1,9 @@
 import { httpClient } from '@/src/core/api/http/http-client';
 import {
   Category,
+  CategoryQueryParams,
   CreateCategoryPayload,
+  PaginatedCategories,
   UpdateCategoryPayload,
 } from '../types/category.payloads';
 
@@ -11,7 +13,17 @@ export const categoryApi = {
       auth: true,
     }),
 
-  getAll: () => httpClient.request<Category[]>('/categories', 'GET'),
+  getAll: (params?: CategoryQueryParams) =>
+    httpClient.request<PaginatedCategories>('/categories', 'GET', {
+      params,
+    }),
+
+  getAllList: (params?: CategoryQueryParams) =>
+    httpClient
+      .request<PaginatedCategories>('/categories', 'GET', undefined, {
+        params: { limit: 100, ...params },
+      })
+      .then((res) => res.data),
 
   getTree: () => httpClient.request<Category[]>('/categories/tree', 'GET'),
 
