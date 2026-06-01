@@ -6,6 +6,7 @@ import {
   PaginatedCategories,
   UpdateCategoryPayload,
 } from '../types/category.payloads';
+import { ApiParams } from '../types/brand.payloads';
 
 export const categoryApi = {
   create: (data: CreateCategoryPayload) =>
@@ -13,17 +14,40 @@ export const categoryApi = {
       auth: true,
     }),
 
-  getAll: (params?: CategoryQueryParams) =>
-    httpClient.request<PaginatedCategories>('/categories', 'GET', {
-      params,
-    }),
+  getAll: async (
+    params?: CategoryQueryParams,
+  ): Promise<PaginatedCategories> => {
+    const res = await httpClient.request<PaginatedCategories | Category[]>(
+      '/categories',
+      'GET',
+      undefined,
+      {
+        params: params as Record<string, string | number | boolean | undefined>,
+      },
+    );
 
-  getAllList: (params?: CategoryQueryParams) =>
-    httpClient
-      .request<PaginatedCategories>('/categories', 'GET', undefined, {
-        params: { limit: 100, ...params },
-      })
-      .then((res) => res.data),
+    if (Array.isArray(res)) {
+      return {
+        data: res,
+        meta: { total: res.length, page: 1, limit: res.length, totalPages: 1 },
+      };
+    }
+
+    return res;
+  },
+
+  getAllList: async (params?: CategoryQueryParams): Promise<Category[]> => {
+    const res = await httpClient.request<PaginatedCategories | Category[]>(
+      '/categories',
+      'GET',
+      undefined,
+      { params: { limit: 100, ...params } as ApiParams },
+    );
+
+    if (Array.isArray(res)) return res;
+
+    return res?.data ?? [];
+  },
 
   getTree: () => httpClient.request<Category[]>('/categories/tree', 'GET'),
 

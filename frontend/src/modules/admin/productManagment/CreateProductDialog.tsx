@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import {
   Dialog,
@@ -28,10 +28,19 @@ type FormFields = {
 type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  defaultMode?: Mode;
 };
 
-export default function CreateMetaDialog({ open, onOpenChange }: Props) {
+export default function CreateMetaDialog({
+  open,
+  onOpenChange,
+  defaultMode = 'brand',
+}: Props) {
   const [mode, setMode] = useState<Mode>('brand');
+
+  useEffect(() => {
+    if (open) setMode(defaultMode);
+  }, [open, defaultMode]);
 
   const [form, setForm] = useState<FormFields>({
     name: '',

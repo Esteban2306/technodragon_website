@@ -113,7 +113,8 @@ export default function AdminSidebar({
 
                   <SidebarMenuItem>
                     <SidebarMenuButton
-                      onClick={() => setOpenMetaDialog(true)}
+                      isActive={active === 'catalog'}
+                      onClick={() => setActive('catalog')}
                       className="hover:bg-[#7a1c1c]/80 cursor-pointer"
                     >
                       <Tags />
@@ -145,11 +146,6 @@ export default function AdminSidebar({
           </SidebarFooter>
         </Sidebar>
       </SidebarProvider>
-
-      <CreateMetaDialog
-        open={openMetaDialog}
-        onOpenChange={setOpenMetaDialog}
-      />
     </>
   );
 }

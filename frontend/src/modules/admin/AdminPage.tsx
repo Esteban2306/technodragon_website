@@ -6,6 +6,7 @@ import CardAdmin from './components/cards/cardAdmin';
 import { useState } from 'react';
 import CreateProductStepper from './createProduct/stepper/CreateProductStepper';
 import { AdminView } from './types/Admin.types';
+import CatalogView from './categories-brands/CatalogView';
 import { useProductsPaginated } from './hooks/useProducts';
 import { ProductFilters } from './types/product.payloads';
 import { ProductCardData } from './components/cards/mockProducts';
@@ -240,6 +241,7 @@ export default function AdminPage() {
             <CreateProductStepper onFinish={() => setView('product')} />
           </div>
         )}
+        {view === 'catalog' && <CatalogView />}
       </div>
     </div>
   );

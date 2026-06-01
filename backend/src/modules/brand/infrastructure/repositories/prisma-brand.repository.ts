@@ -35,12 +35,17 @@ export class PrismaBrandRepository implements BrandRepository {
       order = 'desc',
     } = params || {};
 
+    console.log('findAll params:', { isActive, search, page, limit });
+    console.log('isActive type:', typeof isActive, '| value:', isActive);
+
     const where: Prisma.BrandWhereInput = {
-      ...(isActive !== undefined && { isActive }),
+      ...(typeof isActive === 'boolean' && { isActive }),
       ...(search && {
         name: { contains: search, mode: 'insensitive' },
       }),
     };
+
+    console.log('where:', JSON.stringify(where));
 
     const [items, total] = await this.prisma.$transaction([
       this.prisma.brand.findMany({

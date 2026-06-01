@@ -18,5 +18,6 @@ export const useBrands = (params?: BrandQueryParams) => {
   return useQuery<Brand[]>({
     queryKey: [...queryKeys.brands(params), 'list'],
     queryFn: () => brandApi.getAllList(params),
+    placeholderData: [],
   });
 };

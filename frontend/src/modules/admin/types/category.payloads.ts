@@ -3,6 +3,7 @@ export type Category = {
   name: string;
   slug: string;
   parentId?: string | null;
+  createdAt?: string;
 };
 
 export type CreateCategoryPayload = {
@@ -29,4 +30,12 @@ export interface CategoryQueryParams {
   limit?: number;
   sortBy?: 'name' | 'createdAt';
   order?: 'asc' | 'desc';
+}
+
+export interface CategoryRow {
+  id: string;
+  name: string;
+  slug: string;
+  parentId?: string;
+  createdAt: string;
 }

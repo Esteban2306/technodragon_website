@@ -18,6 +18,7 @@ export const useCategories = (params?: CategoryQueryParams) => {
   return useQuery<Category[]>({
     queryKey: [...queryKeys.categories(), 'list', params],
     queryFn: () => categoryApi.getAllList(params),
+    placeholderData: [],
   });
 };
 

@@ -1,4 +1,3 @@
-// components/filters/ProductFilterBar.tsx
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -15,7 +14,12 @@ type Props = {
   onChange: (filters: ProductFilters) => void;
 };
 
-export default function ProductFilterBar({ filters, total, isLoading, onChange }: Props) {
+export default function ProductFilterBar({
+  filters,
+  total,
+  isLoading,
+  onChange,
+}: Props) {
   const [search, setSearch] = useState(filters.search ?? '');
   const { data: brands = [] } = useBrands();
   const { data: categories = [] } = useCategories();
@@ -35,7 +39,10 @@ export default function ProductFilterBar({ filters, total, isLoading, onChange }
     return () => clearTimeout(t);
   }, [search]);
 
-  const setFilter = <K extends keyof ProductFilters>(key: K, value: ProductFilters[K]) => {
+  const setFilter = <K extends keyof ProductFilters>(
+    key: K,
+    value: ProductFilters[K],
+  ) => {
     onChange({ ...filters, [key]: value, page: 1 });
   };
 
@@ -76,7 +83,11 @@ export default function ProductFilterBar({ filters, total, isLoading, onChange }
           className="bg-[#111] border border-[#2a2a2a] text-sm text-white rounded-lg px-3 py-2 focus:outline-none focus:border-red-600 transition min-w-36"
         >
           <option value="">Todas las marcas</option>
-          {brands.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
+          {brands.map((b) => (
+            <option key={b.id} value={b.id}>
+              {b.name}
+            </option>
+          ))}
         </select>
 
         <select
@@ -85,7 +96,11 @@ export default function ProductFilterBar({ filters, total, isLoading, onChange }
           className="bg-[#111] border border-[#2a2a2a] text-sm text-white rounded-lg px-3 py-2 focus:outline-none focus:border-red-600 transition min-w-36"
         >
           <option value="">Todas las categorías</option>
-          {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+          {categories.map((c) => (
+            <option key={c.id} value={c.id}>
+              {c.name}
+            </option>
+          ))}
         </select>
 
         <select
@@ -101,7 +116,10 @@ export default function ProductFilterBar({ filters, total, isLoading, onChange }
         <select
           value={filters.isActive === undefined ? '' : String(filters.isActive)}
           onChange={(e) =>
-            setFilter('isActive', e.target.value === '' ? undefined : e.target.value === 'true')
+            setFilter(
+              'isActive',
+              e.target.value === '' ? undefined : e.target.value === 'true',
+            )
           }
           className="bg-[#111] border border-[#2a2a2a] text-sm text-white rounded-lg px-3 py-2 focus:outline-none focus:border-red-600 transition"
         >
@@ -111,9 +129,14 @@ export default function ProductFilterBar({ filters, total, isLoading, onChange }
         </select>
 
         <select
-          value={filters.isFeatured === undefined ? '' : String(filters.isFeatured)}
+          value={
+            filters.isFeatured === undefined ? '' : String(filters.isFeatured)
+          }
           onChange={(e) =>
-            setFilter('isFeatured', e.target.value === '' ? undefined : e.target.value === 'true')
+            setFilter(
+              'isFeatured',
+              e.target.value === '' ? undefined : e.target.value === 'true',
+            )
           }
           className="bg-[#111] border border-[#2a2a2a] text-sm text-white rounded-lg px-3 py-2 focus:outline-none focus:border-red-600 transition"
         >

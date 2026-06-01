@@ -28,8 +28,13 @@ __decorate([
 ], FindBrandsQueryDto.prototype, "search", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
-    (0, class_transformer_1.Transform)(({ value }) => value === 'true' ? true : value === 'false' ? false : undefined),
-    (0, class_validator_1.IsBoolean)(),
+    (0, class_transformer_1.Transform)(({ value }) => {
+        if (value === 'true' || value === true)
+            return true;
+        if (value === 'false' || value === false)
+            return false;
+        return undefined;
+    }),
     __metadata("design:type", Boolean)
 ], FindBrandsQueryDto.prototype, "isActive", void 0);
 __decorate([

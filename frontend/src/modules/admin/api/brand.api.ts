@@ -1,5 +1,6 @@
 import { httpClient } from '@/src/core/api/http/http-client';
 import {
+  ApiParams,
   Brand,
   BrandQueryParams,
   CreateBrandPayload,
@@ -11,17 +12,38 @@ export const brandApi = {
   create: (data: CreateBrandPayload) =>
     httpClient.request<Brand>('/brands', 'POST', data, { auth: true }),
 
-  getAll: (params?: BrandQueryParams) =>
-    httpClient.request<PaginatedBrands>('/brands', 'GET', {
-      params,
-    }),
+  getAll: async (params?: BrandQueryParams): Promise<PaginatedBrands> => {
+    const res = await httpClient.request<PaginatedBrands | Brand[]>(
+      '/brands',
+      'GET',
+      undefined,
+      {
+        params: params as Record<string, string | number | boolean | undefined>,
+      },
+    );
 
-  getAllList: (params?: BrandQueryParams) =>
-    httpClient
-      .request<PaginatedBrands>('/brands', 'GET', undefined, {
-        params: { limit: 100, ...params },
-      })
-      .then((res) => res.data),
+    if (Array.isArray(res)) {
+      return {
+        data: res,
+        meta: { total: res.length, page: 1, limit: res.length, totalPages: 1 },
+      };
+    }
+
+    return res;
+  },
+
+  getAllList: async (params?: BrandQueryParams): Promise<Brand[]> => {
+    const res = await httpClient.request<PaginatedBrands | Brand[]>(
+      '/brands',
+      'GET',
+      undefined,
+      { params: { limit: 100, ...params } as ApiParams },
+    );
+
+    if (Array.isArray(res)) return res;
+
+    return res?.data ?? [];
+  },
 
   getById: (id: string) => httpClient.request<Brand>(`/brands/${id}`, 'GET'),
 

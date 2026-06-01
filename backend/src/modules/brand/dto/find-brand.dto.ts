@@ -7,10 +7,11 @@ export class FindBrandsQueryDto {
   search?: string;
 
   @IsOptional()
-  @Transform(({ value }) =>
-    value === 'true' ? true : value === 'false' ? false : undefined,
-  )
-  @IsBoolean()
+  @Transform(({ value }) => {
+    if (value === 'true' || value === true) return true;
+    if (value === 'false' || value === false) return false;
+    return undefined;
+  })
   isActive?: boolean;
 
   @IsOptional()

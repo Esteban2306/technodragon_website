@@ -3,7 +3,11 @@ export type Brand = {
   name: string;
   slug: string;
   isActive: boolean;
+  createdAt?: string;
+  logo?: string;
 };
+
+export type ApiParams = Record<string, string | number | boolean | undefined>;
 
 export type CreateBrandPayload = {
   name: string;
@@ -29,4 +33,13 @@ export interface BrandQueryParams {
   limit?: number;
   sortBy?: 'name' | 'createdAt';
   order?: 'asc' | 'desc';
+}
+
+export interface BrandRow {
+  id: string;
+  name: string;
+  slug: string;
+  logo?: string;
+  isActive: boolean;
+  createdAt: string;
 }

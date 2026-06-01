@@ -1,8 +1,8 @@
-export type AdminView = 'product' | 'create' | 'stock' | 'categories';
+export type AdminView = 'product' | 'create' | 'catalog';
 
-export type AdminSidebarProps = {
+export interface AdminSidebarProps {
   active: AdminView;
-  setActive: React.Dispatch<React.SetStateAction<AdminView>>;
+  setActive: (view: AdminView) => void;
   stockMode: boolean;
   setStockMode: React.Dispatch<React.SetStateAction<boolean>>;
-};
+}

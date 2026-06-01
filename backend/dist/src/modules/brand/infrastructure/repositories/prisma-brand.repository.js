@@ -32,12 +32,15 @@ let PrismaBrandRepository = class PrismaBrandRepository {
     }
     async findAll(params) {
         const { isActive, search, page = 1, limit = 10, sortBy = 'createdAt', order = 'desc', } = params || {};
+        console.log('findAll params:', { isActive, search, page, limit });
+        console.log('isActive type:', typeof isActive, '| value:', isActive);
         const where = {
-            ...(isActive !== undefined && { isActive }),
+            ...(typeof isActive === 'boolean' && { isActive }),
             ...(search && {
                 name: { contains: search, mode: 'insensitive' },
             }),
         };
+        console.log('where:', JSON.stringify(where));
         const [items, total] = await this.prisma.$transaction([
             this.prisma.brand.findMany({
                 where,
