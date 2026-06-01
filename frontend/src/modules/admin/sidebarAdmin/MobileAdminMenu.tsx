@@ -11,9 +11,7 @@ import {
 import { useState } from 'react';
 import { Boxes, Menu, Package, PlusCircle, Tags } from 'lucide-react';
 
-import { AdminView } from '../types/Admin.types';
-import { AdminSidebarProps } from '../types/Admin.types';
-import CreateMetaDialog from '../productManagment/CreateProductDialog';
+import { AdminView, AdminSidebarProps } from '../types/Admin.types';
 
 export default function MobileAdminMenu({
   active,
@@ -21,7 +19,6 @@ export default function MobileAdminMenu({
   stockMode,
   setStockMode,
 }: AdminSidebarProps) {
-  const [openMetaDialog, setOpenMetaDialog] = useState(false);
   const [open, setOpen] = useState(false);
 
   const handleChange = (view: AdminView) => {
@@ -49,7 +46,7 @@ export default function MobileAdminMenu({
             <DropdownMenuItem
               onClick={() => handleChange('product')}
               className={`flex items-center gap-2 px-2 py-2 rounded-md cursor-pointer ${
-                active === 'product' ? 'bg-[#7a1c1c]' : ''
+                active === 'product' ? 'bg-[#7a1c1c] text-white' : ''
               }`}
             >
               <Package size={16} />
@@ -59,7 +56,7 @@ export default function MobileAdminMenu({
             <DropdownMenuItem
               onClick={() => handleChange('create')}
               className={`flex items-center gap-2 px-2 py-2 rounded-md cursor-pointer ${
-                active === 'create' ? 'bg-[#7a1c1c]' : ''
+                active === 'create' ? 'bg-[#7a1c1c] text-white' : ''
               }`}
             >
               <PlusCircle size={16} />
@@ -76,9 +73,10 @@ export default function MobileAdminMenu({
               onClick={() => {
                 setActive('product');
                 setStockMode((prev) => !prev);
+                setOpen(false);
               }}
               className={`flex items-center gap-2 px-2 py-2 rounded-md cursor-pointer ${
-                active === 'stock' ? 'bg-[#7a1c1c]' : ''
+                stockMode ? 'bg-[#7a1c1c] text-white' : ''
               }`}
             >
               <Boxes size={16} />
@@ -86,9 +84,9 @@ export default function MobileAdminMenu({
             </DropdownMenuItem>
 
             <DropdownMenuItem
-              onClick={() => setOpenMetaDialog(true)}
+              onClick={() => handleChange('catalog')}
               className={`flex items-center gap-2 px-2 py-2 rounded-md cursor-pointer ${
-                active === 'categories' ? 'bg-[#7a1c1c]' : ''
+                active === 'catalog' ? 'bg-[#7a1c1c] text-white' : ''
               }`}
             >
               <Tags size={16} />
@@ -97,11 +95,6 @@ export default function MobileAdminMenu({
           </DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>
-
-      <CreateMetaDialog
-        open={openMetaDialog}
-        onOpenChange={setOpenMetaDialog}
-      />
     </div>
   );
 }
